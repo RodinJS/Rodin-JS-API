@@ -1,0 +1,28 @@
+{
+  "name": "rodin-js-api",
+  "version": "0.0.1",
+  "description": "Backend api for rodin.space",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/grigorkh/Rodin-JS-API.git"
+  },
+  "keywords": [
+    "Rodin.js",
+    "rodin.space",
+    "rodin.design",
+    "nodejs",
+    "rodin",
+    "VR",
+    "AR"
+  ],
+  "author": "Grigor Khachatryan",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/grigorkh/Rodin-JS-API/issues"
+  },
+  "homepage": "https://github.com/grigorkh/Rodin-JS-API#readme"
+}
