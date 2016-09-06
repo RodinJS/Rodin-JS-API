@@ -4,6 +4,7 @@
   "description": "Backend api for rodin.space",
   "main": "server.js",
   "scripts": {
+    "start": "node server.js",
     "test": "mocha --reporter spec --timeout 5000"
   },
   "repository": {
