@@ -19,7 +19,6 @@ describe('## User APIs', () => {
         .send(user)
         // .expect(httpStatus.OK)
         .then(res => {
-          console.log(res);
           // expect(res.body.email).to.equal(user.email);
           // expect(res.body.role).to.equal('Member');
           // user = res.body;
