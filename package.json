@@ -16,7 +16,6 @@
     "commit": "git-cz",
     "report-coverage": "coveralls < ./coverage/lcov.info"
   },
-
   "repository": {
     "type": "git",
     "url": "git+https://github.com/grigorkh/Rodin-JS-API.git"
@@ -48,6 +47,7 @@
     "express-jwt": "3.4.0",
     "express-validation": "1.0.0",
     "express-winston": "^1.2.0",
+    "goo.gl": "^0.1.4",
     "helmet": "2.1.1",
     "http-status": "^0.2.0",
     "joi": "8.4.2",
@@ -55,7 +55,10 @@
     "method-override": "^2.3.5",
     "mongoose": "^4.3.7",
     "morgan": "1.7.0",
-    "goo.gl": "^0.1.4",
+    "passport": "^0.3.2",
+    "passport-facebook": "^2.1.1",
+    "passport-google-oauth2": "^0.1.6",
+    "passport-jwt": "^2.1.0",
     "winston": "^2.1.1"
   },
   "devDependencies": {
@@ -92,10 +95,6 @@
     "validate-commit-msg": "^2.6.1"
   },
   "config": {
-    "ghooks": {
-      "pre-commit": "npm run lint && npm test",
-      "commit-msg": "validate-commit-msg"
-    },
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }

@@ -2,7 +2,19 @@ export default {
   env: 'development',
   jwtSecret: '4DNSrMPuQ3Y3McBu96wd2GzGheDXuft8gDqLEQVWHnXQfcaGFtM2ZBgyNYzPN7CK',
   db: 'mongodb://localhost/rodin-js-api-development',
-  port: 3000
+  port: 3000,
+  social: {
+  	facebook: {
+  		clientID: "test",
+  		clientSecret: "test",
+  		callbackURL: "http://localhost:3000/auth/facebook/callback"
+  	},
+  	google: {
+  		clientID: "test",
+  		clientSecret: "test",
+  		callbackURL: "http://yourdormain:3000/auth/google/callback"
+  	}
+  }
 };
 
 // Secret Key Examples: 64 charecter 

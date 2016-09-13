@@ -10,7 +10,7 @@ import expressWinston from 'express-winston';
 import expressValidation from 'express-validation';
 import helmet from 'helmet';
 import winstonInstance from './winston';
-import routes from '../server/routes';
+import apiRoutes from '../server/routes';
 import config from './env';
 import APIError from '../server/helpers/APIError';
 
@@ -46,8 +46,11 @@ if (config.env === 'development') {
   }));
 }
 
-// mount all routes on /api path
-app.use('/api', routes);
+// mount all apiRoutes on /api path
+app.use('/api', apiRoutes);
+
+// mount all socketRoutes on /socket path
+// app.use('/socket', socketRoutes);
 
 // if error is not an instanceOf APIError, convert it.
 app.use((err, req, res, next) => {
