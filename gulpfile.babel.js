@@ -126,9 +126,9 @@ gulp.task('test', ['pre-test', 'set-env'], () => {
       reporters
     }))
     // Enforce test coverage
-    .pipe(plugins.istanbul.enforceThresholds({
-      thresholds: options.codeCoverage.thresholds
-    }))
+    // .pipe(plugins.istanbul.enforceThresholds({
+    //   thresholds: options.codeCoverage.thresholds
+    // }))
     .once('end', () => {
       plugins.util.log('completed !!');
       process.exit(exitCode);
