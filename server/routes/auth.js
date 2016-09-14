@@ -19,9 +19,5 @@ router.route('/login')
 router.route('/random-number')
   .get(requireAuth, authCtrl.getRandomNumber);
   // .get(expressJwt({ secret: config.jwtSecret }), authCtrl.getRandomNumber);
-
-
-
-
-
+  
 export default router;

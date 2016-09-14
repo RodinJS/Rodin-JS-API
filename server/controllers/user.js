@@ -27,12 +27,20 @@ function get(req, res) {
 function create(req, res, next) {
   const user = new User({
     email: req.body.email,
-    password: req.body.password
+    password: req.body.password,
+    profile: {
+      firstName: req.body.firstName,
+      lastName: req.body.lastName
+    }
   });
 
   user.saveAsync()
-    .then((savedUser) => res.json(savedUser))
-    .error((e) => next(e));
+    .then((savedUser) => {
+      res.json({
+        "email": savedUser.email,
+        "role": savedUser.role
+      });
+    }).error((e) => next(e));
 }
 
 /**

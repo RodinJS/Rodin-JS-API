@@ -30,7 +30,11 @@ function login(req, res, next) {
 
 					return res.json({
 						token,
-						username: user
+						user: {
+							email: user.email,
+							role: user.role,
+							profile: user.profile
+						}
 					});
 
 				});

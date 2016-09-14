@@ -1,8 +1,8 @@
-const googl = require('goo.gl');
-const conf = require('../../config');
+import googl from 'goo.gl';
+import config from '../../config/env';
 
 // Set a API key (required by Google)
-googl.setKey(conf.get('urlshortener:key'));
+googl.setKey(config.urlshortenerkey);
 
 // Shorten a long url and output the result
 module.exports.shorten = (url) => {
