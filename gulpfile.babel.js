@@ -5,7 +5,6 @@ import del from 'del';
 import runSequence from 'run-sequence';
 import babelCompiler from 'babel-core/register';
 import * as isparta from 'isparta';
-import swaggerGenerator from 'gulp-apidoc-swagger';
 
 const plugins = gulpLoadPlugins();
 
