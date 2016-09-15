@@ -13,9 +13,6 @@ const config = require('../../config/env');
  * @returns {*}
  */
 function login(req, res, next) {
-	// Ideally you'll fetch this from the db
-	// Idea here was to show how jwt works with simplicity
-
 	User.getByEmail(req.body.email)
 		.then(user => {
 			if (user) {
@@ -44,7 +41,6 @@ function login(req, res, next) {
 			}
 
 		});
-
 }
 
 /**
