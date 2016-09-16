@@ -51,6 +51,6 @@ const cardboardSchema = new mongoose.Schema({
 });
 
 /**
- * @typedef CardBo
+ * @typedef CardBoard
  */
 export default mongoose.model('Cardboard', cardboardSchema);

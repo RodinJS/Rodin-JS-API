@@ -1,4 +1,9 @@
 import User from '../models/user';
+import jwt from 'jsonwebtoken';
+import httpStatus from 'http-status';
+import APIError from '../helpers/APIError';
+
+const config = require('../../config/env');
 
 /**
  * Load user and append to req.
@@ -15,6 +20,7 @@ function load(req, res, next, email) {
  * @returns {User}
  */
 function get(req, res) {
+
 	return res.json(req.user);
 }
 
@@ -25,22 +31,47 @@ function get(req, res) {
  * @returns {User}
  */
 function create(req, res, next) {
-	const user = new User({
-		email: req.body.email,
-		password: req.body.password,
-		profile: {
-			firstName: req.body.firstName,
-			lastName: req.body.lastName
-		}
-	});
-
-	user.saveAsync()
-		.then((savedUser) => {
-			res.json({
-				"email": savedUser.email,
-				"role": savedUser.role
+	User.getByEmail(req.body.email)
+		.then(user => {
+			if (user) {
+				const err = new APIError('User exists', httpStatus.BAD_REQUEST, true);
+				return next(err);
+			};
+		})
+		.error((e) => {
+			const user = new User({
+				email: req.body.email,
+				password: req.body.password,
+				profile: {
+					firstName: req.body.firstName,
+					lastName: req.body.lastName
+				}
 			});
-		}).error((e) => next(e));
+
+			user.saveAsync()
+				.then((savedUser) => {
+					const token = jwt.sign({ 
+						email: savedUser.email,
+						role: savedUser.role,
+						password: savedUser.password
+					}, config.jwtSecret, {
+						expiresIn: "7d"
+					});
+					
+					return res.json({
+						token,
+						user: {
+							email: savedUser.email,
+							role: savedUser.role,
+							profile: savedUser.profile
+						}
+					});
+				})
+				.error((e) => {
+					const err = new APIError(e, httpStatus.BAD_REQUEST, true);
+					return next(err);
+				});
+		});
 }
 
 /**

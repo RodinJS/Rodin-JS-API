@@ -20,38 +20,38 @@ const jwtOptions = {
 // Setting up JWT login strategy
 const jwtLogin = new JwtStrategy(jwtOptions, (payload, done) => {
   User.findOne({email: payload.email}, (err, user) => {
-    if (err) { return done(err, false); }
+	if (err) { return done(err, false); }
 
-    if (user) {
-      done(null, user);
-    } else {
-      done(null, false);
-    }
+	if (user) {
+	  done(null, user);
+	} else {
+	  done(null, false);
+	}
   });
 });
 
 const fbLogin = new FacebookStrategy({
-    clientID: config.social.facebook.clientID,
-    clientSecret: config.social.facebook.clientSecret,
-    callbackURL: config.social.facebook.callbackURL
+	clientID: config.social.facebook.clientID,
+	clientSecret: config.social.facebook.clientSecret,
+	callbackURL: config.social.facebook.callbackURL
   },
   (accessToken, refreshToken, profile, done) => {
-    User.findOne({ facebookId: profile.id }, (err, user) => {
-      return done(err, user);
-    });
+	User.findOne({ facebookId: profile.id }, (err, user) => {
+	  return done(err, user);
+	});
   }
 );
 
 const googleLogin = new GoogleStrategy({
-    clientID:     config.social.google.clientID,
-    clientSecret: config.social.google.clientSecret,
-    callbackURL: config.social.google.callbackURL,
-    passReqToCallback   : true
+	clientID:     config.social.google.clientID,
+	clientSecret: config.social.google.clientSecret,
+	callbackURL: config.social.google.callbackURL,
+	passReqToCallback   : true
   },
   (request, accessToken, refreshToken, profile, done) => {
-    User.findOne({ googleId: profile.id }, (err, user) => {
-      return done(err, user);
-    });
+	User.findOne({ googleId: profile.id }, (err, user) => {
+	  return done(err, user);
+	});
   }
 );
 

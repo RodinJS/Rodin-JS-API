@@ -95,14 +95,26 @@ router.route('/')
 	 *          "password": "s0meStr0ngPassw0rd!"
 	 *     }
 	 *
-	 * @apiSuccess (200) {String}  email 	User email.
-	 * @apiSuccess (200) {String}  role		User role.
+	 * @apiSuccess (200) {String} token        				Server side generated token.
+	 * @apiSuccess (200) {Object} user         				User info object.
+	 * @apiSuccess (200) {String} user.email   				User email.
+	 * @apiSuccess (200) {String} user.role    				User role.
+	 * @apiSuccess (200) {Object} user.profile 				User profile info.
+	 * @apiSuccess (200) {String} user.profile.firstName	User first name.
+	 * @apiSuccess (200) {String} user.profile.lastName     User last name.
 	 *
 	 * @apiSuccessExample {json} Success-Response:
 	 *     HTTP/1.1 200 OK
 	 *     {
-	 *          "email": "user@example.com",
-	 *          "role": "Free"
+	 *          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImdhZm95dHQiLCJyb2",
+	 *          "user": {
+	 *              "email": "user@example.com",
+	 *              "role": "Free"
+	 *              "profile": {
+	 *                  "firstName": "Gago"
+	 *                  "lastName": "Aperikyan"
+	 *              }
+	 *           }
 	 *     }
 	 *
 	 * @apiError BadRequest <code>email</code> and/or <code>password</code> of the User is required.
@@ -118,6 +130,21 @@ router.route('/')
 	 *              "timestamp": 1473863313415
 	 *          }
 	 *      }
+	 *
+	 * @apiError UserExists User exists.
+	 *
+	 * @apiErrorExample {json} Bad Request:
+	 *      HTTP/1.1 400 Bad Request
+	 *      {
+	 *          "success": false
+	 *          "error": {
+	 *              "message": "User exists",
+	 *              "status": 400,
+	 *              "type": "Bad Request",
+	 *              "timestamp": 1474029303546
+	 *          }
+	 *      }
+	 *
 	 */
 	.post(validate(paramValidation.createUser), userCtrl.create);
 
@@ -186,7 +213,7 @@ router.route('/:userEmail')
 	 *          }
 	 *      }
 	 */
-	.get(userCtrl.get)
+	.get(requireAuth, userCtrl.get)
 
 	/** PUT /api/user/:userId - Update user */
 	.put(validate(paramValidation.updateUser), userCtrl.update)

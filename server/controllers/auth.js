@@ -17,27 +17,31 @@ function login(req, res, next) {
 		.then(user => {
 			if (user) {
 				user.comparePassword(req.body.password).then(isMatch => {
-
-					const token = jwt.sign({ //jwt.verify
-						email: user.email,
-						role: user.role
-					}, config.jwtSecret, {
-						expiresIn: "7d"
-					});
-
-					return res.json({
-						token,
-						user: {
+					if (isMatch) {
+						const token = jwt.sign({ //jwt.verify
 							email: user.email,
 							role: user.role,
-							profile: user.profile
-						}
-					});
+							password: user.password
+						}, config.jwtSecret, {
+							expiresIn: "7d"
+						});
 
+						return res.json({
+							token,
+							user: {
+								email: user.email,
+								role: user.role,
+								profile: user.profile
+							}
+						});
+					} else {
+						const err = new APIError('Authentication error', httpStatus.UNAUTHORIZED);
+						return next(err);
+					}
 				});
 			} else {
 				const err = new APIError('Authentication error', httpStatus.UNAUTHORIZED);
-				return next(err);
+				return next(err);				
 			}
 
 		});
@@ -57,4 +61,22 @@ function getRandomNumber(req, res) {
 	});
 }
 
-export default { login, getRandomNumber };
+/**
+ * This is a protected route. Will return random number only if jwt token is provided in header.
+ * @param req
+ * @param res
+ * @returns {*}
+ */
+function verify(req, res) {
+	jwt.verify(req.body.token, config.jwtSecret, function(err, decoded) {
+		if(err) {
+			const err = new APIError('Invalid token or secret', httpStatus.BAD_REQUEST, true);
+			return res.status(httpStatus.BAD_REQUEST).json(err);
+		}
+
+		return res.status(200).json({success: true});
+	});
+
+}
+
+export default { login, getRandomNumber, verify };

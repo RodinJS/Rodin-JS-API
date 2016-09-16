@@ -54,10 +54,6 @@ app.use('/api', apiRoutes);
 // mount all socketRoutes on /socket path
 app.use('/socket', socketRoutes);
 
-app.get('/doc', (req, res) => {
-	res.sendFile(path.join(__dirname + '/../../doc/index.html'));
-});
-
 // if error is not an instanceOf APIError, convert it.
 app.use((err, req, res, next) => {
 	if (err instanceof expressValidation.ValidationError) {

@@ -5,6 +5,8 @@ import del from 'del';
 import runSequence from 'run-sequence';
 import babelCompiler from 'babel-core/register';
 import * as isparta from 'isparta';
+import apidoc from 'gulp-apidoc';
+
 
 const plugins = gulpLoadPlugins();
 
@@ -51,6 +53,13 @@ gulp.task('set-env', () => {
 //     .pipe(plugins.eslint.failAfterError())
 // );
 
+gulp.task('apidoc', (done) => {
+	apidoc({
+	src: "server/",
+	dest: "doc/"
+	}, done);
+});
+
 // Copy non-js files to dist
 gulp.task('copy', () =>
 	gulp.src(paths.nonJs)
@@ -74,12 +83,12 @@ gulp.task('babel', () =>
 );
 
 // Start server with restart on file changes
-gulp.task('nodemon', ['copy', 'babel'], () =>
+gulp.task('nodemon', ['copy', 'babel', 'apidoc'], () =>
 	plugins.nodemon({
 		script: path.join('dist', 'index.js'),
 		ext: 'js',
 		ignore: ['node_modules/**/*.js', 'dist/**/*.js'],
-		tasks: ['copy', 'babel']
+		tasks: ['copy', 'babel', 'apidoc']
 	})
 );
 
@@ -151,11 +160,4 @@ gulp.task('default', ['clean'], () => {
 	runSequence(
 		['copy', 'babel']
 	);
-});
-
-gulp.task('apidoc', () => {
-	swaggerGenerator.exec({
-		src: "server/",
-		dest: "doc/"
-	});
 });
