@@ -29,7 +29,7 @@ router.route('/')
 	 * @apiSuccess (200) {String} user.password				Users <code>password</code> bcrypted 
 	 * @apiSuccess (200) {String} user.role					Users <code>role</code> 
 	 * @apiSuccess (200) {String} user.createdAt			Users profile creation date and time 
-	 * @apiSuccess (200) {String} user.profile				Users additional information 
+	 * @apiSuccess (200) {Object} user.profile				Users additional information 
 	 * @apiSuccess (200) {String} user.profile.firstName	Users <code>firstName</code> 
 	 * @apiSuccess (200) {String} user.profile.lastName		Users <code>lastName</code> 
 	 *

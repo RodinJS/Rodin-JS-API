@@ -25,7 +25,7 @@ describe('## Misc', () => {
         .get('/api/404')
         .expect(httpStatus.NOT_FOUND)
         .then(res => {
-          expect(res.body.message).to.equal('Not Found');
+          expect(res.body.error.message).to.equal('Not Found');
           done();
         });
     });
@@ -50,7 +50,7 @@ describe('## Misc', () => {
         })
         .expect(httpStatus.BAD_REQUEST)
         .then(res => {
-          expect(res.body.message).to.equal(`"email" is required`);
+          expect(res.body.error.message).to.equal(`"email" is required`);
           done();
         });
     });
