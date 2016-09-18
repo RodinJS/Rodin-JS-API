@@ -55,8 +55,8 @@ gulp.task('set-env', () => {
 
 gulp.task('apidoc', (done) => {
 	apidoc({
-	src: "server/",
-	dest: "doc/"
+	src: "./server",
+	dest: "./doc"
 	}, done);
 });
 
@@ -83,12 +83,12 @@ gulp.task('babel', () =>
 );
 
 // Start server with restart on file changes
-gulp.task('nodemon', ['copy', 'babel', 'apidoc'], () =>
+gulp.task('nodemon', ['copy', 'babel'], () =>
 	plugins.nodemon({
 		script: path.join('dist', 'index.js'),
 		ext: 'js',
 		ignore: ['node_modules/**/*.js', 'dist/**/*.js'],
-		tasks: ['copy', 'babel', 'apidoc']
+		tasks: ['copy', 'babel']
 	})
 );
 

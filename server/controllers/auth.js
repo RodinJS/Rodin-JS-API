@@ -62,10 +62,10 @@ function getRandomNumber(req, res) {
 }
 
 /**
- * This is a protected route. Will return random number only if jwt token is provided in header.
+ * Token verify endpoint
  * @param req
  * @param res
- * @returns {*}
+ * @returns {true/false}
  */
 function verify(req, res) {
 	jwt.verify(req.body.token, config.jwtSecret, function(err, decoded) {
@@ -79,4 +79,14 @@ function verify(req, res) {
 
 }
 
-export default { login, getRandomNumber, verify };
+/**
+ * Logout logic happens here :D
+ * @param req
+ * @param res
+ * @returns {*}
+ */
+function logout(req, res) {
+	return res.status(200).json({success: true});
+}
+
+export default { login, verify, logout };

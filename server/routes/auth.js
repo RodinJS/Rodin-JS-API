@@ -60,11 +60,6 @@ const requireAuth = passport.authenticate('jwt', { session: false }); // eslint-
 router.route('/login')
 	.post(validate(paramValidation.login), authCtrl.login);
 
-/** GET /api/auth/random-number - Protected route,
- * needs token returned by the above as header. Authorization: Bearer {token} */
-router.route('/random-number')
-	.get(requireAuth, authCtrl.getRandomNumber);
-
 /**
  * @api {post} /api/auth/verify Verify token
  * @apiName VerifyToken
@@ -91,19 +86,38 @@ router.route('/random-number')
  * @apiErrorExample {json} Bad Request:
  *      HTTP/1.1 400 Bad Request
  *      {
- *          "success": false
- *          "error": {
- *              "message": "\"email\" is required and \"password\" is required",
- *              "status": 400,
- *              "type": "Bad Request",
- *              "timestamp": 1473863313415
- *          }
+ *          "name": "Error"
+ *          "status": 400
+ *          "isPublic": true
+ *          "isOperational": true
  *      }
  */
 router.route('/verify')
 	.post(authCtrl.verify);
 
-// router.route('/logout')
-// 	.post(authCtrl.logout);
+/**
+ * @api {post} /api/auth/logout Logout
+ * @apiName Logout
+	 * @apiGroup Auth
+	 * @apiVersion 0.0.1
+	 *
+ * @apiParam {String} token User's <code>token</code>.
+ *
+ * @apiParamExample {json} Request-Example:
+ *     {
+ *          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImdhbW9AZXhhbXBsZS5jb20iLCJyb2xlIjoiRnJlZSIsImlhdCI6MTQ3Mzg3NTczNywiZXhwIjoxNDc0NDgwNTM3fQ.WaTNyLUH5PuDZ9zPfBjmfllphmONEJSJQHeh1mELAhs",
+ *     }
+ *
+ * @apiSuccess (200) {String} success <code>true</code>.
+ *
+ * @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *          "success": true,
+ *     }
+ *
+ */
+router.route('/logout')
+	.post(requireAuth, authCtrl.logout);
 
 export default router;

@@ -86,8 +86,8 @@ router.route('/')
  	 *
 	 * @apiParam {String} email        User email.
 	 * @apiParam {String} password     User password.
-	 * @apiParam {String} [firstname]  Optional Firstname of the User.
-	 * @apiParam {String} [lastname]   Optional Lastname of the User.
+	 * @apiParam {String} [firstname]  Firstname of the User.
+	 * @apiParam {String} [lastname]   Lastname of the User.
 	 *
 	 * @apiParamExample {json} Request-Example:
 	 *     {
@@ -216,7 +216,7 @@ router.route('/:userEmail')
 	.get(requireAuth, userCtrl.get)
 
 	/** PUT /api/user/:userId - Update user */
-	.put(validate(paramValidation.updateUser), userCtrl.update)
+	.put(requireAuth, validate(paramValidation.updateUser), userCtrl.update)
 
 	/**
 	 * @api {delete} /api/user/:userEmail Delete single user
@@ -282,7 +282,7 @@ router.route('/:userEmail')
 	 *          }
 	 *      }
 	 */
-	.delete(userCtrl.remove);
+	.delete(requireAuth, userCtrl.remove);
 
 /** Load user when API with userId route parameter is hit */
 router.param('userEmail', userCtrl.load);
