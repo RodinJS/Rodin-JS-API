@@ -72,7 +72,7 @@
     "babel-preset-stage-2": "6.5.0",
     "chai": "^3.4.1",
     "commitizen": "^2.8.2",
-    "coveralls": "^2.11.6",
+    "coveralls": "^2.11.13",
     "cz-conventional-changelog": "1.1.5",
     "del": "^2.2.0",
     "eslint": "^1.10.3",
