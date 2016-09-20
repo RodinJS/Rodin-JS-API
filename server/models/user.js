@@ -18,6 +18,12 @@ const UserSchema = new mongoose.Schema({
 		type: String,
 		required: true,
 	},
+	username: {
+		type: String,
+		lowercase: true,
+		unique: true,
+		required: true
+	},
 	role: {
 		type: String,
 		enum: ['Free', 'Premium', 'Admin'],
@@ -30,6 +36,9 @@ const UserSchema = new mongoose.Schema({
 		lastName: {
 			type: String
 		}
+	},
+	type: {
+		type: String //user or organization
 	},
 	createdAt: {
 		type: Date,
@@ -87,8 +96,8 @@ UserSchema.statics = {
 	 * @param {ObjectId} id - The objectId of user.
 	 * @returns {Promise<User, APIError>}
 	 */
-	get(id) {
-		return this.findById(id)
+	get(username) {
+		return this.findOne({ usename: new RegExp('^'+usename+'$', "i") })
 			.execAsync().then((user) => {
 				if (user) {
 					return user;

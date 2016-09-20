@@ -2,6 +2,7 @@ import express from 'express';
 import validate from 'express-validation';
 import paramValidation from '../../config/param-validation';
 import userCtrl from '../controllers/user';
+import check from '../controllers/check';
 import '../../config/passport';
 import passport from 'passport';
 
@@ -76,7 +77,7 @@ router.route('/')
 	 *          }
 	 *      }
 	 */
-	.get(requireAuth, userCtrl.list)
+	.get(requireAuth, check.ifAdmin, userCtrl.list)
 
 	/**
 	 * @api {post} /api/user Create new user
@@ -148,20 +149,20 @@ router.route('/')
 	 */
 	.post(validate(paramValidation.createUser), userCtrl.create);
 
-router.route('/:userEmail')
+router.route('/:username')
 	/**
-	 * @api {get} /api/user/:userEmail Get single user
+	 * @api {get} /api/user/:username Get single user
 	 * @apiName GetUser
  	 * @apiGroup User
  	 * @apiVersion 0.0.1
  	 *
-	 * @apiParam {String} email User email.
+	 * @apiParam {String} username User username.
 	 * @apiParam {String} token Admin token for checking permissions.
 	 *
 	 * @apiParamExample {json} Request-Example:
 	 *     {
-	 *          "email": "user@example.com",
-	 *          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9JeyJlbWFpbCI6ImdhbW9Ahs"
+	 *          "username": "user@example.com",
+	 *          "x-access-token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9JeyJlbWFpbCI6ImdhbW9Ahs"
 	 *     }
 	 *
 	 * @apiSuccess (200) {String}  success 	Success: <code>true</code>.
@@ -185,14 +186,14 @@ router.route('/:userEmail')
 	 *          }
 	 *     }
 	 *
-	 * @apiError BadRequest <code>email</code> of the User is incorect.
+	 * @apiError BadRequest <code>username</code> of the User is incorect.
 	 *
 	 * @apiErrorExample {json} Bad Request:
 	 *      HTTP/1.1 400 Bad Request
 	 *      {
 	 *          "success": false
 	 *          "error": {
-	 *              "message": "Wrong email address",
+	 *              "message": "Wrong username",
 	 *              "status": 400,
 	 *              "type": "Bad Request",
 	 *              "timestamp": 1473863313415
@@ -201,35 +202,35 @@ router.route('/:userEmail')
 	 *
 	 * @apiError Unauthorised You need to be Admin to get this info. TODO: Handle this
 	 *
-	 * @apiErrorExample {json} Unauthorised:
-	 *      HTTP/1.1 401 Unauthorised
+	 * @apiErrorExample {json} Forbidden:
+	 *      HTTP/1.1 403 Forbidden
 	 *      {
 	 *          "success": false
 	 *          "error": {
-	 *              "message": "You need to be Admin to get this info"
-	 *              "status": 401
-	 *              "type": "Authorisation Error"
+	 *              "message": "You have not enough permissions to get this info"
+	 *              "status": 403
+	 *              "type": "Forbidden"
 	 *              "timestamp": 1473756023136
 	 *          }
 	 *      }
 	 */
-	.get(requireAuth, userCtrl.get)
+	.get(userCtrl.get)
 
-	/** PUT /api/user/:userId - Update user */
+	/** PUT /api/user/:username - Update user */
 	.put(requireAuth, validate(paramValidation.updateUser), userCtrl.update)
 
 	/**
-	 * @api {delete} /api/user/:userEmail Delete single user
+	 * @api {delete} /api/user/:username Delete single user
 	 * @apiName DeleteUser
  	 * @apiGroup User
  	 * @apiVersion 0.0.1
  	 *
-	 * @apiParam {String} email User email.
+	 * @apiParam {String} username User username.
 	 * @apiParam {String} token Admin token for checking permissions.
 	 *
 	 * @apiParamExample {json} Request-Example:
 	 *     {
-	 *          "email": "user@example.com",
+	 *          "username": "user@example.com",
 	 *          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9JeyJlbWFpbCI6ImdhbW9Ahs"
 	 *     }
 	 *
@@ -284,7 +285,7 @@ router.route('/:userEmail')
 	 */
 	.delete(requireAuth, userCtrl.remove);
 
-/** Load user when API with userId route parameter is hit */
-router.param('userEmail', userCtrl.load);
+/** Load user when API with username route parameter is hit */
+router.param('username', userCtrl.load);
 
 export default router;

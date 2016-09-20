@@ -9,8 +9,16 @@ const config = require('../../config/env');
  * Load user and append to req.
  */
 function load(req, res, next, email) {
+	console.log(email);
 	User.getByEmail(email).then((user) => {
-		req.user = user;		// eslint-disable-line no-param-reassign
+		console.log(user);
+		req.user = {
+			email: user.email,
+			role: user.role,
+			profile: user.profile
+		};
+		console.log(req.user);
+
 		return next();
 	}).error((e) => next(e));
 }
@@ -20,7 +28,12 @@ function load(req, res, next, email) {
  * @returns {User}
  */
 function get(req, res) {
-
+	console.log(req.user);
+	// req.user = {
+	// 		email: req.user.email,
+	// 		role: req.user.role,
+	// 		profile: req.user.profile
+	// 	};
 	return res.json(req.user);
 }
 
@@ -42,6 +55,7 @@ function create(req, res, next) {
 			const user = new User({
 				email: req.body.email,
 				password: req.body.password,
+				username: req.body.username,
 				profile: {
 					firstName: req.body.firstName,
 					lastName: req.body.lastName
@@ -51,9 +65,9 @@ function create(req, res, next) {
 			user.saveAsync()
 				.then((savedUser) => {
 					const token = jwt.sign({ 
-						email: savedUser.email,
+						username: savedUser.username,
 						role: savedUser.role,
-						password: savedUser.password
+						random: savedUser.password.slice(-15)
 					}, config.jwtSecret, {
 						expiresIn: "7d"
 					});
@@ -62,13 +76,14 @@ function create(req, res, next) {
 						token,
 						user: {
 							email: savedUser.email,
+							username: savedUser.username,
 							role: savedUser.role,
 							profile: savedUser.profile
 						}
 					});
 				})
 				.error((e) => {
-					const err = new APIError(e, httpStatus.BAD_REQUEST, true);
+					const err = new APIError(e, httpStatus.BAD_REQUEST);
 					return next(err);
 				});
 		});

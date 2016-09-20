@@ -3,6 +3,7 @@ import validate from 'express-validation';
 import expressJwt from 'express-jwt';
 import paramValidation from '../../config/param-validation';
 import authCtrl from '../controllers/auth';
+import check from '../controllers/check';
 import config from '../../config/env';
 import '../../config/passport';
 import passport from 'passport';
@@ -14,9 +15,9 @@ const requireAuth = passport.authenticate('jwt', { session: false }); // eslint-
 /**
  * @api {post} /api/auth/login Login
  * @apiName LoginUser
-	 * @apiGroup Auth
-	 * @apiVersion 0.0.1
-	 *
+ * @apiGroup Auth
+ * @apiVersion 0.0.1
+ *
  * @apiParam {String} email        User email.
  * @apiParam {String} password     User password.
  *
@@ -63,9 +64,9 @@ router.route('/login')
 /**
  * @api {post} /api/auth/verify Verify token
  * @apiName VerifyToken
-	 * @apiGroup Auth
-	 * @apiVersion 0.0.1
-	 *
+ * @apiGroup Auth
+ * @apiVersion 0.0.1
+ *
  * @apiParam {String} token User <code>token</code>.
  *
  * @apiParamExample {json} Request-Example:
@@ -96,11 +97,46 @@ router.route('/verify')
 	.post(authCtrl.verify);
 
 /**
+ * @api {post} /api/auth/verify/email Verify if email exists
+ * @apiName VerifyIfEmailExists
+ * @apiGroup Auth
+ * @apiVersion 0.0.1
+ *
+ * @apiParam {String} email User <code>email</code>.
+ *
+ * @apiParamExample {json} Request-Example:
+ *     {
+ *          "email": "gago@mail.ru",
+ *     }
+ *
+ * @apiSuccess (200) {String} success <code>true</code>.
+ *
+ * @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *          "success": true,
+ *     }
+ *
+ * @apiError BadRequest <code>email</code> is required.
+ *
+ * @apiErrorExample {json} Bad Request:
+ *      HTTP/1.1 400 Bad Request
+ *      {
+ *          "name": "Error"
+ *          "status": 400
+ *          "isPublic": true
+ *          "isOperational": true
+ *      }
+ */
+router.route('/verify/email')
+	.post(check.ifEmailExists);
+
+/**
  * @api {post} /api/auth/logout Logout
  * @apiName Logout
-	 * @apiGroup Auth
-	 * @apiVersion 0.0.1
-	 *
+ * @apiGroup Auth
+ * @apiVersion 0.0.1
+ *
  * @apiParam {String} token User's <code>token</code>.
  *
  * @apiParamExample {json} Request-Example:
