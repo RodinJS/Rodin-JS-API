@@ -1,6 +1,6 @@
 import User from '../models/user';
 import jwt from 'jsonwebtoken';
-import httpStatus from 'http-status';
+import httpStatus from '../helpers/httpStatus';
 import APIError from '../helpers/APIError';
 
 const config = require('../../config/env');
@@ -26,7 +26,7 @@ function login(req, res, next) {
 							expiresIn: "7d"
 						});
 
-						return res.json({
+						return res.status(200).json({
 							"success": true,
 							"data": {
 								token,
@@ -39,19 +39,13 @@ function login(req, res, next) {
 							}
 						});
 					} else {
-						const err = new APIError('Authentication error', httpStatus.UNAUTHORIZED);
-						return next({
-							"success": false,
-							"error": err
-						});
+						const err = new APIError('Authentication error', 310);
+						return next(err);
 					}
 				});
 			} else {
-				const err = new APIError('Authentication error', httpStatus.UNAUTHORIZED);
-				return next({
-					"success": false,
-					"error": err
-				});				
+				const err = new APIError('Authentication error', 310);
+				return next(err);				
 			}
 
 		});

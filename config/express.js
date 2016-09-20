@@ -6,7 +6,7 @@ import cookieParser from 'cookie-parser';
 import compress from 'compression';
 import methodOverride from 'method-override';
 import cors from 'cors';
-import httpStatus from 'http-status';
+import httpStatus from '../server/helpers/httpStatus';
 import expressWinston from 'express-winston';
 import expressValidation from 'express-validation';
 import helmet from 'helmet';
@@ -81,9 +81,8 @@ if (config.env !== 'test') {
 	}));
 }
 
-// error handler, send stacktrace only during development
+//error handler, send stacktrace only during development
 app.use((err, req, res, next) => {
-	console.log("-----------------mta");
 	res.status(err.status).json({
 		success: false,
 		error: {

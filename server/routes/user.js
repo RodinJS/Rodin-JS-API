@@ -3,12 +3,12 @@ import validate from 'express-validation';
 import paramValidation from '../../config/param-validation';
 import userCtrl from '../controllers/user';
 import check from '../controllers/check';
-import '../../config/passport';
-import passport from 'passport';
+// import '../../config/passport';
+// import passport from 'passport';
 
 const router = express.Router();	// eslint-disable-line new-cap
 
-const requireAuth = passport.authenticate('jwt', { session: false }); // eslint-disable-line
+// const requireAuth = passport.authenticate('jwt', { session: false }); // eslint-disable-line
 
 router.route('/')
 	/**
@@ -77,7 +77,7 @@ router.route('/')
 	 *          }
 	 *      }
 	 */
-	.get(requireAuth, check.ifAdmin, userCtrl.list)
+	.get(check.ifAdmin, userCtrl.list)
 
 	/**
 	 * @api {post} /api/user Create new user
@@ -150,7 +150,7 @@ router.route('/')
 	.post(validate(paramValidation.createUser), userCtrl.create);
 
 router.route('/me')
-	.get(userCtrl.me);
+	.get(check.ifTokenValid, userCtrl.me);
 
 router.route('/:username')
 	/**
@@ -220,7 +220,7 @@ router.route('/:username')
 	.get(userCtrl.get)
 
 	/** PUT /api/user/:username - Update user */
-	.put(requireAuth, validate(paramValidation.updateUser), userCtrl.update)
+	.put(validate(paramValidation.updateUser), userCtrl.update)
 
 	/**
 	 * @api {delete} /api/user/:username Delete single user
@@ -286,9 +286,9 @@ router.route('/:username')
 	 *          }
 	 *      }
 	 */
-	.delete(requireAuth, userCtrl.remove);
+	.delete(userCtrl.remove);
 
 /** Load user when API with username route parameter is hit */
-router.param('username', userCtrl.load);
+// router.param('username', userCtrl.load);
 
 export default router;

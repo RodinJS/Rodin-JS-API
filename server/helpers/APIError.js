@@ -1,4 +1,4 @@
-import httpStatus from 'http-status';
+import httpStatus from './httpStatus';
 
 /**
  * @extends Error

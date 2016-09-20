@@ -1,6 +1,6 @@
 import Promise from 'bluebird';
 import mongoose from 'mongoose';
-import httpStatus from 'http-status';
+import httpStatus from '../helpers/httpStatus';
 import APIError from '../helpers/APIError';
 import bcrypt from 'bcrypt-nodejs';
 
@@ -80,7 +80,9 @@ UserSchema.method({
 	comparePassword(candidatePassword) {
 		return new Promise((resolve, reject) => {
 			bcrypt.compare(candidatePassword, this.password, (err, isMatch) => {
-				if (err) { return reject(err); }
+				if (err) { 
+					return reject(err); 
+				}
 				resolve(isMatch);
 			});
 		});
@@ -102,11 +104,11 @@ UserSchema.statics = {
 				if (user) {
 					return user;
 				}
-				const err = new APIError('No such user exists!', httpStatus.NOT_FOUND);
-				return Promise.reject({
-					"success": false,
-					"error": err
-				});
+
+			})
+			.error((e) => {
+				const err = new APIError('No such user exists!', httpStatus.NOT_FOUND, true);
+				return Promise.reject(err)
 			});
 	},
 
@@ -121,11 +123,6 @@ UserSchema.statics = {
 				if (user) {
 					return user;
 				}
-				const err = new APIError('No such user exists!', httpStatus.NOT_FOUND);
-				return Promise.reject({
-					"success": false,
-					"error": err
-				});
 			});
 	},
 

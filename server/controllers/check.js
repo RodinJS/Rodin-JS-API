@@ -1,6 +1,6 @@
 import User from '../models/user';
 import jwt from 'jsonwebtoken';
-import httpStatus from 'http-status';
+import httpStatus from '../helpers/httpStatus';
 import APIError from '../helpers/APIError';
 
 const config = require('../../config/env');
@@ -66,14 +66,48 @@ function ifPremium(req, res, next) {
  * @param next
  * @returns {*}
  */
-function ifEmailExists(req, res) {
-	User.getByEmail(req.body.email).then((user) => {
-		const err = new APIError('User with this email alredy exists!', httpStatus.BAD_REQUEST, true);
-		return res.status(httpStatus.BAD_REQUEST).json(err);
-	}).error((e) => {
-		return res.status(200).json({"success": "true"});
-	});			
+// function ifEmailExists(req, res) {
+// 	User.getByEmail(req.body.email).then((user) => {
+// 		const err = new APIError('User with this email alredy exists!', httpStatus.BAD_REQUEST, true);
+// 		return res.status(httpStatus.BAD_REQUEST).json(err);
+// 	}).error((e) => {
+// 		return res.status(200).json({"success": "true"});
+// 	});			
+// }
+
+
+/**
+ * JWT token verification police. Check's if JWT token is valid one and assign token owners nfo to req.
+ * @param req
+ * @param res
+ * @param next
+ * @returns {*}
+ */
+function ifTokenValid(req, res, next) {
+	var token = req.headers['x-access-token']; //TODO: Get from Auth header
+	// verifies secret and checks exp date
+	jwt.verify(token, config.jwtSecret, function(err, decoded) {
+		if(err) {
+			const err = new APIError('Invalid token or secret', httpStatus.BAD_REQUEST, true);
+			console.log("1. ----", err);
+			return next(err);
+		} else {
+			User.get(decoded.username).then((user) => {
+				req.user = {
+					email: user.email,
+					username: user.username,
+					role: user.role,
+					profile: user.profile
+				};
+				
+				return next();
+			}).error((e) => {
+				const err = new APIError('Invalid token or secret', httpStatus.BAD_REQUEST, true);
+				console.log("2. ----", err);
+				return next(err);
+			});
+		}
+	});
 }
 
-
-export default { ifAdmin, ifPremium, ifEmailExists };
+export default { ifAdmin, ifPremium, ifTokenValid };

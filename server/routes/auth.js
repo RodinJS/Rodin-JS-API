@@ -5,12 +5,12 @@ import paramValidation from '../../config/param-validation';
 import authCtrl from '../controllers/auth';
 import check from '../controllers/check';
 import config from '../../config/env';
-import '../../config/passport';
-import passport from 'passport';
+// import '../../config/passport';
+// import passport from 'passport';
 
 const router = express.Router();	// eslint-disable-line new-cap
 
-const requireAuth = passport.authenticate('jwt', { session: false }); // eslint-disable-line
+// const requireAuth = passport.authenticate('jwt', { session: false }); // eslint-disable-line
 
 /**
  * @api {post} /api/auth/login Login
@@ -128,8 +128,8 @@ router.route('/verify')
  *          "isOperational": true
  *      }
  */
-router.route('/verify/email')
-	.post(check.ifEmailExists);
+// router.route('/verify/email')
+// 	.post(check.ifEmailExists);
 
 /**
  * @api {post} /api/auth/logout Logout
@@ -154,6 +154,6 @@ router.route('/verify/email')
  *
  */
 router.route('/logout')
-	.post(requireAuth, authCtrl.logout);
+	.post(authCtrl.logout);
 
 export default router;

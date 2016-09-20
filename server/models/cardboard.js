@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import Promise from 'bluebird';
-import httpStatus from 'http-status';
+import httpStatus from '../helpers/httpStatus';
 import APIError from '../helpers/APIError';
 
 /**

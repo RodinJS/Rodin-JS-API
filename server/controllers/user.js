@@ -1,7 +1,7 @@
 import User from '../models/user';
 import jwt from 'jsonwebtoken';
-import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
+import httpStatus from '../helpers/httpStatus';
 
 const config = require('../../config/env');
 
@@ -12,13 +12,9 @@ function load(req, res, next, username) {
 	jwt.verify(req.headers['x-access-token'], config.jwtSecret, function(err, decoded) {
 		if(err) {
 			const err = new APIError('Invalid token or secret', httpStatus.BAD_REQUEST, true);
-			return res.status(httpStatus.BAD_REQUEST).json({
-					"success": false,
-					"error": err
-				});
+			return res.status(httpStatus.BAD_REQUEST).json(err);
 		} else {
-			User.get(username).then((user) => {
-				console.log("---------stexa",user);
+			User.get(decoded.username).then((user) => {
 				req.user = {
 					email: user.email,
 					username: user.username,
@@ -37,8 +33,6 @@ function load(req, res, next, username) {
  * @returns {User}
  */
 function get(req, res) {
-	// req.user = {
-	// 	};
 	let response = {
 		"success": true,
 		"data": {
@@ -48,6 +42,7 @@ function get(req, res) {
 			profile: req.user.profile
 		}
 	}; 
+	
 	return res.status(200).json(response);
 }
 
@@ -56,45 +51,17 @@ function get(req, res) {
  * @returns {User}
  */
 function me(req, res) {
-	jwt.verify(req.headers['x-access-token'], config.jwtSecret, function(err, decoded) {
-		if(err) {
-			const err = new APIError('Invalid token or secret', httpStatus.BAD_REQUEST, true);
-				return res.status(httpStatus.BAD_REQUEST).json({
-					"success": false,
-					"error": err
-				});
-		} else {
-			User.get(decoded.username).then((user) => {
-				req.user = {
-					email: user.email,
-					username: user.username,
-					role: user.role,
-					profile: user.profile
-				};
-
-				let response = {
-
-				}; 
-
-				return res.status(200).json({
-					"success": true,
-					"data": {
-						email: req.user.email,
-						username: req.user.username,
-						role: req.user.role,
-						profile: req.user.profile
-					}
-				});
-				
-			}).error((e) => {
-				const err = new APIError('Invalid token or secret', httpStatus.BAD_REQUEST, true);
-				return res.status(httpStatus.BAD_REQUEST).json({
-					"success": false,
-					"error": err
-				});
-			});
+	let response = {
+		"success": true,
+		"data": {
+			email: req.user.email,
+			username: req.user.username,
+			role: req.user.role,
+			profile: req.user.profile
 		}
-	});
+	}; 
+
+	return res.status(200).json(response);
 }
 
 /**
@@ -104,18 +71,14 @@ function me(req, res) {
  * @returns {User}
  */
 function create(req, res, next) {
-	User.getByEmail(req.body.email)
+	User.get(req.body.username)
 		.then(user => {
 			if (user) {
-				const err = new APIError('User exists', httpStatus.BAD_REQUEST, true);
-				return next({
-					"success": false,
-					"error": err
-				});
+				const err = new APIError('User exists', 311);
+				return next(err);
 			};
-		})
-		.error((e) => {
-			const user = new User({
+
+			user = new User({
 				email: req.body.email,
 				password: req.body.password,
 				username: req.body.username,
@@ -149,13 +112,11 @@ function create(req, res, next) {
 					});
 				})
 				.error((e) => {
-					const err = new APIError(e, httpStatus.BAD_REQUEST);
-					return next({
-						"success": false,
-						"error": err
-					});
+					const err = new APIError("Something went wrong!", 312, true);
+					return next(err);
 				});
-		});
+		})
+		.error((e) => next(e));
 }
 
 /**

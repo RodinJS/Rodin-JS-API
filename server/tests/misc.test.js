@@ -1,5 +1,5 @@
 import request from 'supertest-as-promised';
-import httpStatus from 'http-status';
+import httpStatus from '../helpers/httpStatus';
 import chai from 'chai';
 import { expect } from 'chai';
 import app from '../../index';
