@@ -82,7 +82,8 @@ if (config.env !== 'test') {
 }
 
 // error handler, send stacktrace only during development
-app.use((err, req, res, next) =>		// eslint-disable-line no-unused-vars
+app.use((err, req, res, next) => {
+	console.log("-----------------mta");
 	res.status(err.status).json({
 		success: false,
 		error: {
@@ -91,8 +92,7 @@ app.use((err, req, res, next) =>		// eslint-disable-line no-unused-vars
 			type: httpStatus[err.status],
 			timestamp: Date.now()
 		}
-		// stack: config.env === 'development' ? err.stack : {}
-	})
-);
+	});
+});
 
 export default app;

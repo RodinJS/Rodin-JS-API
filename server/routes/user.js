@@ -149,6 +149,9 @@ router.route('/')
 	 */
 	.post(validate(paramValidation.createUser), userCtrl.create);
 
+router.route('/me')
+	.get(userCtrl.me);
+
 router.route('/:username')
 	/**
 	 * @api {get} /api/user/:username Get single user

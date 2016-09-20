@@ -8,19 +8,28 @@ const config = require('../../config/env');
 /**
  * Load user and append to req.
  */
-function load(req, res, next, email) {
-	console.log(email);
-	User.getByEmail(email).then((user) => {
-		console.log(user);
-		req.user = {
-			email: user.email,
-			role: user.role,
-			profile: user.profile
-		};
-		console.log(req.user);
+function load(req, res, next, username) {
+	jwt.verify(req.headers['x-access-token'], config.jwtSecret, function(err, decoded) {
+		if(err) {
+			const err = new APIError('Invalid token or secret', httpStatus.BAD_REQUEST, true);
+			return res.status(httpStatus.BAD_REQUEST).json({
+					"success": false,
+					"error": err
+				});
+		} else {
+			User.get(username).then((user) => {
+				console.log("---------stexa",user);
+				req.user = {
+					email: user.email,
+					username: user.username,
+					role: user.role,
+					profile: user.profile
+				};
 
-		return next();
-	}).error((e) => next(e));
+				return next();
+			}).error((e) => next(e));
+		}
+	});
 }
 
 /**
@@ -28,13 +37,64 @@ function load(req, res, next, email) {
  * @returns {User}
  */
 function get(req, res) {
-	console.log(req.user);
 	// req.user = {
-	// 		email: req.user.email,
-	// 		role: req.user.role,
-	// 		profile: req.user.profile
 	// 	};
-	return res.json(req.user);
+	let response = {
+		"success": true,
+		"data": {
+			email: req.user.email,
+			username: req.user.username,
+			role: req.user.role,
+			profile: req.user.profile
+		}
+	}; 
+	return res.status(200).json(response);
+}
+
+/**
+ * Get user
+ * @returns {User}
+ */
+function me(req, res) {
+	jwt.verify(req.headers['x-access-token'], config.jwtSecret, function(err, decoded) {
+		if(err) {
+			const err = new APIError('Invalid token or secret', httpStatus.BAD_REQUEST, true);
+				return res.status(httpStatus.BAD_REQUEST).json({
+					"success": false,
+					"error": err
+				});
+		} else {
+			User.get(decoded.username).then((user) => {
+				req.user = {
+					email: user.email,
+					username: user.username,
+					role: user.role,
+					profile: user.profile
+				};
+
+				let response = {
+
+				}; 
+
+				return res.status(200).json({
+					"success": true,
+					"data": {
+						email: req.user.email,
+						username: req.user.username,
+						role: req.user.role,
+						profile: req.user.profile
+					}
+				});
+				
+			}).error((e) => {
+				const err = new APIError('Invalid token or secret', httpStatus.BAD_REQUEST, true);
+				return res.status(httpStatus.BAD_REQUEST).json({
+					"success": false,
+					"error": err
+				});
+			});
+		}
+	});
 }
 
 /**
@@ -48,7 +108,10 @@ function create(req, res, next) {
 		.then(user => {
 			if (user) {
 				const err = new APIError('User exists', httpStatus.BAD_REQUEST, true);
-				return next(err);
+				return next({
+					"success": false,
+					"error": err
+				});
 			};
 		})
 		.error((e) => {
@@ -73,18 +136,24 @@ function create(req, res, next) {
 					});
 					
 					return res.json({
-						token,
-						user: {
-							email: savedUser.email,
-							username: savedUser.username,
-							role: savedUser.role,
-							profile: savedUser.profile
+						"success": true,
+						"data": {
+							token,
+							user: {
+								email: savedUser.email,
+								username: savedUser.username,
+								role: savedUser.role,
+								profile: savedUser.profile
+							}
 						}
 					});
 				})
 				.error((e) => {
 					const err = new APIError(e, httpStatus.BAD_REQUEST);
-					return next(err);
+					return next({
+						"success": false,
+						"error": err
+					});
 				});
 		});
 }
@@ -98,7 +167,9 @@ function create(req, res, next) {
 function update(req, res, next) {
 	const user = req.user;
 	user.email = req.body.email;
-	user.password = req.body.password;
+	user.username = req.body.username;
+	user.oldPassword = req.body.oldPassword;
+	user.newPassword = req.body.newPassword;
 
 	user.saveAsync()
 		.then((savedUser) => res.json(savedUser))
@@ -128,4 +199,4 @@ function remove(req, res, next) {
 		.error((e) => next(e));
 }
 
-export default { load, get, create, update, list, remove };
+export default { load, get, create, update, list, remove, me };

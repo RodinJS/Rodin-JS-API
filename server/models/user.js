@@ -97,13 +97,16 @@ UserSchema.statics = {
 	 * @returns {Promise<User, APIError>}
 	 */
 	get(username) {
-		return this.findOne({ usename: new RegExp('^'+usename+'$', "i") })
+		return this.findOne({ username: new RegExp('^'+username+'$', "i") })
 			.execAsync().then((user) => {
 				if (user) {
 					return user;
 				}
 				const err = new APIError('No such user exists!', httpStatus.NOT_FOUND);
-				return Promise.reject(err);
+				return Promise.reject({
+					"success": false,
+					"error": err
+				});
 			});
 	},
 
@@ -119,7 +122,10 @@ UserSchema.statics = {
 					return user;
 				}
 				const err = new APIError('No such user exists!', httpStatus.NOT_FOUND);
-				return Promise.reject(err);
+				return Promise.reject({
+					"success": false,
+					"error": err
+				});
 			});
 	},
 

@@ -19,30 +19,39 @@ function login(req, res, next) {
 				user.comparePassword(req.body.password).then(isMatch => {
 					if (isMatch) {
 						const token = jwt.sign({ //jwt.verify
-							username: savedUser.username,
-							role: savedUser.role,
-							random: savedUser.password.slice(-15)
+							username: user.username,
+							role: user.role,
+							random: user.password.slice(-15)
 						}, config.jwtSecret, {
 							expiresIn: "7d"
 						});
 
 						return res.json({
-							token,
-							user: {
-								email: savedUser.email,
-								username: savedUser.username,
-								role: savedUser.role,
-								profile: savedUser.profile
+							"success": true,
+							"data": {
+								token,
+								user: {
+									email: user.email,
+									username: user.username,
+									role: user.role,
+									profile: user.profile
+								}
 							}
 						});
 					} else {
 						const err = new APIError('Authentication error', httpStatus.UNAUTHORIZED);
-						return next(err);
+						return next({
+							"success": false,
+							"error": err
+						});
 					}
 				});
 			} else {
 				const err = new APIError('Authentication error', httpStatus.UNAUTHORIZED);
-				return next(err);				
+				return next({
+					"success": false,
+					"error": err
+				});				
 			}
 
 		});
@@ -58,7 +67,10 @@ function verify(req, res) {
 	jwt.verify(req.headers['x-access-token'], config.jwtSecret, function(err, decoded) {
 		if(err) {
 			const err = new APIError('Invalid token or secret', httpStatus.BAD_REQUEST, true);
-			return res.status(httpStatus.BAD_REQUEST).json(err);
+			return res.status(httpStatus.BAD_REQUEST).json({
+					"success": false,
+					"error": err
+				});
 		}
 		return res.status(200).json({success: true});
 	});

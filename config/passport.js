@@ -23,7 +23,6 @@ const jwtLogin = new JwtStrategy(jwtOptions, (payload, done) => {
 	if (err) { return done(err, false); }
 
 	if (user) {
-		// console.log("---JWT--- => ", user);
 	  done(null, user);
 	} else {
 	  done(null, false);
