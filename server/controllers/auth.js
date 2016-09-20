@@ -13,15 +13,15 @@ const config = require('../../config/env');
  * @returns {*}
  */
 function login(req, res, next) {
-	User.getByEmail(req.body.email)
+	User.get(req.body.username)
 		.then(user => {
 			if (user) {
 				user.comparePassword(req.body.password).then(isMatch => {
 					if (isMatch) {
 						const token = jwt.sign({ //jwt.verify
-							email: user.email,
-							role: user.role,
-							password: user.password
+							username: savedUser.username,
+							role: savedUser.role,
+							random: savedUser.password.slice(-15)
 						}, config.jwtSecret, {
 							expiresIn: "7d"
 						});
@@ -29,9 +29,10 @@ function login(req, res, next) {
 						return res.json({
 							token,
 							user: {
-								email: user.email,
-								role: user.role,
-								profile: user.profile
+								email: savedUser.email,
+								username: savedUser.username,
+								role: savedUser.role,
+								profile: savedUser.profile
 							}
 						});
 					} else {
@@ -48,32 +49,17 @@ function login(req, res, next) {
 }
 
 /**
- * This is a protected route. Will return random number only if jwt token is provided in header.
- * @param req
- * @param res
- * @returns {*}
- */
-function getRandomNumber(req, res) {
-	// req.user is assigned by jwt middleware if valid token is provided
-	return res.json({
-		user: req.user,
-		num: Math.random() * 100
-	});
-}
-
-/**
  * Token verify endpoint
  * @param req
  * @param res
  * @returns {true/false}
  */
 function verify(req, res) {
-	jwt.verify(req.body.token, config.jwtSecret, function(err, decoded) {
+	jwt.verify(req.headers['x-access-token'], config.jwtSecret, function(err, decoded) {
 		if(err) {
 			const err = new APIError('Invalid token or secret', httpStatus.BAD_REQUEST, true);
 			return res.status(httpStatus.BAD_REQUEST).json(err);
 		}
-
 		return res.status(200).json({success: true});
 	});
 
@@ -86,7 +72,8 @@ function verify(req, res) {
  * @returns {*}
  */
 function logout(req, res) {
-	return res.status(200).json({success: true});
+	return res.status(200).json({success: true}); //TODO: remove token from Redis!
 }
 
-export default { login, verify, logout };
+
+export default { login, logout, verify };

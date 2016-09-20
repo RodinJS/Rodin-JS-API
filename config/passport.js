@@ -9,8 +9,8 @@ import {Strategy as GoogleStrategy} from 'passport-google-oauth2';
 
 // Setting JWT strategy options
 const jwtOptions = {
-  // Telling Passport to check authorization headers for JWT
-  jwtFromRequest: ExtractJwt.fromHeader('token'),
+  // Telling Passport to check headers for JWT
+  jwtFromRequest: ExtractJwt.fromHeader('x-access-token'),
   // Telling Passport where to find the secret
   secretOrKey: config.jwtSecret
 
@@ -23,6 +23,7 @@ const jwtLogin = new JwtStrategy(jwtOptions, (payload, done) => {
 	if (err) { return done(err, false); }
 
 	if (user) {
+		// console.log("---JWT--- => ", user);
 	  done(null, user);
 	} else {
 	  done(null, false);
