@@ -89,7 +89,6 @@ function ifTokenValid(req, res, next) {
 	jwt.verify(token, config.jwtSecret, function(err, decoded) {
 		if(err) {
 			const err = new APIError('Invalid token or secret', httpStatus.BAD_REQUEST, true);
-			console.log("1. ----", err);
 			return next(err);
 		} else {
 			User.get(decoded.username).then((user) => {
@@ -99,11 +98,10 @@ function ifTokenValid(req, res, next) {
 					role: user.role,
 					profile: user.profile
 				};
-				
+
 				return next();
 			}).error((e) => {
 				const err = new APIError('Invalid token or secret', httpStatus.BAD_REQUEST, true);
-				console.log("2. ----", err);
 				return next(err);
 			});
 		}

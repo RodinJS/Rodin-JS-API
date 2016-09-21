@@ -37,8 +37,17 @@ const UserSchema = new mongoose.Schema({
 			type: String
 		}
 	},
+	projects: [        
+		{
+            id: {
+                type: String
+            }
+        }
+    ],
 	type: {
-		type: String //user or organization
+		type: String,
+		enum: ['User', 'Organization'],
+		default: 'User'
 	},
 	createdAt: {
 		type: Date,

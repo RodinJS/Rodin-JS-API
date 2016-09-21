@@ -57,14 +57,11 @@ function login(req, res, next) {
  * @param res
  * @returns {true/false}
  */
-function verify(req, res) {
+function verify(req, res, next) {
 	jwt.verify(req.headers['x-access-token'], config.jwtSecret, function(err, decoded) {
 		if(err) {
 			const err = new APIError('Invalid token or secret', httpStatus.BAD_REQUEST, true);
-			return res.status(httpStatus.BAD_REQUEST).json({
-					"success": false,
-					"error": err
-				});
+			return next(err);
 		}
 		return res.status(200).json({success: true});
 	});
