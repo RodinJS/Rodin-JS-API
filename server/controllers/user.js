@@ -42,7 +42,7 @@ function get(req, res) {
 			profile: req.user.profile
 		}
 	}; 
-	
+
 	return res.status(200).json(response);
 }
 
@@ -112,7 +112,7 @@ function create(req, res, next) {
 					});
 				})
 				.error((e) => {
-					const err = new APIError("Something went wrong!", 312, true);
+					const err = new APIError("Something went wrong!", httpStatus.SOMETHING_WENT_WRONG, true);
 					return next(err);
 				});
 		})
