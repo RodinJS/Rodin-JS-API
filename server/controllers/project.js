@@ -5,12 +5,6 @@ import httpStatus from '../helpers/httpStatus';
 
 const config = require('../../config/env');
 
-function log(...args) {
-  console.log("\n----------------\n");
-  console.log.apply(console, args);
-  console.log("\n----------------\n");
-}
-
 /**
  * Get project
  * @returns {Project}
@@ -54,8 +48,7 @@ function create(req, res, next) {
       });
     })
     .error((e) => {
-      console.log(e);
-      // const err = new APIError("Something went wrong!", 312, true);
+      const err = new APIError("Something went wrong!", 312, true);
       return next(e);
     });
 }
@@ -67,15 +60,20 @@ function create(req, res, next) {
  * @returns {Project}
  */
 function update(req, res, next) {
-  const project = req.project;
-  project.email = req.body.email;
-  project.username = req.body.username;
-  project.oldPassword = req.body.oldPassword;
-  project.newPassword = req.body.newPassword;
+  let project = req.project;
 
   project.saveAsync()
-    .then((savedProject) => res.json(savedProject))
-    .error((e) => next(e));
+    .then((savedProject) => {
+      return res.status(201).json({
+        "success": true,
+        "data": savedProject.outcome()
+      });
+    })
+    .error((e) => {
+      const err = new APIError("Something went wrong!", 312, true);
+      return next(e);
+    });
+
 }
 
 /**
@@ -87,7 +85,7 @@ function update(req, res, next) {
 function list(req, res, next) {
   const {limit = 50, skip = 0} = req.query;
   Project.list({limit, skip}).then((projects) => {
-    res.json({
+    res.status(200).json({
       success: true,
       data: projects
     })
@@ -101,8 +99,12 @@ function list(req, res, next) {
  */
 function remove(req, res, next) {
   const project = req.project;
-  project.removeAsync()
-    .then((deletedProject) => res.json(deletedProject))
+  project.status(200).removeAsync()
+    .then((deletedProject) => {
+      res.json({
+        success: true
+      })
+    })
     .error((e) => next(e));
 }
 
