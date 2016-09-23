@@ -37,7 +37,7 @@ const UserSchema = new mongoose.Schema({
 			type: String
 		}
 	},
-	projects: [        
+	projects: [
 		{
             id: {
                 type: String
@@ -67,6 +67,10 @@ const UserSchema = new mongoose.Schema({
 		type: Date,
 		default: Date.now
 	},
+  updatedAt: {
+    type: Date,
+    default: Date.now
+  },
 	facebookId: {
 		type: String
 	},
@@ -103,8 +107,8 @@ UserSchema.method({
 	comparePassword(candidatePassword) {
 		return new Promise((resolve, reject) => {
 			bcrypt.compare(candidatePassword, this.password, (err, isMatch) => {
-				if (err) { 
-					return reject(err); 
+				if (err) {
+					return reject(err);
 				}
 				resolve(isMatch);
 			});

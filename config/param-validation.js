@@ -22,6 +22,29 @@ export default {
     // }
   },
 
+
+  // POST /api/project
+  createProject: {
+    body: {
+      name: Joi.string().required(),
+      description: Joi.string().required(),
+      tags: Joi.array()
+    }
+  },
+
+  // UPDATE /api/project/:projectId
+  updateProject: {
+    body: {
+      name: Joi.string().required(),
+      description: Joi.string().required(),
+      tags: Joi.array(),
+      url: Joi.string().required(),
+    }
+    // params: {
+    //   projectId: Joi.string().hex().required()
+    // }
+  },
+
   // POST /api/auth/login
   login: {
     body: {
