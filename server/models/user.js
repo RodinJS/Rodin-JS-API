@@ -44,6 +44,20 @@ const UserSchema = new mongoose.Schema({
             }
         }
     ],
+    cert:
+    {
+    	ios: {
+	    	p12: {
+	    		type: String
+	    	},
+	    	profile: {
+	    		type: String
+	    	}
+    	},
+    	android: {
+    		type: String
+    	}
+    },
 	type: {
 		type: String,
 		enum: ['User', 'Organization'],

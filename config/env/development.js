@@ -19,5 +19,9 @@ export default {
 	socket: {
 		appId  : "358b43a076ed7dc0",
 		appSecret : "50835ec1-0392-7c98-60be-3f4ad1b7"
+	},
+	ios: {
+		appId: "2e659ea81e645f84",
+		appSecret: "af7cffae-17ce-25b2-8b76-849df75a"
 	}
 };
