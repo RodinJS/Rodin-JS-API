@@ -38,11 +38,9 @@ const UserSchema = new mongoose.Schema({
 		}
 	},
 	projects: [
-		{
-            id: {
-                type: String
-            }
-        }
+		{ 
+			type: String
+		}
     ],
     cert:
     {
@@ -67,10 +65,10 @@ const UserSchema = new mongoose.Schema({
 		type: Date,
 		default: Date.now
 	},
-  updatedAt: {
-    type: Date,
-    default: Date.now
-  },
+ 	updatedAt: {
+		type: Date,
+		default: Date.now
+	},
 	facebookId: {
 		type: String
 	},
@@ -135,21 +133,33 @@ UserSchema.statics = {
 			})
 			.error((e) => {
 				const err = new APIError('No such user exists!', httpStatus.NOT_FOUND, true);
-				return Promise.reject(err)
+				return Promise.reject(err);
 			});
 	},
 
 	/**
-	 * Get user by email
+	 * Check if user has permission to modify project
 	 * @param {ObjectId} id - The objectId of user.
 	 * @returns {Promise<User, APIError>}
 	 */
-	getByEmail(email) {
-		return this.findOne({ email: new RegExp('^'+email+'$', "i") }) // eslint-disable-line
+	getPermission(username, id) {
+		return this.findOne({ username: new RegExp('^'+username+'$', "i") }) // eslint-disable-line
 			.execAsync().then((user) => {
 				if (user) {
-					return user;
+					for(let i = 0; i < user.projects.length; i++) {
+						console.log("----- ", i, " ---- ", user.projects[i]);
+						if(user.projects[i] === id) {
+							return true;
+						}
+					}
+					return false;
+				} else {
+					return false;
 				}
+			})
+			.error((e) => {
+				const err = new APIError('No such user exists!', httpStatus.NOT_FOUND, true);
+				return Promise.reject(err);
 			});
 	},
 

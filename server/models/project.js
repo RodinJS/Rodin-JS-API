@@ -97,9 +97,7 @@ ProjectSchema.statics = {
 
 ProjectSchema.pre("save", function (next) {
   let project = this;
-  console.log("\n\n5555555555555555555\n\n")
   function generateProjectRoot(i, callback) {
-
     if (i !== 0) {
       project.root += i;
     } else {

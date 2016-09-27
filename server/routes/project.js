@@ -75,7 +75,7 @@ router.route('/')
 	 *          }
 	 *      }
  */
-  .get(check.ifTokenValid, projectCtrl.list)
+  .get(check.ifAdmin, projectCtrl.list)
 
   /**
    * @api {post} /api/project Create new project
@@ -147,7 +147,7 @@ router.route('/')
    */
   .post(check.ifTokenValid, validate(paramValidation.createProject), projectCtrl.create);
 
-router.route('/:projectId')
+router.route('/:id')
 /**
  * @api {get} /api/project/:projectId Get single project
  * @apiName GetUser

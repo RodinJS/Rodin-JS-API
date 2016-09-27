@@ -1,4 +1,5 @@
 import Project from '../models/project';
+import User from '../models/user';
 import jwt from 'jsonwebtoken';
 import APIError from '../helpers/APIError';
 import httpStatus from '../helpers/httpStatus';
@@ -11,13 +12,13 @@ const config = require('../../config/env');
  */
 function get(req, res) {
   let response = {
-    "success": true,
-    "data": {
-      email: req.project.email,
-      username: req.project.username,
-      role: req.project.role,
-      profile: req.project.profile
-    }
+	"success": true,
+	"data": {
+	  email: req.project.email,
+	  username: req.project.username,
+	  role: req.project.role,
+	  profile: req.project.profile
+	}
   };
 
   return res.status(200).json(response);
@@ -31,26 +32,50 @@ function get(req, res) {
  * @returns {Project}
  */
 function create(req, res, next) {
-
   let project = new Project({
-    name: req.body.name,
-    tags: req.body.tags,
-    root: req.body.name,
-    description: req.body.description,
-    isNew: true
+	name: req.body.name,
+	tags: req.body.tags,
+	root: req.body.name,
+	description: req.body.description,
+	isNew: true
   });
 
   project.saveAsync()
-    .then((savedProject) => {
-      return res.status(201).json({
-        "success": true,
-        "data": savedProject.outcome()
-      });
-    })
-    .error((e) => {
-      const err = new APIError("Something went wrong!", 312, true);
-      return next(e);
-    });
+	.then((savedProject) => {
+	  User.get(req.user.username)
+		.then(user => {
+		  if (user) {
+			User.updateAsync(
+			  {
+				username: req.user.username
+			  }, 
+			  {
+				$push: {
+				  "projects": savedProject._id
+				}
+			  }
+			)
+			.then(updatedUser => {
+			  return res.status(201).json({
+				"success": true,
+				"data": savedProject.outcome()
+			  });
+			})
+			.catch((e) => {
+			  const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+			  return next(err);
+			});
+		  } else {
+			const err = new APIError('User not found!', 310);
+			return next(err);       
+		  }
+
+		});
+	})
+	.error((e) => {
+	  const err = new APIError("Something went wrong!", 312, true);
+	  return next(e);
+	});
 }
 
 /**
@@ -63,16 +88,16 @@ function update(req, res, next) {
   let project = req.project;
 
   project.saveAsync()
-    .then((savedProject) => {
-      return res.status(201).json({
-        "success": true,
-        "data": savedProject.outcome()
-      });
-    })
-    .error((e) => {
-      const err = new APIError("Something went wrong!", 312, true);
-      return next(e);
-    });
+	.then((savedProject) => {
+	  return res.status(200).json({
+		"success": true,
+		"data": savedProject.outcome()
+	  });
+	})
+	.error((e) => {
+	  const err = new APIError("Something went wrong!", 312, true);
+	  return next(e);
+	});
 
 }
 
@@ -85,12 +110,12 @@ function update(req, res, next) {
 function list(req, res, next) {
   const {limit = 50, skip = 0} = req.query;
   Project.list({limit, skip}).then((projects) => {
-    res.status(200).json({
-      success: true,
-      data: projects
-    })
+	res.status(200).json({
+	  success: true,
+	  data: projects
+	})
   })
-    .error((e) => next(e));
+  .error((e) => next(e));
 }
 
 /**
@@ -98,14 +123,42 @@ function list(req, res, next) {
  * @returns {Project}
  */
 function remove(req, res, next) {
-  const project = req.project;
-  project.status(200).removeAsync()
-    .then((deletedProject) => {
-      res.json({
-        success: true
-      })
-    })
-    .error((e) => next(e));
+	const id = req.params.id;
+	const username = req.user.username;
+	User.getPermission(username, id)
+		.then(user => {
+			if (user) {
+				Project.removeAsync({ _id : id })
+					.then((deletedProject) => {
+						if(deletedProject.result.ok === 1) {
+							User.updateAsync(
+								{
+									username: username
+								},
+								{ 
+									$pull: 
+										{ 
+											projects: id 
+										} 
+								}
+							)
+							.then(updatedUser => {
+									return res.status(200).json({
+										"success": true,
+										"data": "Project Successfuly deleted!"
+									});
+					        	});
+						} else {
+							const err = new APIError("Something went wrong!", 312, true);
+							return next(err);
+						}
+					}).error((e) => next(e));
+			} else {
+				const err = new APIError('User has no permission to modify this project!', 310, true);
+				return next(err);				
+			}
+
+		});
 }
 
 export default {get, create, update, list, remove};

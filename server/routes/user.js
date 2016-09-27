@@ -286,7 +286,7 @@ router.route('/:username')
 	 *          }
 	 *      }
 	 */
-	.delete(userCtrl.remove);
+	.delete(check.ifTokenValid, userCtrl.remove);
 
 /** Load user when API with username route parameter is hit */
 // router.param('username', userCtrl.load);

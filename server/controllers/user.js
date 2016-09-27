@@ -1,4 +1,5 @@
 import User from '../models/user';
+import Project from '../models/project';
 import jwt from 'jsonwebtoken';
 import APIError from '../helpers/APIError';
 import httpStatus from '../helpers/httpStatus';
@@ -154,10 +155,34 @@ function list(req, res, next) {
  * @returns {User}
  */
 function remove(req, res, next) {
-	const user = req.user;
-	user.removeAsync()
-		.then((deletedUser) => res.json(deletedUser))
-		.error((e) => next(e));
+	const username = req.user.username;
+
+	User.get(username)
+	    .then(user => {
+	    	if (user) {
+	      		for(let i = 0; i < user.projects.length; i++) {
+	      			Project.removeAsync({ _id : user.projects[i] })
+						.then((deletedProject) => {
+							console.log(" --- ", i, " --- ", user.projects[i]);							
+						}).error((e) => next(e));
+	      		}
+	        } else {
+				const err = new APIError("Something went wrong!", 312, true);
+				return next(err);
+			}
+			User.removeAsync({ username : username })
+				.then((deletedUser) => res.status(200).json({
+					"success": true,
+					"data": deletedUser
+				}))
+				.error((e) => next(e));
+	    })
+		.catch((e) => {
+			const err = new APIError('User not found!', httpStatus.BAD_REQUEST, true);
+			return next(err);
+		});
+
+
 }
 
 export default { load, get, create, update, list, remove, me };

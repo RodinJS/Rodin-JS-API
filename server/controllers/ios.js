@@ -46,7 +46,7 @@ function cert(req, res, next) {
 							headers: {
 								'app-id': config.socket.appId,
 								'app-secret': config.socket.appSecret
-							}
+							},
 							multipart: [
 								{
 									'content-type': ' application/x-pkcs12',
