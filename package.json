@@ -78,7 +78,7 @@
     "coveralls": "^2.11.14",
     "cz-conventional-changelog": "1.1.5",
     "del": "^2.2.0",
-    "eslint": "^1.10.3",
+    "eslint": "^3.6.0",
     "eslint-config-airbnb": "5.0.1",
     "ghooks": "^1.2.4",
     "gulp": "3.9.1",
