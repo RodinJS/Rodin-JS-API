@@ -23,7 +23,8 @@ if (config.env === 'development') {
 }
 
 // parse body params and attache them to req.body
-app.use(bodyParser.json());
+// app.use(bodyParser.json());
+app.use(bodyParser.json({limit: '10mb'}));
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(cookieParser());
@@ -70,6 +71,7 @@ app.use((err, req, res, next) => {
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
+		console.log("-----error");
 	const err = new APIError('API not found', httpStatus.NOT_FOUND);
 	return next(err);
 });

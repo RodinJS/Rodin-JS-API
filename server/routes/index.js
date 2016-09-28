@@ -2,6 +2,7 @@ import express from 'express';
 import userRoutes from './user';
 import projectRoutes from './project';
 import authRoutes from './auth';
+import editorRoutes from './editor';
 import iosRoutes from './ios';
 
 const router = express.Router();	// eslint-disable-line new-cap
@@ -19,6 +20,9 @@ router.use('/project', projectRoutes);
 
 // mount auth routes at /auth
 router.use('/auth', authRoutes);
+
+// mount editor routes at /editor
+router.use('/editor', editorRoutes);
 
 // mount ios routes at /ios
 router.use('/ios', iosRoutes);
