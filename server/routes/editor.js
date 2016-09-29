@@ -9,9 +9,9 @@ router.route('/tree')
 	.get(check.ifTokenValid, editorCtrl.getTreeJSON);
 
 router.route('/serve')
-	.get(check.ifTokenValid, editorCtrl.getFile)
-	.put(check.ifTokenValid, editorCtrl.putFile)
-	.post(check.ifTokenValid, editorCtrl.postFile)
+	.get(check.ifTokenValid, check.project, editorCtrl.getFile)
+	.put(check.ifTokenValid, check.project, editorCtrl.putFile)
+	.post(check.ifTokenValid, check.project, editorCtrl.postFile)
 	.delete(check.ifTokenValid, check.project, editorCtrl.deleteFile);
 
 router.route('/:id')

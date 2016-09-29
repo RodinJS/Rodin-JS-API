@@ -19,12 +19,4 @@ function cleanUrl(url) {
     return url;
 };
 
-function readFile(path, callback) {
-    try {
-        fs.readFile(path, 'utf8', callback);
-    } catch (e) {
-        callback(e);
-    }
-}
-
-export default { lookupMime, cleanUrl, readFile };
+export default { lookupMime, cleanUrl };
