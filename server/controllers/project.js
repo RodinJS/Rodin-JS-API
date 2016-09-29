@@ -129,7 +129,7 @@ function update(req, res, next) {
  */
 function list(req, res, next) {
   const {limit = 50, skip = 0} = req.query;
-  Project.list({limit, skip}).then((projects) => {
+  Project.list({limit, skip}, req.user.username).then((projects) => {
 	res.status(200).json({
 	  success: true,
 	  data: projects

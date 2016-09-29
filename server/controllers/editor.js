@@ -82,15 +82,38 @@ function putFile(req, res, next) {
 		const err = new APIError('Provide file name!', httpStatus.BAD_REQUEST, true);
 		return next(err);
 	}	
-	if (!req.query.path && !req.query.content) {
-		const err = new APIError('Provide path or content of file!', httpStatus.BAD_REQUEST, true);
+	if (!req.query.path) {
+		const err = new APIError('Provide path of file!', httpStatus.BAD_REQUEST, true);
+		return next(err);	
+	}	
+	if (!req.query.action) {
+		const err = new APIError('Provide action!', httpStatus.BAD_REQUEST, true);
 		return next(err);	
 	}
 
-	let path = req.query.path;
-	let content = help.cleanUrl(req.query.content);
+	// if (req.query.action === 'rename') {
+
+	// } else if (req.query.action === 'save') {
+
+	// } else {
+
+	// }
+
+
+
+
+
 	
-	if (!fs.lstatSync(filePath).isDirectory()) { //check if file
+
+	let path = help.cleanUrl(req.query.path);
+	let content = req.query.content;
+	
+	if (!fs.lstatSync(path).isDirectory()) { //check if file
+		if (!req.query.content) {
+			const err = new APIError('Provide content of file!', httpStatus.BAD_REQUEST, true);
+			return next(err);	
+		}
+
 		fs.writeFile(path, content, (err) => {
 			if (err) {
 				const e = new APIError('Could not write to file!', httpStatus.COULD_NOT_WRITE_TO_FILE, true);
@@ -98,14 +121,26 @@ function putFile(req, res, next) {
 			} 
 			res.status(200).send({ "success": true });
 		});
-	} else {
-		fs.rename('/tmp/hello', '/tmp/world', function (err) {
+	} else { 
+		fs.rename(path, '/tmp/world',  (err) => {
 			if (err) throw err;
-			fs.stat('/tmp/world', function (err, stats) {
+			fs.stat('/tmp/world',  (err, stats) => {
 				if (err) throw err;
 				console.log('stats: ' + JSON.stringify(stats));
+				res.status(200).send({ "success": true });
 			});
 		});
+	}
+}
+
+function rename(req, res, next) {
+	if (!req.query.filename) {
+		const err = new APIError('Provide file name!', httpStatus.BAD_REQUEST, true);
+		return next(err);
+	}	
+	if (!req.query.path) {
+		const err = new APIError('Provide path of file!', httpStatus.BAD_REQUEST, true);
+		return next(err);	
 	}
 }
 

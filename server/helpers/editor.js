@@ -15,8 +15,8 @@ function lookupMime(filename) {
 // don't let users crawl up the folder structure by using a/../../../c/d
 function cleanUrl(url) { 
     url = decodeURIComponent(url);
-    while(url.indexOf('..').length > 0) { url = url.replace('..', ''); }
-    return url;
+    let newURL = url.split('../').join("");
+    return newURL;
 };
 
 export default { lookupMime, cleanUrl };

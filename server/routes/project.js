@@ -75,7 +75,7 @@ router.route('/')
 	 *          }
 	 *      }
  */
-  .get(check.ifAdmin, projectCtrl.list)
+  .get(check.ifTokenValid, projectCtrl.list)
 
   /**
    * @api {post} /api/project Create new project
