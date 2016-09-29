@@ -90,4 +90,5 @@ doc
 files
 
 #project files folder
-projects
+projects/*
+!projects/.gitkeap
