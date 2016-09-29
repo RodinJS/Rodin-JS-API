@@ -1,4 +1,5 @@
 import User from '../models/user';
+import Project from '../models/project';
 import jwt from 'jsonwebtoken';
 import httpStatus from '../helpers/httpStatus';
 import APIError from '../helpers/APIError';
@@ -92,20 +93,44 @@ function ifTokenValid(req, res, next) {
 			return next(err);
 		} else {
 			User.get(decoded.username).then((user) => {
-				req.user = {
-					email: user.email,
-					username: user.username,
-					role: user.role,
-					profile: user.profile
-				};
+				if(user) {
+					req.user = {
+						email: user.email,
+						username: user.username,
+						role: user.role,
+						profile: user.profile
+					};
 
-				return next();
+					return next();
+				} else {
+					const err = new APIError('Invalid token!', httpStatus.BAD_REQUEST, true);
+					return next(err);					
+				}
 			}).error((e) => {
-				const err = new APIError('Invalid token or secret', httpStatus.BAD_REQUEST, true);
+				const err = new APIError('Invalid token!', httpStatus.BAD_REQUEST, true);
 				return next(err);
 			});
 		}
 	});
 }
 
-export default { ifAdmin, ifPremium, ifTokenValid };
+function project(req, res, next) {
+	if (!req.query.id) {
+		const err = new APIError('Provide project ID!', httpStatus.BAD_REQUEST, true);
+		return next(err);	
+	}
+
+	Project.get(req.query.id).then((project) => {
+		req.project = {
+			name: project.name,
+			root: project.root
+		};
+
+		return next();
+	}).error((e) => {
+		const err = new APIError('Project ID is invalid!', httpStatus.BAD_REQUEST, true);
+		return next(err);
+	});
+}
+
+export default { ifAdmin, ifPremium, ifTokenValid, project };

@@ -9,9 +9,12 @@ router.route('/tree')
 	.get(check.ifTokenValid, editorCtrl.getTreeJSON);
 
 router.route('/serve')
-	.get(check.ifTokenValid, editorCtrl.serve);
+	.get(check.ifTokenValid, editorCtrl.getFile)
+	.put(check.ifTokenValid, editorCtrl.putFile)
+	.post(check.ifTokenValid, editorCtrl.postFile)
+	.delete(check.ifTokenValid, check.project, editorCtrl.deleteFile);
 
-router.route('/:projectId')
-	.get(check.ifTokenValid, editorCtrl.getProject);
+router.route('/:id')
+	.get(check.ifTokenValid, editorCtrl.getTreeJSON);
 
 export default router;

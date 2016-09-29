@@ -11,3 +11,20 @@ function lookupMime(filename) {
         jpeg: "image/jpeg"
     }[ext];
 }
+
+// don't let users crawl up the folder structure by using a/../../../c/d
+function cleanUrl(url) { 
+    url = decodeURIComponent(url);
+    while(url.indexOf('..').length > 0) { url = url.replace('..', ''); }
+    return url;
+};
+
+function readFile(path, callback) {
+    try {
+        fs.readFile(path, 'utf8', callback);
+    } catch (e) {
+        callback(e);
+    }
+}
+
+export default { lookupMime, cleanUrl, readFile };

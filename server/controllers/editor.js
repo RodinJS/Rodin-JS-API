@@ -2,64 +2,123 @@ import http from 'http';
 import path from 'path';
 import url from 'url';
 import fs from 'fs';
-import os from 'os';
+
 import dirToJson from 'dir-to-json';
 
 import Project from '../models/project';
 import User from '../models/user';
-import jwt from 'jsonwebtoken';
 import APIError from '../helpers/APIError';
 import httpStatus from '../helpers/httpStatus';
+import help from '../helpers/editor';
 
-const config = require('../../config/env');
-
-// const system = os.type(); // Windows_NT, Linux, Darwin
-// const platform = os.platform(); // 'aix', 'darwin', 'freebsd', 'linux', 'openbsd', 'sunos', 'win32'
-
-function readFile(path, callback) {
-	try {
-		fs.readFile(path, 'utf8', callback);
-	} catch (e) {
-		callback(e);
-	}
-}
-
+import config from '../../config/env';
 
 function getTreeJSON(req, res, next) {
-	dirToJson( "./server" )
-		.then((dirTree) => {
-			return res.send({
-				"success": true,
-				"data": {
-					"tree": dirTree
-				}
-			});
+	Project.get(req.params.id)
+		.then((project) => {
+			if(project) {
+				//TODO normalize root folder path
+				let response = {
+					"success": true,
+					"data": {
+						name: project.name,
+						description: project.description,
+						root: project.root,
+						tree: ''
+					}
+				};
+
+				const rootPath = 'projects/' + project.root;
+				dirToJson(rootPath)
+					.then((dirTree) => {
+						console.log(dirTree);
+						response.data.tree = dirTree;
+						return res.status(200).json(response);
+					})
+					.catch((e) => {
+						const err = new APIError('Problem with generating tree', httpStatus.BAD_REQUEST, true);
+						return next(err);
+					});
+
+			} else {
+				const err = new APIError('Project is empty', httpStatus.NOT_FOUND, true);
+				return next(err);
+			}
 		})
 		.catch((e) => {
-			const err = new APIError('Gago pavesilsya', httpStatus.BAD_REQUEST, true);
-			return next(err);
+			const err = new APIError('Project not found', httpStatus.NOT_FOUND, true);
+			return next(e);
 		});
-}
-
-
-function getProject(req, res, next) {
 
 }
 
-function serve(req, res, next) {
+function getFile(req, res, next) {
 	if (!req.query.filename) {
 		const err = new APIError('Provide file name!', httpStatus.BAD_REQUEST, true);
 		return next(err);	
 	}
 
 	const filePath = req.query.filename;
-	readFile(filePath, (err, content) => {
-	    console.log(content);
+	help.readFile(filePath, (err, content) => {
+	    // console.log(content);
 	    return res.send(content);
 	});
 }
 
-export default { getTreeJSON, getProject, serve };
+function putFile(req, res, next) {
+
+}
+
+function postFile(req, res, next) {
+
+}
+
+function deleteFile(req, res, next) {
+	if (!req.query.filename) {
+		const err = new APIError('Provide file name!', httpStatus.BAD_REQUEST, true);
+		return next(err);	
+	}
+
+	const filePath = 'projects/' + req.project.root + '/' + help.cleanUrl(req.query.filename);
+	if (!fs.lstatSync(filePath).isDirectory()) { //check if file
+		if (fs.existsSync(filePath)) {
+	        fs.unlink(filePath, (err) => {
+	            if (err) {
+					const err = new APIError('Could not delete object!', httpStatus.COULD_NOT_DELETE_OBJECT, true);
+					return next(err);
+	            } else {
+	                res.status(200).send({ "success": true, "data":  filePath});
+	            }
+	        });
+	    } else {
+			const err = new APIError('Path does not exist!', httpStatus.PATH_DOES_NOT_EXIST, true);
+			return next(err);
+	    }
+	} else { // when folder
+		deleteFolderRecursive(filePath);
+		function deleteFolderRecursive(path) {
+			if(fs.existsSync(path)) {
+				fs.readdirSync(path).forEach((file,index) => {
+					var curPath = path + "/" + file;
+					if(fs.lstatSync(curPath).isDirectory()) { // recurse
+						deleteFolderRecursive(curPath);
+					} else { // delete file
+						fs.unlinkSync(curPath);
+					}
+				});
+				fs.rmdirSync(path);
+				res.status(200).send({ "success": true, "data":  filePath});
+			} else {
+				const err = new APIError('Path does not exist!', httpStatus.PATH_DOES_NOT_EXIST, true);
+				return next(err);				
+			}
+		};
+	}
+
+}
+
+
+export default { getTreeJSON, getFile, putFile, postFile, deleteFile };
 
 
 

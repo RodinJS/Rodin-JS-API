@@ -25,6 +25,9 @@ const ProjectSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  owner: {
+    type: String
+  },
   build: {
     oculus: {
       type: Boolean
@@ -68,7 +71,7 @@ ProjectSchema.statics = {
    * @returns {Promise<User, APIError>}
    */
   get(id) {
-    return this.findOne({id: new RegExp('^' + id + '$', "i")})
+    return this.findOne({_id: id})  //new RegExp('^' + id + '$', "i")
       .execAsync().then((project) => {
         if (project) {
           return project;

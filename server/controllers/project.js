@@ -1,27 +1,40 @@
+import fs from 'fs';
 import Project from '../models/project';
 import User from '../models/user';
 import jwt from 'jsonwebtoken';
 import APIError from '../helpers/APIError';
 import httpStatus from '../helpers/httpStatus';
 
-const config = require('../../config/env');
+import config from '../../config/env';
 
 /**
  * Get project
  * @returns {Project}
  */
-function get(req, res) {
-  let response = {
-	"success": true,
-	"data": {
-	  email: req.project.email,
-	  username: req.project.username,
-	  role: req.project.role,
-	  profile: req.project.profile
-	}
-  };
+function get(req, res, next) {
+	Project.get(req.params.id)
+		.then((project) => {
+			if(project) {
+				//TODO normalize root folder path
+				let response = {
+					"success": true,
+					"data": {
+						name: project.name,
+						description: project.description,
+						root: project.root
+					}
+				};
 
-  return res.status(200).json(response);
+				return res.status(200).json(response);
+			} else {
+				const err = new APIError('Project is empty', httpStatus.NOT_FOUND, true);
+				return next(err);
+			}
+		})
+		.catch((e) => {
+			const err = new APIError('Project not found', httpStatus.NOT_FOUND, true);
+			return next(e);
+		});
 }
 
 /**
@@ -36,41 +49,48 @@ function create(req, res, next) {
 	name: req.body.name,
 	tags: req.body.tags,
 	root: req.body.name,
+	owner: req.user.username,
 	description: req.body.description,
 	isNew: true
   });
 
   project.saveAsync()
 	.then((savedProject) => {
-	  User.get(req.user.username)
-		.then(user => {
-		  if (user) {
-			User.updateAsync(
-			  {
-				username: req.user.username
-			  }, 
-			  {
-				$push: {
-				  "projects": savedProject._id
-				}
-			  }
-			)
-			.then(updatedUser => {
-			  return res.status(201).json({
-				"success": true,
-				"data": savedProject.outcome()
-			  });
-			})
-			.catch((e) => {
-			  const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
-			  return next(err);
-			});
-		  } else {
-			const err = new APIError('User not found!', 310);
-			return next(err);       
-		  }
+		let rootDir = 'projects/' + savedProject.root;
 
-		});
+		if (!fs.existsSync(rootDir)) { 
+			fs.mkdirSync(rootDir); //creating root dir for project 
+		}
+		
+		User.get(req.user.username)
+			.then(user => {
+			  if (user) {
+				User.updateAsync(
+				  {
+					username: req.user.username
+				  }, 
+				  {
+					$push: {
+					  "projects": savedProject._id
+					}
+				  }
+				)
+				.then(updatedUser => {
+				  return res.status(201).json({
+					"success": true,
+					"data": savedProject.outcome()
+				  });
+				})
+				.catch((e) => {
+				  const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+				  return next(err);
+				});
+			  } else {
+				const err = new APIError('User not found!', 310);
+				return next(err);       
+			  }
+
+			});
 	})
 	.error((e) => {
 	  const err = new APIError("Something went wrong!", 312, true);

@@ -4,8 +4,7 @@ import jwt from 'jsonwebtoken';
 import APIError from '../helpers/APIError';
 import httpStatus from '../helpers/httpStatus';
 
-const config = require('../../config/env');
-
+import config from '../../config/env';
 /**
  * Load user and append to req.
  */
