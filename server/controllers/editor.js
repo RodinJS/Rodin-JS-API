@@ -68,29 +68,45 @@ function getFile(req, res, next) {
 
 	const filePath = 'projects/' + req.project.root + '/' + help.cleanUrl(req.query.filename);
 	readFile(filePath, (err, content) => {
-		if(content) {
-	    	return res.send({"success": true, "data": {content}});
-		} else {
+		if(err) {
 			const err = new APIError('File does not exist!', httpStatus.FILE_DOES_NOT_EXIST, true);
 			return next(err);	
 		}
+
+	    return res.send({"success": true, "data": {content}});
 	});
 }
 
 function putFile(req, res, next) {
 	if (!req.query.filename) {
 		const err = new APIError('Provide file name!', httpStatus.BAD_REQUEST, true);
+		return next(err);
+	}	
+	if (!req.query.path && !req.query.content) {
+		const err = new APIError('Provide path or content of file!', httpStatus.BAD_REQUEST, true);
 		return next(err);	
 	}
 
-	fs.writeFile('gago.txt', 'Content', (err) => {
-	    if (err) {
-			const e = new APIError('Could not write to file!', httpStatus.COULD_NOT_WRITE_TO_FILE, true);
-			return next(e);	    	
-	    } 
-	    res.status(200).send({ "success": true });
-	});
-
+	let path = req.query.path;
+	let content = help.cleanUrl(req.query.content);
+	
+	if (!fs.lstatSync(filePath).isDirectory()) { //check if file
+		fs.writeFile(path, content, (err) => {
+			if (err) {
+				const e = new APIError('Could not write to file!', httpStatus.COULD_NOT_WRITE_TO_FILE, true);
+				return next(e);
+			} 
+			res.status(200).send({ "success": true });
+		});
+	} else {
+		fs.rename('/tmp/hello', '/tmp/world', function (err) {
+			if (err) throw err;
+			fs.stat('/tmp/world', function (err, stats) {
+				if (err) throw err;
+				console.log('stats: ' + JSON.stringify(stats));
+			});
+		});
+	}
 }
 
 function postFile(req, res, next) {
@@ -141,10 +157,4 @@ function deleteFile(req, res, next) {
 
 }
 
-
 export default { getTreeJSON, getFile, putFile, postFile, deleteFile };
-
-
-
-
-

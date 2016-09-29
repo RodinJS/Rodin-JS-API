@@ -5,8 +5,8 @@ import config from '../../config/env';
 
 const router = express.Router();	// eslint-disable-line new-cap
 
-router.route('/tree')
-	.get(check.ifTokenValid, editorCtrl.getTreeJSON);
+// router.route('/tree')
+// 	.get(check.ifTokenValid, editorCtrl.getTreeJSON);
 
 router.route('/serve')
 	.get(check.ifTokenValid, check.project, editorCtrl.getFile)
