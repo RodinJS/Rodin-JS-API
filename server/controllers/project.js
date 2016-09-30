@@ -106,9 +106,7 @@ function update(req, res, next) {
 		.then(project => {
 
 			if (project) {
-				console.log(req.body);
-				console.log(req.params.id);
-				project.updateAsync(
+				Project.updateAsync(
 					{
 						_id: req.params.id
 					}, 
