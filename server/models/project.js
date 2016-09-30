@@ -91,7 +91,6 @@ ProjectSchema.statics = {
     return this.findOne({_id: id, owner: owner})  //new RegExp('^' + id + '$', "i")
       .execAsync().then((project) => {
         if (project) {
-          console.log("----------------", project);
           return project;
         } else {
           const err = new APIError('No such project exists!----', httpStatus.NOT_FOUND, true);
@@ -110,8 +109,25 @@ ProjectSchema.statics = {
    * @param {number} limit - Limit number of projects to be returned.
    * @returns {Promise<Project[]>}
    */
-  list({skip = 0, limit = 50} = {}, owner) {
-    return this.find({owner: owner})
+  list({skip = 0, limit = 50} = {}, owner, _queryString = null) {
+    const query = {};
+    if(owner) {
+      query.owner = owner;
+    }
+
+    if(_queryString) {
+      const re = new RegExp(_queryString, 'gi');
+      query.$or = [
+        {
+          name: re,
+        }, 
+        {
+          description: re
+        }
+      ]
+    }
+
+    return this.find(query)
       .sort({createdAt: -1})
       .skip(skip)
       .limit(limit)

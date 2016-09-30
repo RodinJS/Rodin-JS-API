@@ -12,7 +12,7 @@ import config from '../../config/env';
  * @returns {Project}
  */
 function get(req, res, next) {
-	Project.get(req.params.id)
+	Project.getOne(req.params.id, req.user.username)
 		.then((project) => {
 			if(project) {
 				//TODO normalize root folder path
@@ -21,6 +21,7 @@ function get(req, res, next) {
 					"data": {
 						name: project.name,
 						description: project.description,
+						owner: project.owner,
 						root: project.root
 					}
 				};
@@ -129,7 +130,7 @@ function update(req, res, next) {
  */
 function list(req, res, next) {
   const {limit = 50, skip = 0} = req.query;
-  Project.list({limit, skip}, req.user.username).then((projects) => {
+  Project.list({limit, skip}, req.user.username, req.query._queryString).then((projects) => {
 	res.status(200).json({
 	  success: true,
 	  data: projects
