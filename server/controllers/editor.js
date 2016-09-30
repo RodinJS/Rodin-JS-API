@@ -138,7 +138,7 @@ function putFile(req, res, next) {
 }
 
 function postFile(req, res, next) {
-
+	res.status(httpStatus.MOVED_PERMANENTLY).send({"success": false, "error": "Not implemented yet! Sorry for that..."});
 }
 
 function deleteFile(req, res, next) {
