@@ -115,12 +115,16 @@ function update(req, res, next) {
 					}
 				)
 				.then(updatedUser => {
-					return res.status(200).json({
-							"success": true,
-							"data": updatedUser
-						});
+					if (updatedUser.nModified === 1) {
+						return res.status(200).json({
+								"success": true,
+								"data": {}
+							});
+					} else {
+						const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+						return next(err);
+					}
 				}).catch(e => {
-					console.log(e);
 					const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
 					return next(err);
 				});
@@ -129,19 +133,6 @@ function update(req, res, next) {
 				return next(err);				
 			}
 		});
-
- //  project.saveAsync()
-	// .then((savedProject) => {
-	//   return res.status(200).json({
-	// 	"success": true,
-	// 	"data": savedProject.outcome()
-	//   });
-	// })
-	// .error((e) => {
-	//   const err = new APIError("Something went wrong!", 312, true);
-	//   return next(e);
-	// });
-
 }
 
 /**

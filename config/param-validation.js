@@ -38,10 +38,11 @@ export default {
       allowUnknownBody: false
     },
     body: {
-      name: Joi.string().required(),
-      description: Joi.string().required(),
+      name: Joi.string().optional(),
+      description: Joi.string().optional(),
       tags: Joi.array().optional(),
-      url: Joi.string().optional()
+      url: Joi.string().optional(),
+      thumbnail: Joi.string().optional()
     }
     // params: {
     //   projectId: Joi.string().hex().required()

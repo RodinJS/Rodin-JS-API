@@ -18,7 +18,7 @@ const ProjectSchema = new mongoose.Schema({
   tags: [{
     type: String
   }],
-  picture: {
+  thumbnail: {
     type: String
   },
   root: {
