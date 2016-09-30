@@ -18,12 +18,7 @@ function get(req, res, next) {
 				//TODO normalize root folder path
 				let response = {
 					"success": true,
-					"data": {
-						name: project.name,
-						description: project.description,
-						owner: project.owner,
-						root: project.root
-					}
+					"data": project
 				};
 
 				return res.status(200).json(response);
@@ -106,19 +101,48 @@ function create(req, res, next) {
  * @returns {Project}
  */
 function update(req, res, next) {
-  let project = req.project;
 
-  project.saveAsync()
-	.then((savedProject) => {
-	  return res.status(200).json({
-		"success": true,
-		"data": savedProject.outcome()
-	  });
-	})
-	.error((e) => {
-	  const err = new APIError("Something went wrong!", 312, true);
-	  return next(e);
-	});
+	Project.getOne(req.params.id, req.user.username)
+		.then(project => {
+
+			if (project) {
+				console.log(req.body);
+				console.log(req.params.id);
+				project.updateAsync(
+					{
+						_id: req.params.id
+					}, 
+					{
+						$set: req.body
+					}
+				)
+				.then(updatedUser => {
+					return res.status(200).json({
+							"success": true,
+							"data": updatedUser
+						});
+				}).catch(e => {
+					console.log(e);
+					const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+					return next(err);
+				});
+			} else {
+				const err = new APIError('Project not found!', 310, true);
+				return next(err);				
+			}
+		});
+
+ //  project.saveAsync()
+	// .then((savedProject) => {
+	//   return res.status(200).json({
+	// 	"success": true,
+	// 	"data": savedProject.outcome()
+	//   });
+	// })
+	// .error((e) => {
+	//   const err = new APIError("Something went wrong!", 312, true);
+	//   return next(e);
+	// });
 
 }
 

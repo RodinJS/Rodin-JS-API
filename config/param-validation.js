@@ -28,17 +28,20 @@ export default {
     body: {
       name: Joi.string().required(),
       description: Joi.string().required(),
-      tags: Joi.array()
+      tags: Joi.array().optional()
     }
   },
 
   // UPDATE /api/project/:projectId
   updateProject: {
+    options : {
+      allowUnknownBody: false
+    },
     body: {
       name: Joi.string().required(),
       description: Joi.string().required(),
-      tags: Joi.array(),
-      url: Joi.string().required(),
+      tags: Joi.array().optional(),
+      url: Joi.string().optional()
     }
     // params: {
     //   projectId: Joi.string().hex().required()

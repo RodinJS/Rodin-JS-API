@@ -19,9 +19,6 @@ function cert(req, res, next) {
 		}	
 	}
 
-	console.log(certs);
-	console.log(req.user.username);
-
 	User.get(req.user.username)
 		.then(user => {
 			if (user) {

@@ -162,7 +162,6 @@ function remove(req, res, next) {
 	      		for(let i = 0; i < user.projects.length; i++) {
 	      			Project.removeAsync({ _id : user.projects[i] })
 						.then((deletedProject) => {
-							console.log(" --- ", i, " --- ", user.projects[i]);							
 						}).error((e) => next(e));
 	      		}
 	        } else {
