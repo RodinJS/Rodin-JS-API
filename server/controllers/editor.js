@@ -31,7 +31,7 @@ function getTreeJSON(req, res, next) {
 				const rootPath = 'projects/' + project.root;
 				dirToJson(rootPath)
 					.then((dirTree) => {
-						console.log(dirTree);
+						// console.log(dirTree);
 						response.data.tree = dirTree;
 						return res.status(200).json(response);
 					})
@@ -82,65 +82,58 @@ function putFile(req, res, next) {
 		const err = new APIError('Provide file name!', httpStatus.BAD_REQUEST, true);
 		return next(err);
 	}	
-	if (!req.query.path) {
-		const err = new APIError('Provide path of file!', httpStatus.BAD_REQUEST, true);
-		return next(err);	
-	}	
 	if (!req.query.action) {
 		const err = new APIError('Provide action!', httpStatus.BAD_REQUEST, true);
 		return next(err);	
 	}
 
-	// if (req.query.action === 'rename') {
+	// let path = help.cleanUrl(req.query.path);
+	const action = req.query.action;
+	const filePath = 'projects/' + req.project.root + '/' + help.cleanUrl(req.query.filename);
 
-	// } else if (req.query.action === 'save') {
-
-	// } else {
-
-	// }
-
-
-
-
-
-	
-
-	let path = help.cleanUrl(req.query.path);
-	let content = req.query.content;
-	
-	if (!fs.lstatSync(path).isDirectory()) { //check if file
+	if (req.query.action === 'rename') {
+		if (!req.query.newName) {
+			const err = new APIError('Provide action!', httpStatus.BAD_REQUEST, true);
+			return next(err);	
+		}
+		// const newName = help.cleanUrl(req.query.newName);
+		const newName = 'projects/' + req.project.root + '/' + help.cleanUrl(req.query.newName);
+		if (fs.existsSync(filePath)) {
+			fs.rename(filePath, newName, (err) => {
+				if (err) {
+					err = new APIError('Path or file does not exist!', httpStatus.FILE_OR_PATH_DOES_NOT_EXIST, true);
+					return next(err);
+	            }
+				fs.stat(newName, (err, stats) => {
+					if(err) {
+						const err = new APIError('Error while renaming file/path!', httpStatus.NOT_A_FILE, true);
+						return next(err);
+					}
+					console.log('stats: ' + JSON.stringify(stats));
+					res.status(200).send({ "success": true });
+				});
+			});
+		} else {
+			const err = new APIError('Path or file does not exist!', httpStatus.FILE_OR_PATH_DOES_NOT_EXIST, true);
+			return next(err);			
+		}
+	} else if (req.query.action === 'save') {
 		if (!req.query.content) {
 			const err = new APIError('Provide content of file!', httpStatus.BAD_REQUEST, true);
 			return next(err);	
 		}
 
-		fs.writeFile(path, content, (err) => {
+		let content = req.query.content;
+		fs.writeFile(filePath, content, (err) => {
 			if (err) {
 				const e = new APIError('Could not write to file!', httpStatus.COULD_NOT_WRITE_TO_FILE, true);
 				return next(e);
 			} 
 			res.status(200).send({ "success": true });
 		});
-	} else { 
-		fs.rename(path, '/tmp/world',  (err) => {
-			if (err) throw err;
-			fs.stat('/tmp/world',  (err, stats) => {
-				if (err) throw err;
-				console.log('stats: ' + JSON.stringify(stats));
-				res.status(200).send({ "success": true });
-			});
-		});
-	}
-}
-
-function rename(req, res, next) {
-	if (!req.query.filename) {
-		const err = new APIError('Provide file name!', httpStatus.BAD_REQUEST, true);
+	} else {
+		const err = new APIError('Provide action name!', httpStatus.BAD_REQUEST, true);
 		return next(err);
-	}	
-	if (!req.query.path) {
-		const err = new APIError('Provide path of file!', httpStatus.BAD_REQUEST, true);
-		return next(err);	
 	}
 }
 
@@ -150,11 +143,16 @@ function postFile(req, res, next) {
 
 function deleteFile(req, res, next) {
 	if (!req.query.filename) {
-		const err = new APIError('Provide file name!', httpStatus.BAD_REQUEST, true);
+		const err = new APIError('Provide file name!', httpStatus.FILE_OR_PATH_DOES_NOT_EXIST, true);
 		return next(err);	
 	}
 
 	const filePath = 'projects/' + req.project.root + '/' + help.cleanUrl(req.query.filename);
+	if(!fs.existsSync(filePath)) {
+		const err = new APIError('Path or file does not exist!---', httpStatus.FILE_OR_PATH_DOES_NOT_EXIST, true);
+		return next(err);
+	}
+
 	if (!fs.lstatSync(filePath).isDirectory()) { //check if file
 		if (fs.existsSync(filePath)) {
 	        fs.unlink(filePath, (err) => {
@@ -166,7 +164,7 @@ function deleteFile(req, res, next) {
 	            }
 	        });
 	    } else {
-			const err = new APIError('Path does not exist!', httpStatus.PATH_DOES_NOT_EXIST, true);
+			const err = new APIError('File does not exist!', httpStatus.FILE_DOES_NOT_EXIST, true);
 			return next(err);
 	    }
 	} else { // when folder

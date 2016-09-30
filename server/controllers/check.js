@@ -85,33 +85,38 @@ function ifPremium(req, res, next) {
  * @returns {*}
  */
 function ifTokenValid(req, res, next) {
-	var token = req.headers['x-access-token']; //TODO: Get from Auth header
-	// verifies secret and checks exp date
-	jwt.verify(token, config.jwtSecret, function(err, decoded) {
-		if(err) {
-			const err = new APIError('Invalid token or secret', httpStatus.BAD_REQUEST, true);
-			return next(err);
-		} else {
-			User.get(decoded.username).then((user) => {
-				if(user) {
-					req.user = {
-						email: user.email,
-						username: user.username,
-						role: user.role,
-						profile: user.profile
-					};
-
-					return next();
-				} else {
-					const err = new APIError('Invalid token!', httpStatus.BAD_REQUEST, true);
-					return next(err);					
-				}
-			}).error((e) => {
-				const err = new APIError('Invalid token!', httpStatus.BAD_REQUEST, true);
+	if(req.headers['x-access-token']) {
+		var token = req.headers['x-access-token']; //TODO: Get from Auth header
+		// verifies secret and checks exp date
+		jwt.verify(token, config.jwtSecret, function(err, decoded) {
+			if(err) {
+				const err = new APIError('Invalid token or secret', httpStatus.BAD_REQUEST, true);
 				return next(err);
-			});
-		}
-	});
+			} else {
+				User.get(decoded.username).then((user) => {
+					if(user) {
+						req.user = {
+							email: user.email,
+							username: user.username,
+							role: user.role,
+							profile: user.profile
+						};
+
+						return next();
+					} else {
+						const err = new APIError('Invalid token!', httpStatus.BAD_REQUEST, true);
+						return next(err);					
+					}
+				}).error((e) => {
+					const err = new APIError('Invalid token!', httpStatus.BAD_REQUEST, true);
+					return next(err);
+				});
+			}
+		});
+	} else {
+		const err = new APIError('Token does not provided!', httpStatus.TOKEN_DOES_NOT_PROVIDED, true);
+		return next(err);
+	}
 }
 
 function project(req, res, next) {
@@ -120,7 +125,7 @@ function project(req, res, next) {
 		return next(err);	
 	}
 
-	Project.get(req.query.id).then((project) => {
+	Project.getOne(req.query.id, req.user.username).then((project) => {
 		req.project = {
 			name: project.name,
 			root: project.root
@@ -128,7 +133,7 @@ function project(req, res, next) {
 
 		return next();
 	}).error((e) => {
-		const err = new APIError('Project ID is invalid!', httpStatus.BAD_REQUEST, true);
+		const err = new APIError('Access to project denied!', httpStatus.ACCESS_TO_PROJECT_DENIED, true);
 		return next(err);
 	});
 }
