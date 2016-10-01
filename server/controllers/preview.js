@@ -10,10 +10,11 @@ import config from '../../config/env';
  * @returns {Project}
  */
 function get(req, res, next) {
-	res.status(200).send({
-		"user": req.params.user,
-		"project": req.params.project
-	});
+	// res.status(200).send({
+	// 	"user": req.params.user,
+	// 	"project": req.params.project
+	// });
+	res.sendfile('index.html'); 
 	// Project.getOne(req.params.id, req.user.username)
 	// 	.then((project) => {
 	// 		if(project) {
