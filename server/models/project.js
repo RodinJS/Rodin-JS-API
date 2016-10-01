@@ -48,6 +48,10 @@ const ProjectSchema = new mongoose.Schema({
       type: Boolean
     }
   },
+  public: {
+    type: Boolean,
+    default: false
+  },
   type: {
     type: String
   },
@@ -81,7 +85,7 @@ ProjectSchema.statics = {
         const err = new APIError('No such project exists!', httpStatus.NOT_FOUND, true);
         return Promise.reject(err);
       });
-  },  
+  },
   /**
    * Get project by id
    * @param {ObjectId} id - The objectId of project.
@@ -120,7 +124,7 @@ ProjectSchema.statics = {
       query.$or = [
         {
           name: re,
-        }, 
+        },
         {
           description: re
         }
