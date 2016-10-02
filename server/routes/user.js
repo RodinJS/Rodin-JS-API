@@ -10,6 +10,9 @@ const router = express.Router();	// eslint-disable-line new-cap
 
 // const requireAuth = passport.authenticate('jwt', { session: false }); // eslint-disable-line
 
+router.route('/password')
+  .put(check.ifTokenValid, validate(paramValidation.updatePassword), userCtrl.updatePassword);
+
 router.route('/')
 	/**
 	 * @api {get} /api/user Get list of users
@@ -218,12 +221,8 @@ router.route('/:username')
 	 *      }
 	 */
 	.get(userCtrl.get)
-
 	/** PUT /api/user/:username - Update user */
-	.put(check.ifTokenValid, check.ifSelfUpdate, validate(paramValidation.updateUser), userCtrl.update);
-
-router.route('/:username/password')
-  .post(check.ifTokenValid, check.ifSelfUpdate, validate(paramValidation.updatePassword), userCtrl.updatePassword)
+	.put(check.ifTokenValid, check.ifSelfUpdate, validate(paramValidation.updateUser), userCtrl.update)
 
 	/**
 	 * @api {delete} /api/user/:username Delete single user

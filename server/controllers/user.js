@@ -141,7 +141,7 @@ function update(req, res, next) {
 }
 
 function updatePassword(req, res, next) {
-  User.findAsync(
+  User.findOneAsync(
     {
       username: req.user.username
     }
