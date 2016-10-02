@@ -14,26 +14,8 @@ function get(req, res, next) {
 	// 	"user": req.params.user,
 	// 	"project": req.params.project
 	// });
-	res.sendfile('index.html'); 
-	// Project.getOne(req.params.id, req.user.username)
-	// 	.then((project) => {
-	// 		if(project) {
-	// 			//TODO normalize root folder path
-	// 			let response = {
-	// 				"success": true,
-	// 				"data": project
-	// 			};
-
-	// 			return res.status(200).json(response);
-	// 		} else {
-	// 			const err = new APIError('Project is empty', httpStatus.NOT_FOUND, true);
-	// 			return next(err);
-	// 		}
-	// 	})
-	// 	.catch((e) => {
-	// 		const err = new APIError('Project not found', httpStatus.NOT_FOUND, true);
-	// 		return next(e);
-	// 	});
+	// res.sendFile(path.join(__dirname, '../projects/req.params.user/req.params.project', 'index.html'));
+	res.sendfile('index.html');
 }
 
 export default { get };

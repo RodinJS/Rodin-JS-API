@@ -52,7 +52,7 @@ function create(req, res, next) {
 
   project.saveAsync()
 	.then((savedProject) => {
-		let rootDir = 'projects/' + savedProject.root;
+		let rootDir = 'projects/' + req.user.username + '_'+ savedProject._id;
 
 		if (!fs.existsSync(rootDir)) { 
 			fs.mkdirSync(rootDir); //creating root dir for project 
