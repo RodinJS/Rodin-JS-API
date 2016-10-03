@@ -123,12 +123,12 @@ function putFile(req, res, next) {
       return next(err);
     }
   } else if (req.query.action === 'save') {
-    if (_.isUndefined(req.query.content)) {
+    if (_.isUndefined(req.body.content)) {
       const err = new APIError('Provide content of file!', httpStatus.BAD_REQUEST, true);
       return next(err);
     }
 
-    let content = req.query.content;
+    let content = req.body.content;
     fs.writeFile(filePath, content, (err) => {
       if (err) {
         const e = new APIError('Could not write to file!', httpStatus.COULD_NOT_WRITE_TO_FILE, true);
