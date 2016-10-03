@@ -91,7 +91,8 @@ ProjectSchema.statics = {
   },
   /**
    * Get project by id
-   * @param {ObjectId} id - The objectId of project.
+   * @param {String} root - The root folder of project.
+   * @param {String} owner - The owner username of project.
    * @returns {Promise<User, APIError>}
    */
   getByName(root, owner) {

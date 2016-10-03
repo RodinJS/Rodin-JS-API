@@ -28,7 +28,7 @@ function getTreeJSON(req, res, next) {
 					}
 				};
 
-				const rootPath = 'projects/' + project.root;
+				const rootPath = 'projects/' + req.user.username + '/' + project.root;
 				dirToJson(rootPath)
 					.then((dirTree) => {
 						// console.log(dirTree);
