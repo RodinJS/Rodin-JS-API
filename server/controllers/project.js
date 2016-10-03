@@ -251,6 +251,7 @@ function makePublic(req, res, next) {
 							// });
 							const ter = 'ln -s ' + srcDir + ' ' + publicDir;
 							const code = execSync(ter);
+							console.log("---- EXEC", code);
 							return res.status(200).json({
 									"success": true,
 									"data": {publicDir}
