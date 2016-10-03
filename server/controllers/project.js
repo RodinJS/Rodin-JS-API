@@ -222,7 +222,7 @@ function makePublic(req, res, next) {
 
 	const id = req.params.id;
 	const username = req.user.username;
-	const status = req.body.status;
+	const status = Boolean(req.body.status);
 	Project.getOne(id, username)
 		.then(project => {
 
@@ -233,7 +233,7 @@ function makePublic(req, res, next) {
 					}, 
 					{
 						$set: {
-							"public": req.body.status
+							"public": status
 						}
 					}
 				)
@@ -241,7 +241,7 @@ function makePublic(req, res, next) {
 					console.log("----------------pr", project);
 					console.log("----------------up", updatedProject);
 					if (updatedProject.nModified === 1) {
-						if(status == 'true') {
+						if(status === true) {
 							const srcDir = '/projects/' + username + help.cleanUrl(project.root);
 							const publicDir = '/public/' + username + help.cleanUrl(project.root);
 							console.log("----------src", srcDir);
