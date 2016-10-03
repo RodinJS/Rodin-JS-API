@@ -223,61 +223,63 @@ function makePublic(req, res, next) {
 	const id = req.params.id;
 	const username = req.user.username;
 	const status = req.body.status;
-	Project.getOne(id, username)
-		.then(project => {
+	const code = execSync('node -v');
+	console.log("----------------code", code);
+	// Project.getOne(id, username)
+	// 	.then(project => {
 
-			if (project) {
-				Project.updateAsync(
-					{
-						_id: req.params.id
-					}, 
-					{
-						$set: {
-							"public": req.body.status
-						}
-					}
-				)
-				.then(updatedProject => {
-					console.log("----------------pr", project);
-					console.log("----------------up", updatedProject);
-					if (updatedProject.nModified === 1) {
-						if(status === true) {
-							const srcDir = '/var/www/api.rodinapp.com/projects/' + username + help.cleanUrl(project.root);
-							const publicDir = '/var/www/api.rodinapp.com/public/' + username + help.cleanUrl(project.root);
-							console.log("----------src", srcDir);
-							console.log("----------pub", publicDir);
-							// fs.symlink(srcDir, publicDir);
-							const code = execSync('node -v');
-							console.log("----------------code", code);
-							return res.status(200).json({
-									"success": true,
-									"data": {publicDir}
-								});
+	// 		if (project) {
+	// 			Project.updateAsync(
+	// 				{
+	// 					_id: req.params.id
+	// 				}, 
+	// 				{
+	// 					$set: {
+	// 						"public": req.body.status
+	// 					}
+	// 				}
+	// 			)
+	// 			.then(updatedProject => {
+	// 				console.log("----------------pr", project);
+	// 				console.log("----------------up", updatedProject);
+	// 				if (updatedProject.nModified === 1) {
+	// 					if(status === true) {
+	// 						const srcDir = '/var/www/api.rodinapp.com/projects/' + username + help.cleanUrl(project.root);
+	// 						const publicDir = '/var/www/api.rodinapp.com/public/' + username + help.cleanUrl(project.root);
+	// 						console.log("----------src", srcDir);
+	// 						console.log("----------pub", publicDir);
+	// 						// fs.symlink(srcDir, publicDir);
+	// 						const code = execSync('node -v');
+	// 						console.log("----------------code", code);
+	// 						return res.status(200).json({
+	// 								"success": true,
+	// 								"data": {publicDir}
+	// 							});
 
-						} else {
-							const publicDir = '/var/www/api.rodinapp.com/public/' + username + help.cleanUrl(project.root);
-							if(!fs.existsSync(publicDir)) {
-								fs.unlinkSync(publicDir);
-							}
-							return res.status(200).json({
-									"success": true,
-									"data": {publicDir}
-								});
+	// 					} else {
+	// 						const publicDir = '/var/www/api.rodinapp.com/public/' + username + help.cleanUrl(project.root);
+	// 						if(!fs.existsSync(publicDir)) {
+	// 							fs.unlinkSync(publicDir);
+	// 						}
+	// 						return res.status(200).json({
+	// 								"success": true,
+	// 								"data": {publicDir}
+	// 							});
 
-						}
-					} else {
-						const err = new APIError('Can\'t update info--', httpStatus.BAD_REQUEST, true);
-						return next(err);
-					}
-				}).catch(e => {
-					const err = new APIError('Can\'t update info++', httpStatus.BAD_REQUEST, true);
-					return next(err);
-				});
-			} else {
-				const err = new APIError('Project not found!', 310, true);
-				return next(err);				
-			}
-		});
+	// 					}
+	// 				} else {
+	// 					const err = new APIError('Can\'t update info--', httpStatus.BAD_REQUEST, true);
+	// 					return next(err);
+	// 				}
+	// 			}).catch(e => {
+	// 				const err = new APIError('Can\'t update info++', httpStatus.BAD_REQUEST, true);
+	// 				return next(err);
+	// 			});
+	// 		} else {
+	// 			const err = new APIError('Project not found!', 310, true);
+	// 			return next(err);				
+	// 		}
+	// 	});
 }
 
 export default {get, create, update, list, remove, makePublic};
