@@ -259,16 +259,16 @@ function makePublic(req, res, next) {
 
 						} else {
 							const publicDir = '/var/www/api.rodinapp.com/public/' + username + '/' + help.cleanUrl(project.root);
-							if(!fs.existsSync(publicDir)) {
+							if(fs.existsSync(publicDir)) {
 								fs.unlinkSync(publicDir);
+								return res.status(200).json({
+										"success": true,
+										"data": {publicDir}
+								});
 							} else {
 								const err = new APIError('link exist!', httpStatus.BAD_REQUEST, true);
 								return next(err);
 							}
-							return res.status(200).json({
-									"success": true,
-									"data": {publicDir}
-								});
 
 						}
 					} else {
