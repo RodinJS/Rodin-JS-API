@@ -215,6 +215,7 @@ function makePublic(req, res, next) {
 		.then(project => {
 
 			if (project) {
+				console.log("----------------pr", project);
 				Project.updateAsync(
 					{
 						_id: req.params.id
@@ -225,8 +226,9 @@ function makePublic(req, res, next) {
 						}
 					}
 				)
-				.then(updatedUser => {
-					if (updatedUser.nModified === 1) {
+				.then(updatedProject => {
+					console.log("----------------up", updatedProject);
+					if (updatedProject.nModified === 1) {
 						if(status === true) {
 							const srcDir = '/var/www/api.rodinapp.com/projects/' + username + help.cleanUrl(project.root);
 							const publicDir = '/var/www/api.rodinapp.com/public/' + username + help.cleanUrl(project.root);
