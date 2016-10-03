@@ -1,3 +1,4 @@
+import {execSync} from 'child_process';
 import fs from 'fs';
 import Project from '../models/project';
 import User from '../models/user';
@@ -245,8 +246,9 @@ function makePublic(req, res, next) {
 							const publicDir = '/var/www/api.rodinapp.com/public/' + username + help.cleanUrl(project.root);
 							console.log("----------src", srcDir);
 							console.log("----------pub", publicDir);
-							fs.symlink(srcDir, publicDir);
-							
+							// fs.symlink(srcDir, publicDir);
+							const code = execSync('node -v');
+							console.log("----------------code", code);
 							return res.status(200).json({
 									"success": true,
 									"data": {publicDir}
