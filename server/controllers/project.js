@@ -240,7 +240,16 @@ function makePublic(req, res, next) {
 									"success": true,
 									"data": {publicDir}
 								});
+
 						} else {
+							const publicDir = '/var/www/api.rodinapp.com/public/' + username + help.cleanUrl(project.root);
+							if(!fs.existsSync(publicDir)) {
+								fs.unlinkSync(publicDir);
+							}
+							return res.status(200).json({
+									"success": true,
+									"data": {publicDir}
+								});
 
 						}
 					} else {
