@@ -241,7 +241,7 @@ function makePublic(req, res, next) {
 					console.log("----------------pr", project);
 					console.log("----------------up", updatedProject);
 					if (updatedProject.nModified === 1) {
-						if(status === true) {
+						if(status == 'true') {
 							const srcDir = '/projects/' + username + help.cleanUrl(project.root);
 							const publicDir = '/public/' + username + help.cleanUrl(project.root);
 							console.log("----------src", srcDir);
@@ -255,7 +255,7 @@ function makePublic(req, res, next) {
 								});
 
 						} else {
-							// const publicDir = '/var/www/api.rodinapp.com/public/' + username + help.cleanUrl(project.root);
+							const publicDir = '/public/' + username + help.cleanUrl(project.root);
 							// if(!fs.existsSync(publicDir)) {
 							// 	fs.unlinkSync(publicDir);
 							// }
