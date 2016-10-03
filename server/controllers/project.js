@@ -208,6 +208,17 @@ function remove(req, res, next) {
 
 function makePublic(req, res, next) {
 	// fs.symlink('./foo', './new-port');
+	if (!req.params.id) {
+		const err = new APIError('Provide project ID!', httpStatus.FILE_OR_PATH_DOES_NOT_EXIST, true);
+		return next(err);	
+	}
+
+	if (!req.body.status) {
+		const err = new APIError('Provide project status!', httpStatus.FILE_OR_PATH_DOES_NOT_EXIST, true);
+		return next(err);	
+	}
+
+
 	const id = req.params.id;
 	const username = req.user.username;
 	const status = req.body.status;
@@ -215,18 +226,18 @@ function makePublic(req, res, next) {
 		.then(project => {
 
 			if (project) {
-				console.log("----------------pr", project);
 				Project.updateAsync(
 					{
 						_id: req.params.id
 					}, 
 					{
 						$set: {
-							"public": status
+							"public": req.body.status
 						}
 					}
 				)
 				.then(updatedProject => {
+					console.log("----------------pr", project);
 					console.log("----------------up", updatedProject);
 					if (updatedProject.nModified === 1) {
 						if(status === true) {
