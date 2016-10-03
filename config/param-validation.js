@@ -12,14 +12,27 @@ export default {
 
   // UPDATE /api/users/:userId
   updateUser: {
+    options : {
+      allowUnknownBody: false
+    },
     body: {
-      email: Joi.string().required(),
-      username: Joi.string().required(),
-      password: Joi.string().required()
+      email: Joi.string().optional(),
+      username: Joi.string().optional(),
+      profile: {
+        firstName: Joi.string().optional().allow(''),
+        lastName: Joi.string().optional().allow('')
+      }
     }
-    // params: {
-    //   userId: Joi.string().hex().required()
-    // }
+  },
+
+  // UPDATE /api/users/:userId/password
+  updatePassword: {
+    options : {
+      allowUnknownBody: false
+    },
+    body: {
+      password: Joi.string().required().min(3)
+    }
   },
 
 
@@ -42,7 +55,8 @@ export default {
       description: Joi.string().optional(),
       tags: Joi.array().optional(),
       url: Joi.string().optional(),
-      thumbnail: Joi.string().optional()
+      thumbnail: Joi.string().optional(),
+      public: Joi.boolean().optional()
     }
     // params: {
     //   projectId: Joi.string().hex().required()

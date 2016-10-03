@@ -41,7 +41,7 @@ function get(req, res) {
 			role: req.user.role,
 			profile: req.user.profile
 		}
-	}; 
+	};
 
 	return res.status(200).json(response);
 }
@@ -59,7 +59,7 @@ function me(req, res) {
 			role: req.user.role,
 			profile: req.user.profile
 		}
-	}; 
+	};
 
 	return res.status(200).json(response);
 }
@@ -90,14 +90,14 @@ function create(req, res, next) {
 
 			user.saveAsync()
 				.then((savedUser) => {
-					const token = jwt.sign({ 
+					const token = jwt.sign({
 						username: savedUser.username,
 						role: savedUser.role,
 						random: savedUser.password.slice(-15)
 					}, config.jwtSecret, {
 						expiresIn: "7d"
 					});
-					
+
 					return res.json({
 						"success": true,
 						"data": {
@@ -126,15 +126,35 @@ function create(req, res, next) {
  * @returns {User}
  */
 function update(req, res, next) {
-	const user = req.user;
-	user.email = req.body.email;
-	user.username = req.body.username;
-	user.oldPassword = req.body.oldPassword;
-	user.newPassword = req.body.newPassword;
+  User.updateAsync(
+    {
+      username: req.params.username,
+    },
+    {
+      $set: req.body
+    }
+  ).then(() => res.json({
+    "success": true,
+    "data": {}
+  }))
+    .error((e) => next(e));
+}
 
-	user.saveAsync()
-		.then((savedUser) => res.json(savedUser))
-		.error((e) => next(e));
+function updatePassword(req, res, next) {
+  User.findOneAsync(
+    {
+      username: req.user.username
+    }
+  ).then((user) => {
+    user.password = req.body.password;
+    user.saveAsync()
+      .then(() => {
+        res.json({
+          "success": true,
+          "data": {}
+        });
+      }).error((e) => next(e));
+  }).error((e) => next(e));
 }
 
 /**
@@ -183,4 +203,4 @@ function remove(req, res, next) {
 
 }
 
-export default { load, get, create, update, list, remove, me };
+export default { load, get, create, update, updatePassword, list, remove, me };
