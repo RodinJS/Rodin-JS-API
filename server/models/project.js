@@ -28,6 +28,9 @@ const ProjectSchema = new mongoose.Schema({
   owner: {
     type: String
   },
+  public: {
+    type: Boolean
+  },
   build: {
     oculus: {
       type: Boolean

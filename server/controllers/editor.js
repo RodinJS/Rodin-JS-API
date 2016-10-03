@@ -138,7 +138,47 @@ function putFile(req, res, next) {
 }
 
 function postFile(req, res, next) {
-	res.status(httpStatus.MOVED_PERMANENTLY).send({"success": false, "error": "Not implemented yet! Sorry for that..."});
+	if (!req.query.filename) {
+		const err = new APIError('Provide file name!', httpStatus.BAD_REQUEST, true);
+		return next(err);
+	}	
+	if (!req.query.action) {
+		const err = new APIError('Provide action!', httpStatus.BAD_REQUEST, true);
+		return next(err);	
+	}
+
+	// let path = help.cleanUrl(req.query.path);
+	const action = req.query.action;
+	const filePath = 'projects/' + req.project.root + '/' + help.cleanUrl(req.query.filename);
+	if (action === 'create') {
+		const type = req.query.type;
+		if(type === 'file') {
+			if (!fs.existsSync(filePath)){
+				fs.writeFile(filePath, 'Created by ' + req.user.username, function(err) {
+				    if(err) {
+				        err = new APIError('Can not create file!', httpStatus.COULD_NOT_CREATE_FILE, true);
+						return next(err);	
+				    }
+				    res.status(200).send({ "success": true, "data":  'The file was created!'});
+				});
+			} else {
+				const err = new APIError('File already exist!', httpStatus.FILE_DOES_NOT_EXIST, true);
+				return next(err);
+			}
+		} else if (type === 'directory') {
+			if (!fs.existsSync(filePath)) {
+				fs.mkdirSync(filePath);
+			} else {
+				const err = new APIError('File already exist!', httpStatus.FILE_DOES_NOT_EXIST, true);
+				return next(err);	
+			}
+		}
+	} else if (action === 'copy') {
+		res.status(200).send({ "success": true, "data":  'Not impemented yet. Sorry for that...'});
+	} else {
+		const err = new APIError('Provide action name!', httpStatus.BAD_REQUEST, true);
+		return next(err);
+	}
 }
 
 function deleteFile(req, res, next) {
@@ -149,7 +189,7 @@ function deleteFile(req, res, next) {
 
 	const filePath = 'projects/' + req.project.root + '/' + help.cleanUrl(req.query.filename);
 	if(!fs.existsSync(filePath)) {
-		const err = new APIError('Path or file does not exist!---', httpStatus.FILE_OR_PATH_DOES_NOT_EXIST, true);
+		const err = new APIError('Path or file does not exist!', httpStatus.FILE_OR_PATH_DOES_NOT_EXIST, true);
 		return next(err);
 	}
 

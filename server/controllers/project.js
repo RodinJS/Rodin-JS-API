@@ -52,7 +52,7 @@ function create(req, res, next) {
 
   project.saveAsync()
 	.then((savedProject) => {
-		let rootDir = 'projects/' + req.user.username + '_'+ savedProject._id;
+		let rootDir = 'projects/' + req.user.username + '_' + savedProject._id;
 
 		if (!fs.existsSync(rootDir)) { 
 			fs.mkdirSync(rootDir); //creating root dir for project 
@@ -195,4 +195,43 @@ function remove(req, res, next) {
 		});
 }
 
-export default {get, create, update, list, remove};
+function makePublic() {
+	// fs.symlink('./foo', './new-port');
+	const id = req.params.id;
+	const username = req.user.username;
+	Project.getOne(id, username)
+		.then(project => {
+
+			if (project) {
+				Project.updateAsync(
+					{
+						_id: req.params.id
+					}, 
+					{
+						$set: {
+							"public": status
+						}
+					}
+				)
+				.then(updatedUser => {
+					if (updatedUser.nModified === 1) {
+						return res.status(200).json({
+								"success": true,
+								"data": {}
+							});
+					} else {
+						const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+						return next(err);
+					}
+				}).catch(e => {
+					const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+					return next(err);
+				});
+			} else {
+				const err = new APIError('Project not found!', 310, true);
+				return next(err);				
+			}
+		});
+}
+
+export default {get, create, update, list, remove, makePublic};
