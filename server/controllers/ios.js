@@ -19,22 +19,22 @@ function cert(req, res, next) {
 		}	
 	}
 
-	User.get(req.user.username)
-		.then(user => {
-			if (user) {
-				User.updateAsync(
-					{
-						username: req.user.username
-					}, 
-					{
-						$set: {
-							"cert.ios.p12" 	: certs.p12,
-							"cert.ios.profile" : certs.profile
-						}
-					}
-				)
-				.then(updatedUser => {
-					req.user.username
+	// User.get(req.user.username)
+	// 	.then(user => {
+	// 		if (user) {
+	// 			User.updateAsync(
+	// 				{
+	// 					username: req.user.username
+	// 				}, 
+	// 				{
+	// 					$set: {
+	// 						"cert.ios.p12" 	: certs.p12,
+	// 						"cert.ios.profile" : certs.profile
+	// 					}
+	// 				}
+	// 			)
+	// 			.then(updatedUser => {
+	// 				req.user.username
 					request({
 							method: 'POST',
 							preambleCRLF: true,
@@ -70,18 +70,18 @@ function cert(req, res, next) {
 							res.end(body);
 							return console.log('Upload successful!  Server responded with:', body);
 					});
-				})
-				.catch((e) => {
-					console.log(e);
-					const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
-					return next(err);
-				});
-			} else {
-				const err = new APIError('User not found!', 310);
-				return next(err);				
-			}
+			// 	})
+			// 	.catch((e) => {
+			// 		console.log(e);
+			// 		const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+			// 		return next(err);
+			// 	});
+			// } else {
+			// 	const err = new APIError('User not found!', 310);
+			// 	return next(err);				
+			// }
 
-		});
+		// });
 }
 
 export default { cert };

@@ -28,8 +28,25 @@ function get(req, res, next) {
 			}
 		})
 		.catch((e) => {
-			const err = new APIError('Project not found', httpStatus.NOT_FOUND, true);
-			return next(e);
+			Project.getByName(req.params.id, req.user.username)
+				.then((project) => {
+					if(project) {
+						//TODO normalize root folder path
+						let response = {
+							"success": true,
+							"data": project
+						};
+
+						return res.status(200).json(response);
+					} else {
+						const err = new APIError('Project is empty', httpStatus.NOT_FOUND, true);
+						return next(err);
+					}
+				})
+				.catch((e) => {
+					const err = new APIError('Project not found', httpStatus.NOT_FOUND, true);
+					return next(e);
+				});
 		});
 }
 
@@ -208,6 +225,7 @@ function makePublic() {
 				)
 				.then(updatedUser => {
 					if (updatedUser.nModified === 1) {
+						fs.symlink('./foo', './new-port');
 						return res.status(200).json({
 								"success": true,
 								"data": {}

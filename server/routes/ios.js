@@ -20,6 +20,35 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage })
 
 router.route('/cert')
-  .post(check.ifTokenValid, upload.array('cert', 2), iosCtrl.cert);
+  .post(check.ifTokenValid, upload.array([
+		{
+		    name: 'icon-m',
+		    maxCount: 1
+		},
+		{
+		    name: 'icon-h',
+		    maxCount: 1
+		},
+		{
+		    name: 'icon-xh',
+		    maxCount: 1
+		},
+		{
+		    name: 'icon-xxh',
+		    maxCount: 1
+		},
+		{
+		    name: 'icon-xxxh',
+		    maxCount: 1
+		},
+		{
+		    name: 'cert',
+		    maxCount: 1
+		},
+		{
+		    name: 'profile',
+		    maxCount: 1
+		}
+    ]), iosCtrl.cert);
 
 export default router;

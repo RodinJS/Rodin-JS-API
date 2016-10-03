@@ -94,6 +94,23 @@ ProjectSchema.statics = {
    * @param {ObjectId} id - The objectId of project.
    * @returns {Promise<User, APIError>}
    */
+  getByName(root, owner) {
+    return this.findOne({root: root, owner: owner})  //new RegExp('^' + id + '$', "i")
+      .execAsync().then((project) => {
+        if (project) {
+          return project;
+        }
+      })
+      .error((e) => {
+        const err = new APIError('No such project exists!', httpStatus.NOT_FOUND, true);
+        return Promise.reject(err);
+      });
+  },
+  /**
+   * Get project by id
+   * @param {ObjectId} id - The objectId of project.
+   * @returns {Promise<User, APIError>}
+   */
   getOne(id, owner) {
     return this.findOne({_id: id, owner: owner})  //new RegExp('^' + id + '$', "i")
       .execAsync().then((project) => {
