@@ -257,7 +257,7 @@ function makePublic(req, res, next) {
 						return next(err);
 					}
 				}).catch(e => {
-					const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+					const err = new APIError('Can\'t update info++', httpStatus.BAD_REQUEST, true);
 					return next(err);
 				});
 			} else {
