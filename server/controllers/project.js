@@ -223,6 +223,7 @@ function makePublic(req, res, next) {
 	const id = req.params.id;
 	const username = req.user.username;
 	const status = Boolean(req.body.status);
+	console.log("________________staus", typeof(status));
 	Project.getOne(id, username)
 		.then(project => {
 
