@@ -242,8 +242,8 @@ function makePublic(req, res, next) {
 					console.log("----------------up", updatedProject);
 					if (updatedProject.nModified === 1) {
 						if(status === true) {
-							const srcDir = '/var/www/api.rodinapp.com/projects/' + username + help.cleanUrl(project.root);
-							const publicDir = '/var/www/api.rodinapp.com/public/' + username + help.cleanUrl(project.root);
+							const srcDir = '/projects/' + username + help.cleanUrl(project.root);
+							const publicDir = '/public/' + username + help.cleanUrl(project.root);
 							console.log("----------src", srcDir);
 							console.log("----------pub", publicDir);
 							fs.symlink(srcDir, publicDir);
