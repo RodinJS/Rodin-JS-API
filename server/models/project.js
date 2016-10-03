@@ -29,7 +29,7 @@ const ProjectSchema = new mongoose.Schema({
     type: String
   },
   public: {
-    type: Boolean
+    type: String
   },
   build: {
     oculus: {
