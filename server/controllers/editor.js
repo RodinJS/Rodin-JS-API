@@ -66,7 +66,7 @@ function getFile(req, res, next) {
 	    }
 	}
 
-	const filePath = 'projects/' + req.project.root + '/' + help.cleanUrl(req.query.filename);
+	const filePath = 'projects/' + req.user.username + '/' + req.project.root + '/' + help.cleanUrl(req.query.filename);
 	readFile(filePath, (err, content) => {
 		if(err) {
 			const err = new APIError('File does not exist!', httpStatus.FILE_DOES_NOT_EXIST, true);
@@ -89,7 +89,7 @@ function putFile(req, res, next) {
 
 	// let path = help.cleanUrl(req.query.path);
 	const action = req.query.action;
-	const filePath = 'projects/' + req.project.root + '/' + help.cleanUrl(req.query.filename);
+	const filePath = 'projects/' + req.user.username + '/' + req.project.root + '/' + help.cleanUrl(req.query.filename);
 
 	if (req.query.action === 'rename') {
 		if (!req.query.newName) {
@@ -153,7 +153,7 @@ function postFile(req, res, next) {
 
 	// let path = help.cleanUrl(req.query.path);
 	const action = req.query.action;
-	const filePath = 'projects/' + req.project.root + '/' + help.cleanUrl(req.query.filename);
+	const filePath = 'projects/' + req.user.username + '/' + req.project.root + '/' + help.cleanUrl(req.query.filename);
 	if (action === 'create') {
 		const type = req.query.type;
 		if(type === 'file') {
@@ -191,7 +191,7 @@ function deleteFile(req, res, next) {
 		return next(err);	
 	}
 
-	const filePath = 'projects/' + req.project.root + '/' + help.cleanUrl(req.query.filename);
+	const filePath = 'projects/' + req.user.username + '/' + req.project.root + '/' + help.cleanUrl(req.query.filename);
 	if(!fs.existsSync(filePath)) {
 		const err = new APIError('Path or file does not exist!', httpStatus.FILE_OR_PATH_DOES_NOT_EXIST, true);
 		return next(err);
