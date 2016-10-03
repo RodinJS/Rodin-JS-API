@@ -4,6 +4,7 @@ import User from '../models/user';
 import jwt from 'jsonwebtoken';
 import APIError from '../helpers/APIError';
 import httpStatus from '../helpers/httpStatus';
+import help from '../helpers/editor';
 
 import config from '../../config/env';
 
@@ -69,7 +70,7 @@ function create(req, res, next) {
 
   project.saveAsync()
 	.then((savedProject) => {
-		let rootDir = 'projects/' + req.user.username + '_' + savedProject._id;
+		let rootDir = 'projects/' + req.user.username + '/' + savedProject.root;
 
 		if (!fs.existsSync(rootDir)) {
 			fs.mkdirSync(rootDir); //creating root dir for project
@@ -209,6 +210,7 @@ function makePublic() {
 	// fs.symlink('./foo', './new-port');
 	const id = req.params.id;
 	const username = req.user.username;
+	const status = req.body.status;
 	Project.getOne(id, username)
 		.then(project => {
 
@@ -225,11 +227,18 @@ function makePublic() {
 				)
 				.then(updatedUser => {
 					if (updatedUser.nModified === 1) {
-						fs.symlink('./foo', './new-port');
-						return res.status(200).json({
-								"success": true,
-								"data": {}
-							});
+						if(status === true) {
+							const srcDir = '/var/www/api.rodinapp.com/projects/' + username + help.cleanUrl(project.root);
+							const publicDir = '/var/www/api.rodinapp.com/public/' + username + help.cleanUrl(project.root);
+							fs.symlink(srcDir, publicDir);
+							
+							return res.status(200).json({
+									"success": true,
+									"data": {}
+								});
+						} else {
+
+						}
 					} else {
 						const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
 						return next(err);

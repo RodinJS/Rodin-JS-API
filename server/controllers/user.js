@@ -1,3 +1,4 @@
+import fs from 'fs';
 import User from '../models/user';
 import Project from '../models/project';
 import jwt from 'jsonwebtoken';
@@ -90,6 +91,14 @@ function create(req, res, next) {
 
 			user.saveAsync()
 				.then((savedUser) => {
+					let rootDir = 'projects/' + savedUser.username;
+					let publicDir = 'public/' + savedUser.username;
+
+					if (!fs.existsSync(rootDir) && !fs.existsSync(publicDir)) {
+						fs.mkdirSync(rootDir); //creating root dir for project
+						fs.mkdirSync(publicDir);
+					}
+
 					const token = jwt.sign({
 						username: savedUser.username,
 						role: savedUser.role,
