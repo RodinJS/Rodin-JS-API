@@ -178,6 +178,7 @@ function postFile(req, res, next) {
     } else if (type === 'directory') {
       if (!fs.existsSync(filePath)) {
         fs.mkdirSync(filePath);
+        res.status(200).send({"success": true, "data": 'The folder was created!'});
       } else {
         const err = new APIError('File already exist!', httpStatus.FILE_DOES_NOT_EXIST, true);
         return next(err);
