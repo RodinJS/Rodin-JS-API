@@ -206,7 +206,7 @@ function remove(req, res, next) {
 		});
 }
 
-function makePublic() {
+function makePublic(req, res, next) {
 	// fs.symlink('./foo', './new-port');
 	const id = req.params.id;
 	const username = req.user.username;
