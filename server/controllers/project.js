@@ -230,17 +230,19 @@ function makePublic(req, res, next) {
 						if(status === true) {
 							const srcDir = '/var/www/api.rodinapp.com/projects/' + username + help.cleanUrl(project.root);
 							const publicDir = '/var/www/api.rodinapp.com/public/' + username + help.cleanUrl(project.root);
+							console.log("----------src", srcDir);
+							console.log("----------pub", publicDir);
 							fs.symlink(srcDir, publicDir);
 							
 							return res.status(200).json({
 									"success": true,
-									"data": {}
+									"data": {publicDir}
 								});
 						} else {
 
 						}
 					} else {
-						const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+						const err = new APIError('Can\'t update info--', httpStatus.BAD_REQUEST, true);
 						return next(err);
 					}
 				}).catch(e => {
