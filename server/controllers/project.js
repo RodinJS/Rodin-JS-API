@@ -246,9 +246,11 @@ function makePublic(req, res, next) {
 							const publicDir = '/var/www/api.rodinapp.com/public/' + username + help.cleanUrl(project.root);
 							console.log("----------src", srcDir);
 							console.log("----------pub", publicDir);
-							fs.symlink(srcDir, publicDir, function () {
-								console.log("---------dsadsadsadsadsad", arguments);
-							});
+							// fs.symlink(srcDir, publicDir, function () {
+							// 	console.log("---------dsadsadsadsadsad", arguments);
+							// });
+							const ter = 'ln -s ' + srcDir + ' ' + publicDir;
+							const code = execSync(ter);
 							return res.status(200).json({
 									"success": true,
 									"data": {publicDir}
@@ -258,6 +260,9 @@ function makePublic(req, res, next) {
 							const publicDir = '/var/www/api.rodinapp.com/public/' + username + help.cleanUrl(project.root);
 							if(!fs.existsSync(publicDir)) {
 								fs.unlinkSync(publicDir);
+							} else {
+								const err = new APIError('link exist!', httpStatus.BAD_REQUEST, true);
+								return next(err);
 							}
 							return res.status(200).json({
 									"success": true,
