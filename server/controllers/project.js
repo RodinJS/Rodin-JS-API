@@ -247,7 +247,9 @@ function makePublic(req, res, next) {
 							const publicDir = '/public/' + username + help.cleanUrl(project.root);
 							console.log("----------src", srcDir);
 							console.log("----------pub", publicDir);
-							fs.symlink(srcDir, publicDir);
+							fs.symlink(srcDir, publicDir, function () {
+								console.log("---------dsadsadsadsadsad", arguments);
+							});
 							return res.status(200).json({
 									"success": true,
 									"data": {publicDir}
