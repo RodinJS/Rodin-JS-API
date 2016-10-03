@@ -96,20 +96,24 @@ function putFile(req, res, next) {
 			const err = new APIError('Provide action!', httpStatus.BAD_REQUEST, true);
 			return next(err);	
 		}
-		// const newName = help.cleanUrl(req.query.newName);
-		const newName = 'projects/' + req.project.root + '/' + help.cleanUrl(req.query.newName);
+
+    let newName = help.cleanFileName(req.query.newName);
+    let newPath = filePath.split(/[\\\/]+/g);
+    newPath.splice(newPath.length-1, 1, newName);
+    newPath = newPath.join("/");
+
 		if (fs.existsSync(filePath)) {
-			fs.rename(filePath, newName, (err) => {
+			fs.rename(filePath, newPath, (err) => {
 				if (err) {
-					err = new APIError('Path or file does not exist!', httpStatus.FILE_OR_PATH_DOES_NOT_EXIST, true);
-					return next(err);
-	            }
-				fs.stat(newName, (err, stats) => {
+          err = new APIError('Path or file does not exist!', httpStatus.FILE_OR_PATH_DOES_NOT_EXIST, true);
+          return next(err);
+        }
+				fs.stat(newPath, (err, stats) => {
 					if(err) {
 						const err = new APIError('Error while renaming file/path!', httpStatus.NOT_A_FILE, true);
 						return next(err);
 					}
-					console.log('stats: ' + JSON.stringify(stats));
+					// console.log('stats: ' + JSON.stringify(stats));
 					res.status(200).send({ "success": true });
 				});
 			});
