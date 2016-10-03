@@ -283,7 +283,7 @@ router.route('/:id')
    */
   .delete(check.ifTokenValid, projectCtrl.remove);
 
-router.route('/pp/:id')
+router.route('/pp/:status')
 	.post(check.ifTokenValid, projectCtrl.makePublic);
 
 export default router;
