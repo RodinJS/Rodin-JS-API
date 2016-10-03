@@ -247,8 +247,6 @@ function makePublic(req, res, next) {
 							console.log("----------src", srcDir);
 							console.log("----------pub", publicDir);
 							fs.symlink(srcDir, publicDir);
-							// const code = execSync('node -v');
-							// console.log("----------------code", code);
 							return res.status(200).json({
 									"success": true,
 									"data": {publicDir}
@@ -256,12 +254,12 @@ function makePublic(req, res, next) {
 
 						} else {
 							const publicDir = '/public/' + username + help.cleanUrl(project.root);
-							// if(!fs.existsSync(publicDir)) {
-							// 	fs.unlinkSync(publicDir);
-							// }
+							if(!fs.existsSync(publicDir)) {
+								fs.unlinkSync(publicDir);
+							}
 							return res.status(200).json({
 									"success": true,
-									"data": {}
+									"data": {publicDir}
 								});
 
 						}
