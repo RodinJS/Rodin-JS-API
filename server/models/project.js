@@ -29,7 +29,8 @@ const ProjectSchema = new mongoose.Schema({
     type: String
   },
   public: {
-    type: String
+    type: String,
+    default: 'false'
   },
   build: {
     oculus: {
@@ -50,10 +51,6 @@ const ProjectSchema = new mongoose.Schema({
     android: {
       type: Boolean
     }
-  },
-  public: {
-    type: Boolean,
-    default: false
   },
   type: {
     type: String

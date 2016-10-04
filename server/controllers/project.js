@@ -208,7 +208,6 @@ function remove(req, res, next) {
 }
 
 function makePublic(req, res, next) {
-	// fs.symlink('./foo', './new-port');
 	if (!req.params.id) {
 		const err = new APIError('Provide project ID!', httpStatus.FILE_OR_PATH_DOES_NOT_EXIST, true);
 		return next(err);	
@@ -238,20 +237,12 @@ function makePublic(req, res, next) {
 					}
 				)
 				.then(updatedProject => {
-					console.log("----------------pr", project);
-					console.log("----------------up", updatedProject);
 					if (updatedProject.nModified === 1) {
-						if(status == 'true') {
+						if(status === 'true') {
 							const srcDir = '/var/www/api.rodinapp.com/projects/' + username + '/' + help.cleanUrl(project.root);
 							const publicDir = '/var/www/api.rodinapp.com/public/' + username + '/' + help.cleanUrl(project.root);
-							console.log("----------src", srcDir);
-							console.log("----------pub", publicDir);
-							// fs.symlink(srcDir, publicDir, function () {
-							// 	console.log("---------dsadsadsadsadsad", arguments);
-							// });
 							const ter = 'ln -s ' + srcDir + ' ' + publicDir;
 							const code = execSync(ter);
-							console.log("---- EXEC", code);
 							return res.status(200).json({
 									"success": true,
 									"data": {publicDir}
