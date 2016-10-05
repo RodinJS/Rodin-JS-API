@@ -92,3 +92,8 @@ files
 #project files folder
 projects/*
 !projects/.gitkeap
+
+#uploads files folder
+uploads/
+!uploads/.gitkeap
+

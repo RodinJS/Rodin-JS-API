@@ -73,7 +73,7 @@ function ifPremium(req, res, next) {
 // 		return res.status(httpStatus.BAD_REQUEST).json(err);
 // 	}).error((e) => {
 // 		return res.status(200).json({"success": "true"});
-// 	});			
+// 	});
 // }
 
 
@@ -105,7 +105,7 @@ function ifTokenValid(req, res, next) {
 						return next();
 					} else {
 						const err = new APIError('Invalid token!', httpStatus.BAD_REQUEST, true);
-						return next(err);					
+						return next(err);
 					}
 				}).error((e) => {
 					const err = new APIError('Invalid token!', httpStatus.BAD_REQUEST, true);
@@ -122,7 +122,7 @@ function ifTokenValid(req, res, next) {
 function project(req, res, next) {
 	if (!req.query.id) {
 		const err = new APIError('Provide project ID!', httpStatus.BAD_REQUEST, true);
-		return next(err);	
+		return next(err);
 	}
 
 	Project.getOne(req.query.id, req.user.username).then((project) => {
@@ -138,4 +138,17 @@ function project(req, res, next) {
 	});
 }
 
-export default { ifAdmin, ifPremium, ifTokenValid, project };
+function isProjectOwn(req, res, next) {
+  Project.getOne(req.params.id, req.user.username).then(
+    project => {
+      req.project = project;
+      return next();
+    },
+    e => {
+      const err = new APIError('Access to project denied!', httpStatus.ACCESS_TO_PROJECT_DENIED, true);
+      return next(err);
+    }
+  )
+}
+
+export default { ifAdmin, ifPremium, ifTokenValid, project, isProjectOwn };

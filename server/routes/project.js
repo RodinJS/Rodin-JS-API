@@ -3,6 +3,7 @@ import validate from 'express-validation';
 import paramValidation from '../../config/param-validation';
 import projectCtrl from '../controllers/project';
 import check from '../controllers/check';
+import buildRouter from './build/index';
 // import '../../config/passport';
 // import passport from 'passport';
 
@@ -283,4 +284,5 @@ router.route('/:id')
    */
   .delete(check.ifTokenValid, projectCtrl.remove);
 
+router.use('/:id/build', check.ifTokenValid, check.isProjectOwn, buildRouter);
 export default router;

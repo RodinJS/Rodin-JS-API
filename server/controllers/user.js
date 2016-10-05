@@ -41,7 +41,7 @@ function get(req, res) {
 			role: req.user.role,
 			profile: req.user.profile
 		}
-	}; 
+	};
 
 	return res.status(200).json(response);
 }
@@ -59,7 +59,7 @@ function me(req, res) {
 			role: req.user.role,
 			profile: req.user.profile
 		}
-	}; 
+	};
 
 	return res.status(200).json(response);
 }
@@ -90,14 +90,14 @@ function create(req, res, next) {
 
 			user.saveAsync()
 				.then((savedUser) => {
-					const token = jwt.sign({ 
+					const token = jwt.sign({
 						username: savedUser.username,
 						role: savedUser.role,
 						random: savedUser.password.slice(-15)
 					}, config.jwtSecret, {
 						expiresIn: "7d"
 					});
-					
+
 					return res.json({
 						"success": true,
 						"data": {
