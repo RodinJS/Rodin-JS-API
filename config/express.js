@@ -57,7 +57,7 @@ app.use('/api', apiRoutes);
 app.use('/socket', socketRoutes);
 
 // mount all previewRoutes on /preview path
-app.use('/preview', previewRoutes);
+// app.use('/preview', previewRoutes);
 
 // if error is not an instanceOf APIError, convert it.
 app.use((err, req, res, next) => {

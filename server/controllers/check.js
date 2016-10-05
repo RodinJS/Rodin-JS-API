@@ -151,4 +151,13 @@ function isProjectOwn(req, res, next) {
   )
 }
 
-export default { ifAdmin, ifPremium, ifTokenValid, project, isProjectOwn };
+function ifSelfUpdate(req, res, next) {
+  if(req.user.username !== req.params.username) {
+    const err = new APIError(`Access to update denied`, httpStatus.BAD_REQUEST, true);
+    return next(err);
+  }
+
+  return next();
+}
+
+export default { ifAdmin, ifPremium, ifTokenValid, project, ifSelfUpdate, isProjectOwn };

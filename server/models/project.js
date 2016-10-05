@@ -28,6 +28,10 @@ const ProjectSchema = new mongoose.Schema({
   owner: {
     type: String
   },
+  public: {
+    type: String,
+    default: 'false'
+  },
   build: {
     oculus: {
       type: Boolean
@@ -80,6 +84,24 @@ ProjectSchema.statics = {
    */
   get(id) {
     return this.findOne({_id: id})  //new RegExp('^' + id + '$', "i")
+      .execAsync().then((project) => {
+        if (project) {
+          return project;
+        }
+      })
+      .error((e) => {
+        const err = new APIError('No such project exists!', httpStatus.NOT_FOUND, true);
+        return Promise.reject(err);
+      });
+  },
+  /**
+   * Get project by id
+   * @param {String} root - The root folder of project.
+   * @param {String} owner - The owner username of project.
+   * @returns {Promise<User, APIError>}
+   */
+  getByName(root, owner) {
+    return this.findOne({root: root, owner: owner})  //new RegExp('^' + id + '$', "i")
       .execAsync().then((project) => {
         if (project) {
           return project;

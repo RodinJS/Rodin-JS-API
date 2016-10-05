@@ -10,29 +10,12 @@ import config from '../../config/env';
  * @returns {Project}
  */
 function get(req, res, next) {
-	res.status(200).send({
-		"user": req.params.user,
-		"project": req.params.project
-	});
-	// Project.getOne(req.params.id, req.user.username)
-	// 	.then((project) => {
-	// 		if(project) {
-	// 			//TODO normalize root folder path
-	// 			let response = {
-	// 				"success": true,
-	// 				"data": project
-	// 			};
-
-	// 			return res.status(200).json(response);
-	// 		} else {
-	// 			const err = new APIError('Project is empty', httpStatus.NOT_FOUND, true);
-	// 			return next(err);
-	// 		}
-	// 	})
-	// 	.catch((e) => {
-	// 		const err = new APIError('Project not found', httpStatus.NOT_FOUND, true);
-	// 		return next(e);
-	// 	});
+	// res.status(200).send({
+	// 	"user": req.params.user,
+	// 	"project": req.params.project
+	// });
+	// res.sendFile(path.join(__dirname, '../projects/req.params.user/req.params.project', 'index.html'));
+	res.sendfile('index.html');
 }
 
 export default { get };

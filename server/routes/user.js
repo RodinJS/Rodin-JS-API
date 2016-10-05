@@ -10,6 +10,9 @@ const router = express.Router();	// eslint-disable-line new-cap
 
 // const requireAuth = passport.authenticate('jwt', { session: false }); // eslint-disable-line
 
+router.route('/password')
+  .put(check.ifTokenValid, validate(paramValidation.updatePassword), userCtrl.updatePassword);
+
 router.route('/')
 	/**
 	 * @api {get} /api/user Get list of users
@@ -25,14 +28,14 @@ router.route('/')
 	 *     }
 	 *
 	 * @apiSuccess (200) {Object[]} user 					Aray of user profiles
-	 * @apiSuccess (200) {Number} user._id 					Users <code>_id</code> 
-	 * @apiSuccess (200) {String} user.email 				Users <code>email</code> 
-	 * @apiSuccess (200) {String} user.password				Users <code>password</code> bcrypted 
-	 * @apiSuccess (200) {String} user.role					Users <code>role</code> 
-	 * @apiSuccess (200) {String} user.createdAt			Users profile creation date and time 
-	 * @apiSuccess (200) {Object} user.profile				Users additional information 
-	 * @apiSuccess (200) {String} user.profile.firstName	Users <code>firstName</code> 
-	 * @apiSuccess (200) {String} user.profile.lastName		Users <code>lastName</code> 
+	 * @apiSuccess (200) {Number} user._id 					Users <code>_id</code>
+	 * @apiSuccess (200) {String} user.email 				Users <code>email</code>
+	 * @apiSuccess (200) {String} user.password				Users <code>password</code> bcrypted
+	 * @apiSuccess (200) {String} user.role					Users <code>role</code>
+	 * @apiSuccess (200) {String} user.createdAt			Users profile creation date and time
+	 * @apiSuccess (200) {Object} user.profile				Users additional information
+	 * @apiSuccess (200) {String} user.profile.firstName	Users <code>firstName</code>
+	 * @apiSuccess (200) {String} user.profile.lastName		Users <code>lastName</code>
 	 *
 	 * @apiSuccessExample {json} Success-Response:
 	 *     HTTP/1.1 200 OK
@@ -218,9 +221,8 @@ router.route('/:username')
 	 *      }
 	 */
 	.get(userCtrl.get)
-
 	/** PUT /api/user/:username - Update user */
-	.put(validate(paramValidation.updateUser), userCtrl.update)
+	.put(check.ifTokenValid, check.ifSelfUpdate, validate(paramValidation.updateUser), userCtrl.update)
 
 	/**
 	 * @api {delete} /api/user/:username Delete single user

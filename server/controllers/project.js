@@ -1,9 +1,11 @@
+import {execSync} from 'child_process';
 import fs from 'fs';
 import Project from '../models/project';
 import User from '../models/user';
 import jwt from 'jsonwebtoken';
 import APIError from '../helpers/APIError';
 import httpStatus from '../helpers/httpStatus';
+import help from '../helpers/editor';
 
 import config from '../../config/env';
 
@@ -28,8 +30,25 @@ function get(req, res, next) {
 			}
 		})
 		.catch((e) => {
-			const err = new APIError('Project not found', httpStatus.NOT_FOUND, true);
-			return next(e);
+			Project.getByName(req.params.id, req.user.username)
+				.then((project) => {
+					if(project) {
+						//TODO normalize root folder path
+						let response = {
+							"success": true,
+							"data": project
+						};
+
+						return res.status(200).json(response);
+					} else {
+						const err = new APIError('Project is empty', httpStatus.NOT_FOUND, true);
+						return next(err);
+					}
+				})
+				.catch((e) => {
+					const err = new APIError('Project not found', httpStatus.NOT_FOUND, true);
+					return next(e);
+				});
 		});
 }
 
@@ -52,19 +71,19 @@ function create(req, res, next) {
 
   project.saveAsync()
 	.then((savedProject) => {
-		let rootDir = 'projects/' + savedProject.root;
+		let rootDir = 'projects/' + req.user.username + '/' + savedProject.root;
 
-		if (!fs.existsSync(rootDir)) { 
-			fs.mkdirSync(rootDir); //creating root dir for project 
+		if (!fs.existsSync(rootDir)) {
+			fs.mkdirSync(rootDir); //creating root dir for project
 		}
-		
+
 		User.get(req.user.username)
 			.then(user => {
 			  if (user) {
 				User.updateAsync(
 				  {
 					username: req.user.username
-				  }, 
+				  },
 				  {
 					$push: {
 					  "projects": savedProject._id
@@ -83,7 +102,7 @@ function create(req, res, next) {
 				});
 			  } else {
 				const err = new APIError('User not found!', 310);
-				return next(err);       
+				return next(err);
 			  }
 
 			});
@@ -101,38 +120,31 @@ function create(req, res, next) {
  * @returns {Project}
  */
 function update(req, res, next) {
+  req.body.updatedAt = new Date();
 
-	Project.getOne(req.params.id, req.user.username)
-		.then(project => {
-
-			if (project) {
-				Project.updateAsync(
-					{
-						_id: req.params.id
-					}, 
-					{
-						$set: req.body
-					}
-				)
-				.then(updatedUser => {
-					if (updatedUser.nModified === 1) {
-						return res.status(200).json({
-								"success": true,
-								"data": {}
-							});
-					} else {
-						const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
-						return next(err);
-					}
-				}).catch(e => {
-					const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
-					return next(err);
-				});
-			} else {
-				const err = new APIError('Project not found!', 310, true);
-				return next(err);				
-			}
-		});
+  Project.updateAsync(
+    {
+      _id: req.params.id,
+      owner: req.user.username
+    },
+    {
+      $set: req.body
+    })
+    .then(result => {
+      if (result.nModified === 1) {
+        return res.status(200).json({
+          "success": true,
+          "data": {}
+        });
+      } else {
+        const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+        return next(err);
+      }
+    })
+    .catch((e) => {
+      const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+      return next(err);
+    });
 }
 
 /**
@@ -169,11 +181,11 @@ function remove(req, res, next) {
 								{
 									username: username
 								},
-								{ 
-									$pull: 
-										{ 
-											projects: id 
-										} 
+								{
+									$pull:
+										{
+											projects: id
+										}
 								}
 							)
 							.then(updatedUser => {
@@ -189,10 +201,81 @@ function remove(req, res, next) {
 					}).error((e) => next(e));
 			} else {
 				const err = new APIError('User has no permission to modify this project!', 310, true);
-				return next(err);				
+				return next(err);
 			}
 
 		});
 }
 
-export default {get, create, update, list, remove};
+function makePublic(req, res, next) {
+	if (!req.params.id) {
+		const err = new APIError('Provide project ID!', httpStatus.FILE_OR_PATH_DOES_NOT_EXIST, true);
+		return next(err);	
+	}
+
+	if (!req.body.status) {
+		const err = new APIError('Provide project status!', httpStatus.FILE_OR_PATH_DOES_NOT_EXIST, true);
+		return next(err);	
+	}
+
+
+	const id = req.params.id;
+	const username = req.user.username;
+	const status = req.body.status;
+	Project.getOne(id, username)
+		.then(project => {
+
+			if (project) {
+				Project.updateAsync(
+					{
+						_id: req.params.id
+					}, 
+					{
+						$set: {
+							"public": status
+						}
+					}
+				)
+				.then(updatedProject => {
+					if (updatedProject.nModified === 1) {
+						if(status === 'true') {
+							const srcDir = '/var/www/api.rodinapp.com/projects/' + username + '/' + help.cleanUrl(project.root);
+							const publicDir = '/var/www/api.rodinapp.com/public/' + username + '/' + help.cleanUrl(project.root);
+							const ter = 'ln -s ' + srcDir + ' ' + publicDir;
+							const code = execSync(ter);
+							return res.status(200).json({
+									"success": true,
+									"data": {publicDir}
+								});
+
+						} else {
+							const publicDir = '/var/www/api.rodinapp.com/public/' + username + '/' + help.cleanUrl(project.root);
+							if(fs.existsSync(publicDir)) {
+								fs.unlinkSync(publicDir);
+								return res.status(200).json({
+										"success": true,
+										"data": {publicDir}
+								});
+							} else {
+								const err = new APIError('link exist!', httpStatus.BAD_REQUEST, true);
+								return next(err);
+							}
+
+						}
+					} else {
+						const err = new APIError('Can\'t update info--', httpStatus.BAD_REQUEST, true);
+						return next(err);
+					}
+				}).catch(e => {
+					console.log(e)
+					const err = new APIError('Can\'t update info++', httpStatus.BAD_REQUEST, true);
+					return next(e);
+				});
+			} else {
+				const err = new APIError('Project not found!', 310, true);
+				return next(err);				
+			}
+		});
+}
+
+export default {get, create, update, list, remove, makePublic};

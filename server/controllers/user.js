@@ -76,7 +76,7 @@ function create(req, res, next) {
 			if (user) {
 				const err = new APIError('User exists', 311);
 				return next(err);
-			};
+			}
 
 			user = new User({
 				email: req.body.email,
@@ -90,6 +90,14 @@ function create(req, res, next) {
 
 			user.saveAsync()
 				.then((savedUser) => {
+					let rootDir = 'projects/' + savedUser.username;
+					let publicDir = 'public/' + savedUser.username;
+
+					if (!fs.existsSync(rootDir) && !fs.existsSync(publicDir)) {
+						fs.mkdirSync(rootDir); //creating root dir for project
+						fs.mkdirSync(publicDir);
+					}
+
 					const token = jwt.sign({
 						username: savedUser.username,
 						role: savedUser.role,
@@ -126,15 +134,35 @@ function create(req, res, next) {
  * @returns {User}
  */
 function update(req, res, next) {
-	const user = req.user;
-	user.email = req.body.email;
-	user.username = req.body.username;
-	user.oldPassword = req.body.oldPassword;
-	user.newPassword = req.body.newPassword;
+  User.updateAsync(
+    {
+      username: req.params.username,
+    },
+    {
+      $set: req.body
+    }
+  ).then(() => res.json({
+    "success": true,
+    "data": {}
+  }))
+    .error((e) => next(e));
+}
 
-	user.saveAsync()
-		.then((savedUser) => res.json(savedUser))
-		.error((e) => next(e));
+function updatePassword(req, res, next) {
+  User.findOneAsync(
+    {
+      username: req.user.username
+    }
+  ).then((user) => {
+    user.password = req.body.password;
+    user.saveAsync()
+      .then(() => {
+        res.json({
+          "success": true,
+          "data": {}
+        });
+      }).error((e) => next(e));
+  }).error((e) => next(e));
 }
 
 /**
@@ -183,4 +211,4 @@ function remove(req, res, next) {
 
 }
 
-export default { load, get, create, update, list, remove, me };
+export default { load, get, create, update, updatePassword, list, remove, me };
