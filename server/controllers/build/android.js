@@ -26,8 +26,6 @@ const build = (req, res, next) => {
     },
     formData: {
       'project': JSON.stringify(project),
-      'cert': fs.createReadStream(req.files['cert'][0].path),
-      'profile': fs.createReadStream(req.files['profile'][0].path),
       'icon-h': fs.createReadStream(req.files['icon-h'][0].path)
     }
   }, (err, httpResponse, body) => {
@@ -37,7 +35,7 @@ const build = (req, res, next) => {
 
     if (!req.project) {
       req.project = {
-        ios: {
+        android: {
           requested: false,
           built: false
         }
@@ -45,15 +43,14 @@ const build = (req, res, next) => {
     }
 
     if (!req.project.ios) {
-      req.project.ios = {
+      req.project.android = {
         requested: false,
         built: false
       }
     }
 
-    req.project.build.ios.requested = true;
-    req.project.build.ios.buildId = httpResponse.buildId;
-
+    req.project.build.android.requested = true;
+    req.project.build.android.buildId = JSON.parse(body).data.buildId;
     req.project.saveAsync().then(
       project => {
         return res.status(200).json({

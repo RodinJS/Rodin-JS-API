@@ -23,17 +23,21 @@ export default {
   ios: {
     urls: {
       build: "http://63.135.170.41:8080/api/v1/project",
-      cancel: "http://63.135.170.41:8080/api/v1/project"
+      cancel: "http://63.135.170.41:8080/api/v1/project",
+      get: "http://63.135.170.41:8080/api/v1/project",
+      download: "http://63.135.170.41:8080/api/v1/bin"
     },
     appId: "2e659ea81e645f84",
     appSecret: "af7cffae-17ce-25b2-8b76-849df75a"
   },
   android: {
     urls: {
-      build: "http://63.135.170.41:8080/api/v1/project",
-      cancel: "http://63.135.170.41:8080/api/v1/project"
+      build: "http://45.55.92.49:8080/api/v1/project",
+      cancel: "http://45.55.92.49:8080/api/v1/project",
+      get: "http://45.55.92.49:8080/api/v1/project",
+      download: "http://45.55.92.49:8080/api/v1/bin"
     },
-    appId: "9b0c34423f114d02",
-    appSecret: "497b6d9f-6289-5a4f-5bb7-f4bb2926"
+    appId: "b250ab167fca8e94",
+    appSecret: "6a1e68ce-ea2b-d99d-b5eb-7cbca83a"
   }
 };

@@ -4,6 +4,7 @@ import paramValidation from '../../config/param-validation';
 import projectCtrl from '../controllers/project';
 import check from '../controllers/check';
 import buildRouter from './build/index';
+import downloadRouter from './download';
 // import '../../config/passport';
 // import passport from 'passport';
 
@@ -286,8 +287,9 @@ router.route('/:id')
 
 
 router.use('/:id/build', check.ifTokenValid, check.isProjectOwn, buildRouter);
+router.use('/:id/download', check.ifTokenValid, check.isProjectOwn, downloadRouter);
 
 router.route('/pp/:id')
-	.post(check.ifTokenValid, projectCtrl.makePublic);
+	.post(check.ifTokenValid, projectCtrl.makePublic, downloadRouter);
 
 export default router;

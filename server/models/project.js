@@ -57,7 +57,15 @@ const ProjectSchema = new mongoose.Schema({
       buildId: String
     },
     android: {
-      type: Boolean
+      requested: {
+        type: Boolean,
+        default: false
+      },
+      built: {
+        type: Boolean,
+        default: false
+      },
+      buildId: String
     }
   },
   type: {

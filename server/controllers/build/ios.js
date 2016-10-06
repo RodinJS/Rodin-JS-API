@@ -52,7 +52,7 @@ const build = (req, res, next) => {
     }
 
     req.project.build.ios.requested = true;
-    req.project.build.ios.buildId = httpResponse.buildId;
+    req.project.build.ios.buildId = JSON.parse(body).data.buildId;
     req.project.saveAsync().then(
       project => {
         return res.status(200).json({
