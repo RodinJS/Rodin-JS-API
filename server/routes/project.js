@@ -285,7 +285,7 @@ router.route('/:id')
   .delete(check.ifTokenValid, projectCtrl.remove);
 
 
-router.use('/:id/build', check.ifTokenValid, check.isProjectOwn, buildRouter);
+// router.use('/:id/build', check.ifTokenValid, check.isProjectOwn, buildRouter);
 
 router.route('/pp/:id')
 	.post(check.ifTokenValid, projectCtrl.makePublic);
