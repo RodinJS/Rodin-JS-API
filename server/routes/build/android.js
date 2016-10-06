@@ -1,9 +1,9 @@
 import express from 'express';
-import IOSBuildController from '../../controllers/build/ios';
+import AndroidBuildController from '../../controllers/build/android'
 
 const router = express.Router();
 
 router.route('/')
-  .post(IOSBuildController.build);
+  .post(AndroidBuildController.build);
 
 export default router;

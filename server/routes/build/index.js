@@ -1,5 +1,6 @@
 import express from "express";
 import iosRouter from "./ios";
+import androidRouter from "./android";
 import multer from "multer";
 import path from "path";
 
@@ -21,7 +22,7 @@ const upload = multer({storage: storage});
 
 const router = express.Router();
 
-router.use('/ios', upload.fields(
+router.use('/', upload.fields(
   [
     {
       name: 'icon-m',
@@ -53,6 +54,9 @@ router.use('/ios', upload.fields(
     }
   ]
 ));
+
+
 router.use('/ios', iosRouter);
+router.use('/android', androidRouter);
 
 export default router;

@@ -7,7 +7,7 @@ import fs from 'fs';
 const build = (req, res, next) => {
   const files = req.files;
 
-  for (let file of ['cert', 'profile', 'icon-h']) {
+  for (let file of ['icon-h']) {
     if (!req.files[file] || !req.files[file][0]) {
       return next(new APIError(`${file} file was not provided`, httpStatus.BAD_REQUEST, true));
     }
@@ -19,10 +19,10 @@ const build = (req, res, next) => {
   project.url = `https://api.rodinapp.com/public/${req.user.username}/${req.project.name}/`;
 
   request.post({
-    url: config.ios.urls.build,
+    url: config.android.urls.build,
     headers: {
-      'app-id': config.ios.appId,
-      'app-secret': config.ios.appSecret
+      'app-id': config.android.appId,
+      'app-secret': config.android.appSecret
     },
     formData: {
       'project': JSON.stringify(project),
@@ -53,6 +53,7 @@ const build = (req, res, next) => {
 
     req.project.build.ios.requested = true;
     req.project.build.ios.buildId = httpResponse.buildId;
+
     req.project.saveAsync().then(
       project => {
         return res.status(200).json({
