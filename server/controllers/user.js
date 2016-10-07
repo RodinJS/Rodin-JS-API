@@ -3,6 +3,7 @@ import Project from '../models/project';
 import jwt from 'jsonwebtoken';
 import APIError from '../helpers/APIError';
 import httpStatus from '../helpers/httpStatus';
+import fs from 'fs';
 
 import config from '../../config/env';
 /**
