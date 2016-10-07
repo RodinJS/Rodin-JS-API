@@ -99,4 +99,12 @@ app.use((err, req, res, next) => {
 	});
 });
 
+// disable cache 
+app.use((req, res, next) => {
+    res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+    res.header('Expires', '-1');
+    res.header('Pragma', 'no-cache');
+    next();
+});
+
 export default app;
