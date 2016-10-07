@@ -34,10 +34,26 @@ const ProjectSchema = new mongoose.Schema({
   },
   build: {
     oculus: {
-      type: Boolean
+      requested: {
+        type: Boolean,
+        default: false
+      },
+      built: {
+        type: Boolean,
+        default: false
+      },
+      buildId: String
     },
     vive: {
-      type: Boolean
+      requested: {
+        type: Boolean,
+        default: false
+      },
+      built: {
+        type: Boolean,
+        default: false
+      },
+      buildId: String
     },
     daydream: {
       type: Boolean

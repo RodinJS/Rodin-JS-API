@@ -6,8 +6,33 @@ import jwt from 'jsonwebtoken';
 import APIError from '../helpers/APIError';
 import httpStatus from '../helpers/httpStatus';
 import help from '../helpers/editor';
-
+import request from 'request';
 import config from '../../config/env';
+
+const getStatus = (project, device, cb) => {
+  console.log(JSON.stringify(project, null, 3));
+  request.get(
+    {
+      url: `${config[device].urls.getStatus}/${project.build[device].buildId}`,
+      headers: {
+        'app-id': config[device].appId,
+        'app-secret': config[device].appSecret
+      }
+    },
+    (err, httpResponse, body) => {
+      // console.log("1", err);
+      // console.log("2", httpResponse);
+      console.log("3", body);
+      if (err || httpResponse.statusCode !== 200) {
+        project.build[device].built = false;
+        return project.save(err => cb(err, project));
+      }
+
+      project.build[device].built = JSON.parse(body).data.buildStatus;
+      return project.save(err => cb(err, project));
+    }
+  )
+};
 
 /**
  * Get project
@@ -17,6 +42,14 @@ function get(req, res, next) {
 	Project.getOne(req.params.id, req.user.username)
 		.then((project) => {
 			if(project) {
+			  if(req.query.device) {
+			    return getStatus(project, req.query.device, (err, project) => {
+            res.status(200).json({
+              success: true,
+              data: project
+            });
+          })
+        }
 				//TODO normalize root folder path
 				let response = {
 					"success": true,
@@ -33,6 +66,14 @@ function get(req, res, next) {
 			Project.getByName(req.params.id, req.user.username)
 				.then((project) => {
 					if(project) {
+            if(req.query.device) {
+              return getStatus(project, req.query.device, (err, project) => {
+                res.status(200).json({
+                  success: true,
+                  data: project
+                });
+              })
+            }
 						//TODO normalize root folder path
 						let response = {
 							"success": true,
@@ -210,12 +251,12 @@ function remove(req, res, next) {
 function makePublic(req, res, next) {
 	if (!req.params.id) {
 		const err = new APIError('Provide project ID!', httpStatus.FILE_OR_PATH_DOES_NOT_EXIST, true);
-		return next(err);	
+		return next(err);
 	}
 
 	if (!req.body.status) {
 		const err = new APIError('Provide project status!', httpStatus.FILE_OR_PATH_DOES_NOT_EXIST, true);
-		return next(err);	
+		return next(err);
 	}
 
 
@@ -229,7 +270,7 @@ function makePublic(req, res, next) {
 				Project.updateAsync(
 					{
 						_id: req.params.id
-					}, 
+					},
 					{
 						$set: {
 							"public": status
@@ -273,7 +314,7 @@ function makePublic(req, res, next) {
 				});
 			} else {
 				const err = new APIError('Project not found!', 310, true);
-				return next(err);				
+				return next(err);
 			}
 		});
 }

@@ -7,7 +7,7 @@ import fs from 'fs';
 const build = (req, res, next) => {
   const files = req.files;
 
-  for (let file of ['cert', 'profile', 'icon-h']) {
+  for (let file of []) {
     if (!req.files[file] || !req.files[file][0]) {
       return next(new APIError(`${file} file was not provided`, httpStatus.BAD_REQUEST, true));
     }
@@ -19,16 +19,13 @@ const build = (req, res, next) => {
   project.url = `https://api.rodinapp.com/public/${req.user.username}/${req.project.name}/`;
 
   request.post({
-    url: config.ios.urls.build,
+    url: config.vive.urls.build,
     headers: {
-      'app-id': config.ios.appId,
-      'app-secret': config.ios.appSecret
+      'app-id': config.vive.appId,
+      'app-secret': config.vive.appSecret
     },
     formData: {
-      'project': JSON.stringify(project),
-      'cert': fs.createReadStream(req.files['cert'][0].path),
-      'profile': fs.createReadStream(req.files['profile'][0].path),
-      'icon-h': fs.createReadStream(req.files['icon-h'][0].path)
+      'project': JSON.stringify(project)
     }
   }, (err, httpResponse, body) => {
     if (err || httpResponse.statusCode !== 200) {
@@ -37,7 +34,7 @@ const build = (req, res, next) => {
 
     if (!req.project) {
       req.project = {
-        ios: {
+        vive: {
           requested: false,
           built: false
         }
@@ -45,15 +42,15 @@ const build = (req, res, next) => {
     }
 
     if (!req.project.ios) {
-      req.project.ios = {
+      req.project.vive = {
         requested: false,
         built: false
       }
     }
 
-    req.project.build.ios.requested = true;
-    req.project.build.ios.built = false;
-    req.project.build.ios.buildId = JSON.parse(body).data.buildId;
+    req.project.build.vive.requested = true;
+    req.project.build.vive.built = false;
+    req.project.build.vive.buildId = JSON.parse(body).data.buildId;
     req.project.saveAsync().then(
       project => {
         return res.status(200).json({

@@ -1,6 +1,9 @@
 import express from "express";
 import iosRouter from "./ios";
 import androidRouter from "./android";
+import oculusRouter from "./oculus";
+import viveRouter from "./vive";
+
 import multer from "multer";
 import path from "path";
 
@@ -58,5 +61,7 @@ router.use('/', upload.fields(
 
 router.use('/ios', iosRouter);
 router.use('/android', androidRouter);
+router.use('/oculus', oculusRouter);
+router.use('/vive', viveRouter);
 
 export default router;

@@ -50,6 +50,7 @@ const build = (req, res, next) => {
     }
 
     req.project.build.android.requested = true;
+    req.project.build.android.built = false;
     req.project.build.android.buildId = JSON.parse(body).data.buildId;
     req.project.saveAsync().then(
       project => {
