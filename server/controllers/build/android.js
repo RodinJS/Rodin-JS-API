@@ -16,7 +16,7 @@ const build = (req, res, next) => {
   const project = JSON.parse(req.body.project);
   project.appId = req.project._id;
   project.userId = req.user.username;
-  project.url = `https://api.${request.headers.host}/public/${req.user.username}/${req.project.name}/`;
+  project.url = `https://api.${req.headers.host}/public/${req.user.username}/${req.project.name}/`;
 
   request.post({
     url: config.android.urls.build,
