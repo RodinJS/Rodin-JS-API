@@ -11,4 +11,4 @@ function cleanFileName(name) {
     return newName[newName.length-1];
 }
 
-export default { lookupMime, cleanUrl, cleanFileName};
+export default { cleanUrl, cleanFileName};
