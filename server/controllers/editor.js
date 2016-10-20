@@ -69,7 +69,8 @@ function getFile(req, res, next) {
         return next(err);
     }
 
-    const filePath = 'projects/' + req.user.username + '/' + req.project.root + '/' + help.cleanUrl(req.query.filename);
+    const filePath = help.generateFilePath(req, req.query.filename);
+
     readFile(filePath, (err, content) => {
         if (err) {
             const err = new APIError('File does not exist!', httpStatus.FILE_DOES_NOT_EXIST, true);
@@ -94,12 +95,11 @@ function putFile(req, res, next) {
 
     // let path = help.cleanUrl(req.query.path);
     const action = req.query.action;
-    const filePath = 'projects/' + req.user.username + '/' + req.project.root + '/' + help.cleanUrl(req.query.filename);
-    //const folderPath = 'projects/' + req.user.username + '/' + req.project.root + '/';
+    const filePath = help.generateFilePath(req, req.query.filename);
 
     if (req.query.action === 'rename') {
         if (_.isUndefined(req.query.newName)) {
-            const err = new APIError('Provide action!', httpStatus.BAD_REQUEST, true);
+            const err = new APIError('Provide renaming file!', httpStatus.BAD_REQUEST, true);
             return next(err);
         }
 
@@ -160,16 +160,18 @@ function postFile(req, res, next) {
         const err = new APIError('Provide name!', httpStatus.BAD_REQUEST, true);
         return next(err);
     }
+
     if (_.isUndefined(req.body.path)) {
         const err = new APIError('Provide destination path!', httpStatus.BAD_REQUEST, true);
         return next(err);
     }
+
     if (_.isUndefined(req.body.action)) {
         const err = new APIError('Provide action!', httpStatus.BAD_REQUEST, true);
         return next(err);
     }
 
-    let mainPath = 'projects/' + req.user.username + '/' + req.project.root + '/' + help.cleanUrl(req.body.path);
+    let mainPath = help.generateFilePath(req, req.body.path);
 
     const type = req.body.type;
     let filePath = mainPath + "/" + help.cleanFileName(req.body.name);
@@ -191,6 +193,7 @@ function postFile(req, res, next) {
                 return next(err);
             }
         }
+
         else if (type === 'directory') {
             if (!fs.existsSync(filePath)) {
                 fs.mkdirSync(filePath);
@@ -201,10 +204,10 @@ function postFile(req, res, next) {
                 return next(err);
             }
         }
+
         else {
             const err = new APIError('Provide type name!', httpStatus.BAD_REQUEST, true);
             return next(err);
-
         }
     }
 
@@ -227,7 +230,6 @@ function postFile(req, res, next) {
                     let newFilePath = mainPath + "/" + help.cleanFileName(req.body.copyName);
 
                     readFile(newFilePath, (err, content)=> {
-                        console.log(err, content);
 
                         if (err && err.code === "ENOENT") {
                             fs.writeFile(newFilePath, content, (err) => {
@@ -276,10 +278,7 @@ function postFile(req, res, next) {
 
                 const err = new APIError('Folder does not exist!', httpStatus.PATH_DOES_NOT_EXIST, true);
                 return next(err);
-
             }
-
-
         }
 
     }
@@ -305,7 +304,7 @@ function uploadFiles(req, res, next) {
 
 
     const action = req.body.action;
-    let mainPath = 'projects/' + req.user.username + '/' + req.project.root + '/' + help.cleanUrl(req.body.path);
+    let mainPath = help.generateFilePath(req, req.body.path);
     let folderPath = mainPath + "/" + (req.body.destination ? help.cleanFileName(req.body.destination) : '');
 
     if(req.body.folderName){
@@ -381,7 +380,7 @@ function deleteFile(req, res, next) {
         return next(err);
     }
 
-    const filePath = 'projects/' + req.user.username + '/' + req.project.root + '/' + help.cleanUrl(req.query.filename);
+    const filePath = help.generateFilePath(req, req.query.filename);
     if (!fs.existsSync(filePath)) {
         const err = new APIError('Path or file does not exist!', httpStatus.FILE_OR_PATH_DOES_NOT_EXIST, true);
         return next(err);
@@ -423,6 +422,8 @@ function deleteFile(req, res, next) {
     }
 
 }
+
+
 
 function readFile(path, callback) {
     try {
