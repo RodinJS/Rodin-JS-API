@@ -423,8 +423,6 @@ function deleteFile(req, res, next) {
 
 }
 
-
-
 function readFile(path, callback) {
     try {
         fs.readFile(path, 'utf8', callback);
