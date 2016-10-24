@@ -1,0 +1,21 @@
+[
+  {
+    "name": "Empty Project",
+    "description": "Empty Project",
+    "tags": [
+      "empty"
+    ],
+    "thumbnail": "",
+    "root": ""
+  },
+  {
+    "name": "Simple Project",
+    "description": "Simple Project",
+    "tags": [
+      "cube",
+      "simple"
+    ],
+    "thumbnail": "",
+    "root": ""
+  }
+]
