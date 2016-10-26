@@ -2,7 +2,7 @@ export default {
   env: 'test',
   jwtSecret: '4DNSrMPuX3Y3McBu96wd2GzGheDX4ft8gDqLEQVWHnXQfcaGFtM2ZBgyNYzPN87F',
   db: 'mongodb://localhost/rodin-js-api-test',
-  port: 3000,
+  port: 4000,
   social: {
   	facebook: {
 	  		clientID: "test",

@@ -9,12 +9,15 @@ import apidoc from 'gulp-apidoc';
 
 
 const plugins = gulpLoadPlugins();
-
+const testPath = './server/tests/';
 const paths = {
 	js: ['./**/*.js', '!dist/**', '!projects/**', '!public/**', '!node_modules/**', '!coverage/**'],
 	nonJs: ['./package.json', './.gitignore'],
-	tests: './server/tests/*.js'
+	tests: './server/tests/*.js',
+	singleTestFile: [''+testPath+'5.invitationCode.test.js']
+	//''+testPath+'_user.test.js',
 };
+
 
 const options = {
 	codeCoverage: {
@@ -138,6 +141,31 @@ gulp.task('test', ['pre-test', 'set-env'], () => {
 		// .pipe(plugins.istanbul.enforceThresholds({
 		//   thresholds: options.codeCoverage.thresholds
 		// }))
+		.once('end', () => {
+			plugins.util.log('completed !!');
+			process.exit(exitCode);
+		});
+});
+
+
+// run single test
+gulp.task('singletest', ['set-env'], () => {
+	let reporters;
+	let	exitCode = 0;
+
+	return gulp.src([...paths.singleTestFile], { read: false })
+		.pipe(plugins.mocha({
+			reporter: plugins.util.env['mocha-reporter'] || 'spec',
+			ui: 'bdd',
+			timeout: 6000,
+			compilers: {
+				js: babelCompiler
+			}
+		}))
+		.once('error', (err) => {
+			plugins.util.log(err);
+			exitCode = 1;
+		})
 		.once('end', () => {
 			plugins.util.log('completed !!');
 			process.exit(exitCode);

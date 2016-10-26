@@ -156,4 +156,18 @@ router.route('/verify')
 router.route('/logout')
 	.post(authCtrl.logout);
 
+
+/**
+ *
+ */
+router.route('/invitationCode')
+    /**
+     *
+     */
+	.post(authCtrl.generateInvitationCode)
+    /**
+     *
+     */
+	.delete(authCtrl.removeInvitationCode);
+
 export default router;

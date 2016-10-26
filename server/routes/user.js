@@ -92,6 +92,7 @@ router.route('/')
 	 * @apiParam {String} password     User password.
 	 * @apiParam {String} [firstname]  Firstname of the User.
 	 * @apiParam {String} [lastname]   Lastname of the User.
+	 * @apiParam {String} [invitationCode]   Invitation Code for premium User.
 	 *
 	 * @apiParamExample {json} Request-Example:
 	 *     {
@@ -150,7 +151,7 @@ router.route('/')
 	 *      }
 	 *
 	 */
-	.post(validate(paramValidation.createUser), userCtrl.create);
+	.post(validate(paramValidation.createUser), userCtrl.validateInvitationCode,  userCtrl.create);
 
 router.route('/me')
 	.get(check.ifTokenValid, userCtrl.me);

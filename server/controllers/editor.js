@@ -17,6 +17,8 @@ import config from '../../config/env';
 
 import fsExtra from 'fs-extra';
 import Promise from 'bluebird';
+import cp from 'child_process';
+//import fileSearch from '../../../node_modules/cpp-file-search/build/Release/nativeFileSearch';
 
 
 //transpilerScript
@@ -180,7 +182,7 @@ function postFile(req, res, next) {
 
         if (type === 'file') {
             if (!fs.existsSync(filePath)) {
-                fs.writeFile(filePath, 'Created by ' + req.user.username, function (err) {
+                fs.writeFile(filePath, '//Created by ' + req.user.username, function (err) {
                     if (err) {
                         err = new APIError('Can not create file!', httpStatus.COULD_NOT_CREATE_FILE, true);
                         return next(err);
@@ -289,7 +291,46 @@ function postFile(req, res, next) {
     }
 }
 
+function searchInsideFiles(req, res, next) {
+
+    let mainPath = help.generateFilePath(req, req.query.path);
+    let searchWord = req.query.search;
+    let grepFormat = 'bnrH';
+
+    if(req.query.caseSensitive)
+        grepFormat = 'bnrHi';
+    //"find . -iname '*.js' | xargs grep 'srcpath' -isl"
+    //find . -type f -name '*.*'
+    //find . -name '*.html' | xargs grep 'example'
+    //"find . -type f -name '*.*' | xargs grep 'srcpath' -isl"
+    //grep -rnw '/path/to/somewhere/' -e "pattern"
+    //grep -rn "+mainPath+" -e 'srcpath'
+    //grep -nrH 'srcpath' "+mainPath+"
+
+    //find . -iname '*.html' | xargs grep 'example' -isl
+
+   /* fileSearch('../../../'+mainPath, searchWord,  function (err, data) {
+        console.log(err);
+        console.log(data);
+    });*/
+
+   /* exec("grep -"+grepFormat+" '"+searchWord+"'  "+mainPath+"", {timeout: 5000}, (error, stdout) => {
+        if (error) {
+            const err = new APIError('Search failed', httpStatus.BAD_REQUEST, true);
+            return next(err);
+        }
+        let foundedFiles = mapSearchedFiles(stdout.split('\n'));
+        res.status(200).send({success:true, data:foundedFiles});
+    });*/
+}
+
 function uploadFiles(req, res, next) {
+
+    // THIS WORKS ONLY FOR UNIT TEST
+    if (req.body.testUpload)
+        req.files = req.body.files;
+    // THIS WORKS ONLY FOR UNIT TEST
+
 
     if (_.isUndefined(req.files) || req.files.length < 0) {
         const err = new APIError('Please select utleast one file', httpStatus.BAD_REQUEST, true);
@@ -302,14 +343,13 @@ function uploadFiles(req, res, next) {
     }
 
 
-
     const action = req.body.action;
     let mainPath = help.generateFilePath(req, req.body.path);
     let folderPath = mainPath + "/" + (req.body.destination ? help.cleanFileName(req.body.destination) : '');
 
-    if(req.body.folderName){
+    if (req.body.folderName) {
 
-        folderPath = folderPath+'/'+req.body.folderName;
+        folderPath = folderPath + '/' + req.body.folderName;
 
         if (!fs.existsSync(folderPath))
             fs.mkdirSync(folderPath)
@@ -322,10 +362,10 @@ function uploadFiles(req, res, next) {
             return next(err);
         }
 
-        if(action === 'replace')
+        if (action === 'replace')
             startUpload(folderPath, req.files, res, next);
 
-        else if(action === 'rename'){
+        else if (action === 'rename') {
 
             let uploadingFiles = _.map(req.files, function (file) {
                 file.originalname = file.originalname.replace(/(\.[\w\d_-]+)$/i, '_1$1');
@@ -335,7 +375,7 @@ function uploadFiles(req, res, next) {
             startUpload(folderPath, uploadingFiles, res, next);
         }
 
-        else{
+        else {
 
             let uploadingFiles = _.map(req.files, function (file) {
                 return file.originalname;
@@ -358,11 +398,11 @@ function uploadFiles(req, res, next) {
     });
 }
 
-function startUpload(folderPath, files, res, next){
+function startUpload(folderPath, files, res, next) {
     const PromisifiedFS = Promise.promisifyAll(fs);
 
-    var promises = files.map((file) =>{
-        return PromisifiedFS.writeFileAsync(folderPath+'/'+file.originalname, new Buffer(file.buffer));
+    var promises = files.map((file) => {
+        return PromisifiedFS.writeFileAsync(folderPath + '/' + file.originalname, new Buffer(file.buffer));
     });
 
     Promise.all(promises).then(()=> {
@@ -431,4 +471,26 @@ function readFile(path, callback) {
     }
 }
 
-export default {getTreeJSON, getFile, putFile, postFile, deleteFile, uploadFiles};
+function mapSearchedFiles(files) {
+    let output = {};
+    for (let i = 0; i < files.length; i++) {
+        let splitFile = files[i].split(':');
+        let fileName = splitFile[0].split(':')[0].split("/").pop();
+
+        if (fileName && !output[fileName])
+            output[fileName] = [];
+
+        if (splitFile.length >= 3) {
+            output[fileName].push({
+                line: splitFile[1],
+                column: splitFile[2],
+                string: splitFile[3].replace(/^\s\s*/, '')
+            });
+        }
+
+    }
+    return output;
+}
+
+
+export default {getTreeJSON, getFile, putFile, postFile, deleteFile, uploadFiles, searchInsideFiles};

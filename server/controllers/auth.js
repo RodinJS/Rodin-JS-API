@@ -1,7 +1,10 @@
 import User from '../models/user';
+import InvitationCode from '../models/invitationCode';
 import jwt from 'jsonwebtoken';
 import httpStatus from '../helpers/httpStatus';
 import APIError from '../helpers/APIError';
+
+import commonHelpers from '../helpers/common';
 
 const config = require('../../config/env');
 
@@ -78,5 +81,41 @@ function logout(req, res) {
 	return res.status(200).json({success: true}); //TODO: remove token from Redis!
 }
 
+function generateInvitationCode(req, res, next){
+	if(!req.body.email){
+		const err = new APIError('Please provide email address', httpStatus.BAD_REQUEST, true);
+		return next(err);
+	}
+	const code = commonHelpers.generateCode(7);
+	const email = req.body.email;
+	let invitationCode = new InvitationCode({email:email, invitationCode:code});
+	invitationCode.save((err)=>{
+		if(err){
+			const err = new APIError('Something wrong', httpStatus.BAD_REQUEST, true);
+			return next(err);
+		}
+		res.status(200).json({success:true, invitationCode:code});
+	})
 
-export default { login, logout, verify };
+}
+
+function removeInvitationCode(req, res, next){
+	let invitationCode = req.body.invitationCode;
+	return InvitationCode.delete(invitationCode)
+		.then(() => {
+			if(res){
+				res.status(200).json({success:true, code:invitationCode});
+			}
+			return {success:true}
+		})
+		.error((e) => {
+			if(next){
+				const err = new APIError('Something wrong', httpStatus.BAD_REQUEST, true);
+				return next(err);
+			}
+			return {success:false, error:e}
+		});
+}
+
+
+export default { login, logout, verify, generateInvitationCode, removeInvitationCode};

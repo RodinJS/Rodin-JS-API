@@ -1,4 +1,5 @@
 import User from '../models/user';
+import InvitationCode from '../models/invitationCode';
 import Project from '../models/project';
 import jwt from 'jsonwebtoken';
 import APIError from '../helpers/APIError';
@@ -79,15 +80,20 @@ function create(req, res, next) {
 				return next(err);
 			}
 
-			user = new User({
-				email: req.body.email,
-				password: req.body.password,
-				username: req.body.username,
-				profile: {
-					firstName: req.body.firstName,
-					lastName: req.body.lastName
-				}
-			});
+            let userObject = {
+                email: req.body.email,
+                password: req.body.password,
+                username: req.body.username,
+                profile: {
+                    firstName: req.body.firstName,
+                    lastName: req.body.lastName
+                }
+            };
+
+            if(req.body.invitationCode)
+                userObject.role = 'Premium';
+
+			user = new User(userObject);
 
 			user.saveAsync()
 				.then((savedUser) => {
@@ -99,7 +105,9 @@ function create(req, res, next) {
 						fs.mkdirSync(publicDir);
 					}
 
-					const token = jwt.sign({
+                    InvitationCode.delete(req.body.invitationCode);
+
+                    const token = jwt.sign({
 						username: savedUser.username,
 						role: savedUser.role,
 						random: savedUser.password.slice(-15)
@@ -212,4 +220,44 @@ function remove(req, res, next) {
 
 }
 
-export default { load, get, create, update, updatePassword, list, remove, me };
+function validateInvitationCode(req, res, next){
+	if(!req.body.invitationCode) return next();
+
+    InvitationCode.get(req.body.invitationCode)
+        .then((invitationCode)=>{
+
+            if(invitationCode){
+
+                invitationCode = invitationCode.toObject();
+                let dateDiff = dateDiffInDays(invitationCode.creationDate, new Date());
+                if(invitationCode.email == req.body.email && dateDiff < 7){
+                    return next();
+                }
+                else{
+                    delete req.body.invitationCode;
+
+                    if(dateDiff > 7)
+                        InvitationCode.delete(invitationCode.invitationCode);
+
+                    return next();
+                }
+            }
+            else {
+                delete req.body.invitationCode;
+                return next();
+            }
+        });
+
+
+    // a and b are javascript Date objects
+    function dateDiffInDays(a, b) {
+        let  MS_PER_DAY = 1000 * 60 * 60 * 24;
+        // Discard the time and time-zone information.
+        let utc1 = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
+        let utc2 = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate());
+        return Math.floor((utc2 - utc1) / MS_PER_DAY);
+    }
+
+}
+
+export default { load, get, create, update, updatePassword, list, remove, me, validateInvitationCode};

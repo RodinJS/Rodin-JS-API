@@ -122,6 +122,9 @@ router.route('/serve')
     .delete(check.ifTokenValid, check.project, editorCtrl.deleteFile);
 
 
+router.route('/search')
+    .get(check.ifTokenValid, check.project, editorCtrl.searchInsideFiles);
+
 /**
  * @api {POST} /api/editor/upload  Upload file/folder
  * @apiName GetFileContent
