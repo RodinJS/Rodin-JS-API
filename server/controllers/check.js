@@ -120,12 +120,13 @@ function ifTokenValid(req, res, next) {
 }
 
 function project(req, res, next) {
-	if (!req.query.id) {
+	const projectID = req.query.id || req.params.id;
+	if (!projectID) {
 		const err = new APIError('Provide project ID!', httpStatus.BAD_REQUEST, true);
 		return next(err);
 	}
 
-	Project.getOne(req.query.id, req.user.username).then((project) => {
+	Project.getOne(projectID, req.user.username).then((project) => {
 		req.project = {
 			name: project.name,
 			root: project.root

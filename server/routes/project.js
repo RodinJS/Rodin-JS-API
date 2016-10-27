@@ -285,6 +285,9 @@ router.route('/:id')
    */
   .delete(check.ifTokenValid, projectCtrl.remove);
 
+router.route('/publish/:id')
+    .get(check.ifTokenValid, check.project, projectCtrl.publishProject);
+
 
 router.use('/:id/build', check.ifTokenValid, check.isProjectOwn, buildRouter);
 router.use('/:id/download', check.ifTokenValid, check.isProjectOwn, downloadRouter);

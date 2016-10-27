@@ -28,7 +28,7 @@ describe('## User  APIs', () => {
 
     describe('# DELETE /api/user/', () => {
 
-        it('should remove  user', (done) => {
+        it('should remove user', (done) => {
 
             request(app)
                 .del('/api/user/'+info.user.username)

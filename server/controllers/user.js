@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken';
 import APIError from '../helpers/APIError';
 import httpStatus from '../helpers/httpStatus';
 import fs from 'fs';
+import fsExtra from 'fs-extra';
 
 import config from '../../config/env';
 /**
@@ -99,10 +100,12 @@ function create(req, res, next) {
 				.then((savedUser) => {
 					let rootDir = 'projects/' + savedUser.username;
 					let publicDir = 'public/' + savedUser.username;
+					let publishDir = 'publish/' + savedUser.username;
 
-					if (!fs.existsSync(rootDir) && !fs.existsSync(publicDir)) {
+					if (!fs.existsSync(rootDir) && !fs.existsSync(publicDir) && !fs.existsSync(publishDir)) {
 						fs.mkdirSync(rootDir); //creating root dir for project
 						fs.mkdirSync(publicDir);
+						fs.mkdirSync(publishDir);
 					}
 
                     InvitationCode.delete(req.body.invitationCode);
@@ -196,10 +199,19 @@ function remove(req, res, next) {
 	User.get(username)
 	    .then(user => {
 	    	if (user) {
+                let rootDir = 'projects/' + username;
+                let publicDir = 'public/' + username;
+                let publishDir = 'publish/' + username;
+
+                fsExtra.removeSync(rootDir);
+                fsExtra.removeSync(publicDir);
+                fsExtra.removeSync(publishDir);
+
 	      		for(let i = 0; i < user.projects.length; i++) {
-	      			Project.removeAsync({ _id : user.projects[i] })
-						.then((deletedProject) => {
-						}).error((e) => next(e));
+
+                    Project.removeAsync({ _id : user.projects[i] })
+                        .then((deletedProject) => {
+                        }).error((e) => next(e));
 	      		}
 	        } else {
 				const err = new APIError("Something went wrong!", 312, true);

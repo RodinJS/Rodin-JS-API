@@ -164,7 +164,6 @@ describe('## Editor APIs', () => {
                 });
         });
 
-
         it('should delete files inside project', (done) => {
             let removableCount = 0;
             for (var i = 0; i < removableFilesAndFolder.length; i++) {
@@ -249,7 +248,6 @@ describe('## Editor APIs', () => {
                     done();
                 })
         });
-
 
         it('should delete uploaded files', (done) => {
 

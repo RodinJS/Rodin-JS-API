@@ -59,6 +59,7 @@
     "mongoose": "^4.6.1",
     "morgan": "1.7.0",
     "multer": "^1.2.0",
+    "nativeFileSearch": "git+https://github.com/serghov/cpp-file-search.git",
     "passport": "^0.3.2",
     "passport-facebook": "^2.1.1",
     "passport-google-oauth2": "^0.1.6",
@@ -66,8 +67,8 @@
     "request": "^2.75.0",
     "request-promise": "^4.1.1",
     "shortid": "^2.2.6",
-    "winston": "^2.1.1",
-    "nativeFileSearch":"git+https://github.com/serghov/cpp-file-search.git"
+    "stripe": "^4.12.0",
+    "winston": "^2.1.1"
   },
   "devDependencies": {
     "babel-cli": "6.16.0",

@@ -8,6 +8,8 @@ import httpStatus from '../helpers/httpStatus';
 import help from '../helpers/editor';
 import request from 'request';
 import config from '../../config/env';
+import fsExtra from 'fs-extra';
+
 
 const getStatus = (project, device, cb) => {
   console.log(JSON.stringify(project, null, 3));
@@ -319,4 +321,32 @@ function makePublic(req, res, next) {
 		});
 }
 
-export default {get, create, update, list, remove, makePublic};
+/** Publish the project **/
+function publishProject(req, res, next){
+
+	let projectFolder = help.generateFilePath(req, '');
+	let publishFolder = help.generateFilePath(req, '', 'publish');
+
+	if(fs.existsSync(projectFolder)){
+
+		if(fs.existsSync(publishFolder)){
+			fsExtra.removeSync(publishFolder)
+		}
+
+		fsExtra.copy(projectFolder, publishFolder, function (err) {
+			if (err){
+				const err = new APIError('Publishing error', httpStatus.BAD_REQUEST, true);
+				return next(err);
+			}
+			res.status(200).json({success:true, data:'Project published'})
+		});
+
+	}
+	else{
+		const err = new APIError('Project not found', httpStatus.NOT_FOUND, true);
+		return next(err);
+	}
+
+}
+
+export default {get, create, update, list, remove, makePublic, publishProject};

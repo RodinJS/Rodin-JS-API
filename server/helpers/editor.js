@@ -11,8 +11,9 @@ function cleanFileName(name) {
     return newName[newName.length-1];
 }
 
-function generateFilePath (req, fileName){
-    return 'projects/' + req.user.username + '/' + req.project.root + '/' + cleanUrl(fileName);
+function generateFilePath (req, fileName, rootFolder){
+    rootFolder = rootFolder || 'projects';
+    return rootFolder+'/' + req.user.username + '/' + req.project.root + '/' + cleanUrl(fileName);
 
 }
 

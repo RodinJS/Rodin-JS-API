@@ -52,5 +52,13 @@ export default {
     },
     appId: "8fb0e4c6fdac3847",
     appSecret: "86bae61d-ddfe-9fbe-e4cd-904fced2"
+  },
+  payments:{
+    tokens:{
+      stripe:{
+        secret:'sk_test_Okevb5aLgncqi6W6lmhItxoV',
+        publish:'pk_test_ubTC5Za2RM1vj2VlRYPhvX2r'
+      }
+    }
   }
 };

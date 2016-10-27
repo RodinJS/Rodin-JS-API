@@ -9,6 +9,14 @@ chai.config.includeStack = true;
 describe('## Projects APIs', () => {
 
 
+    let project = {
+        data:{
+            name: 'testProject',
+            tags: ['test'],
+            description:'test project description'
+        }
+    };
+
     before(function (done) {
         User.login(()=> {
             done();
@@ -17,26 +25,30 @@ describe('## Projects APIs', () => {
 
 
     it('should create a new project', (done) => {
-        let project = {
-            headers:{
-             'x-access-token':User.getToken()
-            },
-            data:{
-                name: 'testProject',
-                tags: ['test'],
-                description:'test project description'
-            }
-        };
         request(app)
             .post('/api/project')
-            .set(project.headers)
+            .set(User.generateHeaders())
             .send(project.data)
             .expect(httpStatus.CREATED)
             .then(res => {
+                project.info = res.body.data;
                 expect(res.body.success).to.equal(true);
                 done();
             });
 
+    });
+
+    it('should publish   project', (done) => {
+        request(app)
+            .get('/api/project/publish/'+project.info._id+'')
+            .set(User.generateHeaders())
+            .expect(httpStatus.OK)
+            .then(res => {
+                console.log(res.body);
+                expect(res.body.success).to.equal(true);
+                expect(res.body.data).to.equal('Project published');
+                done();
+            });
     });
 
 });

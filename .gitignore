@@ -94,6 +94,8 @@ projects/*
 !projects/.gitkeap
 public/*
 !public/.gitkeap
+publish/*
+!publish/.gitkeap
 
 #uploads files folder
 uploads/
