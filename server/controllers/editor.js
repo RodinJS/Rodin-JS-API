@@ -17,8 +17,7 @@ import config from '../../config/env';
 
 import fsExtra from 'fs-extra';
 import Promise from 'bluebird';
-import cp from 'child_process';
-//import fileSearch from '../../../node_modules/cpp-file-search/build/Release/nativeFileSearch';
+const fileSearch =  require('nativeFileSearch');
 
 
 //transpilerScript
@@ -295,33 +294,15 @@ function searchInsideFiles(req, res, next) {
 
     let mainPath = help.generateFilePath(req, req.query.path);
     let searchWord = req.query.search;
-    let grepFormat = 'bnrH';
-
-    if(req.query.caseSensitive)
-        grepFormat = 'bnrHi';
-    //"find . -iname '*.js' | xargs grep 'srcpath' -isl"
-    //find . -type f -name '*.*'
-    //find . -name '*.html' | xargs grep 'example'
-    //"find . -type f -name '*.*' | xargs grep 'srcpath' -isl"
-    //grep -rnw '/path/to/somewhere/' -e "pattern"
-    //grep -rn "+mainPath+" -e 'srcpath'
-    //grep -nrH 'srcpath' "+mainPath+"
-
-    //find . -iname '*.html' | xargs grep 'example' -isl
-
-   /* fileSearch('../../../'+mainPath, searchWord,  function (err, data) {
-        console.log(err);
-        console.log(data);
-    });*/
-
-   /* exec("grep -"+grepFormat+" '"+searchWord+"'  "+mainPath+"", {timeout: 5000}, (error, stdout) => {
+    fileSearch(mainPath, searchWord, 10000, (error, data) => {
         if (error) {
             const err = new APIError('Search failed', httpStatus.BAD_REQUEST, true);
             return next(err);
         }
-        let foundedFiles = mapSearchedFiles(stdout.split('\n'));
+
+        let foundedFiles = mapSearchedFiles(data);
         res.status(200).send({success:true, data:foundedFiles});
-    });*/
+    });
 }
 
 function uploadFiles(req, res, next) {
@@ -473,20 +454,17 @@ function readFile(path, callback) {
 
 function mapSearchedFiles(files) {
     let output = {};
+
     for (let i = 0; i < files.length; i++) {
-        let splitFile = files[i].split(':');
-        let fileName = splitFile[0].split(':')[0].split("/").pop();
 
-        if (fileName && !output[fileName])
-            output[fileName] = [];
+        let splitFilePath = files[i].fileName.split("/");
 
-        if (splitFile.length >= 3) {
-            output[fileName].push({
-                line: splitFile[1],
-                column: splitFile[2],
-                string: splitFile[3].replace(/^\s\s*/, '')
-            });
-        }
+        let relativePath = splitFilePath.splice(2, splitFilePath.length).join('/');
+
+        if (relativePath && !output[relativePath])
+            output[relativePath] = [];
+
+        output[relativePath].push(_.omit(files[i], 'fileName'));
 
     }
     return output;

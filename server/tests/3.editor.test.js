@@ -57,6 +57,7 @@ requestMocks.UPLOAD_FOLDER = _.assignIn({'folderName': 'testuploadfolder'}, requ
 
 
 const removableFilesAndFolder = ['testfolder', 'testfile_copy.js', 'testfolder_copy', 'testfile_rename.js'];
+const removableUploadFilesAndFolder = ['testuploadfolder', 'test_buffer_file.js', 'test_buffer_file_1.js'];
 
 describe('## Editor APIs', () => {
 
@@ -69,6 +70,7 @@ describe('## Editor APIs', () => {
         });
     });
 
+
     describe('# POST /api/editor/serve', ()=> {
 
         it('should create a new file inside project', (done) => {
@@ -79,7 +81,6 @@ describe('## Editor APIs', () => {
                 .send(requestMocks.CREATE_FILE)
                 .expect(httpStatus.OK)
                 .then(res => {
-                    console.log(res.body);
                     expect(res.body.success).to.equal(true);
                     expect(res.body.data).to.equal('The file was created!');
                     done();
@@ -110,7 +111,6 @@ describe('## Editor APIs', () => {
                 .send(requestMocks.CREATE_FOLDER)
                 .expect(httpStatus.OK)
                 .then(res => {
-                    console.log(res.body);
                     expect(res.body.success).to.equal(true);
                     expect(res.body.data).to.equal('The folder was created!');
                     done();
@@ -164,8 +164,8 @@ describe('## Editor APIs', () => {
                 });
         });
 
-        it('should delete files inside project', (done) => {
 
+        it('should delete files inside project', (done) => {
             let removableCount = 0;
             for (var i = 0; i < removableFilesAndFolder.length; i++) {
                 request(app)
@@ -173,6 +173,7 @@ describe('## Editor APIs', () => {
                     .set(User.generateHeaders())
                     .expect(httpStatus.OK)
                     .then(res => {
+                        //console.log(res.body);
                         if (res.body.success) removableCount += 1;
                         if (removableCount == removableFilesAndFolder.length)
                             done();
@@ -190,9 +191,8 @@ describe('## Editor APIs', () => {
                 .post('/api/editor/upload?id=' + User.getProject()._id + '')
                 .set(User.generateHeaders())
                 .send(requestMocks.UPLOAD_FILES)
-                //.expect(httpStatus.OK)
+                .expect(httpStatus.OK)
                 .then(res => {
-                    console.log(res.body);
                     expect(res.body.success).to.equal(true);
                     expect(res.body.data).to.equal('Files successfuly uploaded!');
                     done();
@@ -230,32 +230,43 @@ describe('## Editor APIs', () => {
                 .post('/api/editor/upload?id=' + User.getProject()._id + '')
                 .set(User.generateHeaders())
                 .send(requestMocks.UPLOAD_FOLDER)
-                //.expect(httpStatus.OK)
+                .expect(httpStatus.OK)
                 .then(res => {
-                    console.log(res.body);
                     expect(res.body.success).to.equal(true);
                     expect(res.body.data).to.equal('Files successfuly uploaded!');
                     done();
                 });
         });
 
+        it('should search file by text', (done)=>{
+            request(app)
+                .get('/api/editor/search?id=' + User.getProject()._id + '&path=&search=[1,2,3]')
+                .set(User.generateHeaders())
+                .expect(httpStatus.OK)
+                .then(res=>{
+                    expect(res.body.success).to.equal(true);
+                    expect(Object.keys(res.body.data).length).to.equal(3);
+                    done();
+                })
+        });
 
-     /*   it('should delete uploaded files', (done) => {
+
+        it('should delete uploaded files', (done) => {
 
             let removableCount = 0;
-            for (var i = 0; i < removableFilesAndFolder.length; i++) {
+            for (var i = 0; i < removableUploadFilesAndFolder.length; i++) {
                 request(app)
-                    .delete('/api/editor/serve?id=' + User.getProject()._id + '&filename=' + removableFilesAndFolder[i])
+                    .delete('/api/editor/serve?id=' + User.getProject()._id + '&filename=' + removableUploadFilesAndFolder[i])
                     .set(User.generateHeaders())
                     .expect(httpStatus.OK)
                     .then(res => {
                         if (res.body.success) removableCount += 1;
-                        if (removableCount == removableFilesAndFolder.length)
+                        if (removableCount == removableUploadFilesAndFolder.length)
                             done();
                     });
             }
 
-        });*/
+        });
 
     });
 
