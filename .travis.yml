@@ -13,8 +13,8 @@ addons:
     sources:
       - ubuntu-toolchain-r-test
     packages:
-      - g++-5.1
-      - libboost-filesystem
+      - g++
+      - libboost-filesystem-dev
 cache:
   directories:
   - node_modules
