@@ -7,7 +7,7 @@ node_js:
 services:
   - mongodb
 env:
-  - CXX=g++-5.1
+  - CXX=g++
 addons:
   apt:
     sources:
