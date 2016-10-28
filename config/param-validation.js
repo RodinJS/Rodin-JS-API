@@ -21,6 +21,11 @@ export default {
       profile: {
         firstName: Joi.string().optional().allow(''),
         lastName: Joi.string().optional().allow('')
+      },
+      editorSettings: {
+        theme: {
+          name: Joi.string().optional()
+        }
       }
     }
   },

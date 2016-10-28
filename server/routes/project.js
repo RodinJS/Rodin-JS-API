@@ -150,7 +150,7 @@ router.route('/')
   .post(check.ifTokenValid, validate(paramValidation.createProject), projectCtrl.create);
 
 router.route('/:id')
-/**
+ /**
  * @api {get} /api/project/:projectId Get single project
  * @apiName GetUser
  * @apiGroup User
