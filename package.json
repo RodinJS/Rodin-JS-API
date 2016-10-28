@@ -64,7 +64,7 @@
     "passport-facebook": "^2.1.1",
     "passport-google-oauth2": "^0.1.6",
     "passport-jwt": "^2.1.0",
-    "request": "^2.75.0",
+    "request": "^2.76.0",
     "request-promise": "^4.1.1",
     "shortid": "^2.2.6",
     "stripe": "^4.12.0",
