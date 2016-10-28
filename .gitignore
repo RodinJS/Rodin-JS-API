@@ -98,6 +98,6 @@ publish/*
 !publish/.gitkeap
 
 #uploads files folder
-uploads/
-!uploads/.gitkeap
+resrouces/
+!resrouces/.gitkeap
 

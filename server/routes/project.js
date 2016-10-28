@@ -285,8 +285,24 @@ router.route('/:id')
    */
   .delete(check.ifTokenValid, projectCtrl.remove);
 
+/**
+ *
+ */
 router.route('/publish/:id')
     .get(check.ifTokenValid, check.project, projectCtrl.publishProject);
+
+
+/**
+ * templates
+ */
+router.route('/templates/importOnce')
+    .get(projectCtrl.importOnce);
+
+/**
+ *
+ */
+router.route('/templates/list')
+    .get(check.ifTokenValid, projectCtrl.getTemplatesList);
 
 
 router.use('/:id/build', check.ifTokenValid, check.isProjectOwn, buildRouter);

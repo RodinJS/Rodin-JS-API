@@ -14,7 +14,7 @@ const paths = {
 	js: ['./**/*.js', '!dist/**', '!projects/**', '!public/**', '!node_modules/**', '!coverage/**'],
 	nonJs: ['./package.json', './.gitignore'],
 	tests: './server/tests/*.js',
-	singleTestFile: [''+testPath+'1.user.test.js']
+	singleTestFile: [''+testPath+'1.user.test.js', ''+testPath+'2.projects.test.js', ''+testPath+'99.removeUser.test.js']
 };
 
 

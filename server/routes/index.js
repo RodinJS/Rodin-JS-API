@@ -18,6 +18,7 @@ router.use('/user', userRoutes);
 // mount project routes at /project
 router.use('/project', projectRoutes);
 
+
 // mount auth routes at /auth
 router.use('/auth', authRoutes);
 
@@ -26,5 +27,6 @@ router.use('/editor', editorRoutes);
 
 // mount ios routes at /ios
 router.use('/ios', iosRoutes);
+
 
 export default router;

@@ -1,6 +1,25 @@
-/**
- * Created by xgharibyan on 10/26/16.
- */
+const defTemplates = [
+    {
+        "name": "Empty Project",
+        "description": "Empty Project",
+        "tags": [
+            "empty"
+        ],
+        "thumbnail": "",
+        "root": "blank"
+    },
+    {
+        "name": "Simple Project",
+        "description": "Simple Project",
+        "tags": [
+            "cube",
+            "simple"
+        ],
+        "thumbnail": "",
+        "root": "simple"
+    }
+];
+
 
 
 function generateCode(codeLength) {
@@ -14,4 +33,8 @@ function generateCode(codeLength) {
     return text;
 }
 
-export default {generateCode};
+function getDefTemplatesObject(){
+    return defTemplates
+}
+
+export default {generateCode, getDefTemplatesObject};
