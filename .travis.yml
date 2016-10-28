@@ -2,7 +2,6 @@ sudo: required
 dist: trusty
 language: node_js
 node_js:
-  - "4.5.0"
   - "6.9.1"
   - "7.0.0"
 services:
