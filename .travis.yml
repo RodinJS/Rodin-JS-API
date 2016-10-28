@@ -25,3 +25,5 @@ before_script:
   - npm prune
 after_script:
   - npm run report-coverage
+after_success:
+  - bash <(curl -s https://codecov.io/bash) -t 087a512f-6e23-4b5b-83a1-dc36b9e9986a
