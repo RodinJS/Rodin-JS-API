@@ -1,15 +1,30 @@
+sudo: required
+dist: trusty
 language: node_js
 node_js:
-  - "4.5.0"
-  - "6.5.0"
+  - "6.9.1"
+  - "7.0.0"
 services:
   - mongodb
+env:
+  - CXX=g++-5
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-5
+      - libboost-filesystem-dev
 cache:
   directories:
   - node_modules
 git:
   depth: 3
+before_install:
+  - pip install --user codecov
 before_script:
   - npm prune
 after_script:
   - npm run report-coverage
+after_success:
+  - bash <(curl -s https://codecov.io/bash) -t 087a512f-6e23-4b5b-83a1-dc36b9e9986a
