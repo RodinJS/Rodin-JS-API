@@ -23,7 +23,7 @@ const ProjectSchema = new mongoose.Schema({
   },
   root: {
     type: String,
-    required: true,
+    required: true
   },
   owner: {
     type: String
@@ -94,6 +94,9 @@ const ProjectSchema = new mongoose.Schema({
   updatedAt: {
     type: Date,
     default: Date.now
+  },
+  publishDate:{
+    type:Date
   }
 });
 
@@ -173,7 +176,7 @@ ProjectSchema.statics = {
       const re = new RegExp(_queryString, 'gi');
       query.$or = [
         {
-          name: re,
+          name: re
         },
         {
           description: re
@@ -222,7 +225,7 @@ ProjectSchema.methods.outcome = function () {
     name: project.name,
     owner: project.owner,
     root: project.root,
-    picture: project.picture,
+    picture: project.picture
   }
 };
 

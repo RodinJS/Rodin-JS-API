@@ -384,7 +384,21 @@ function publishProject(req, res, next) {
                 const err = new APIError('Publishing error', httpStatus.BAD_REQUEST, true);
                 return next(err);
             }
-            res.status(200).json({success: true, data: 'Project published'})
+
+            Project.updateAsync({_id: req.params.id, owner: req.user.username},{$set: {publishDate:new Date()}})
+                .then(result => {
+                    if (result.nModified === 1) {
+                        return res.status(200).json({success: true, data: 'Project published'})
+                    }
+                    else {
+                        const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+                        return next(err);
+                    }
+                })
+                .catch((e) => {
+                    const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+                    return next(err);
+                });
         });
 
     }
