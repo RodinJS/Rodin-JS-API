@@ -90,7 +90,7 @@
     "gulp-env": "^0.4.0",
     "gulp-eslint": "^1.1.1",
     "gulp-istanbul": "1.0.0",
-    "gulp-load-plugins": "^1.2.0",
+    "gulp-load-plugins": "^1.4.0",
     "gulp-mocha": "^2.2.0",
     "gulp-newer": "^1.1.0",
     "gulp-nodemon": "^2.0.6",
