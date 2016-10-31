@@ -1,13 +1,13 @@
-import {WTF} from '../../_build/js/rodinjs/RODIN.js';
+import {WTF} from 'https://cdn.rodinapp.com/rodinjs/RODIN.js';
 
-import {THREE} from '../../_build/js/three/THREE.GLOBAL.js';
-import {TWEEN} from '../../_build/js/rodinjs/Tween.js';
-import * as RODIN from '../../_build/js/rodinjs/RODIN.js';
+import {THREE} from 'https://cdn.rodinapp.com/three/THREE.GLOBAL.js';
+import {TWEEN} from 'https://cdn.rodinapp.com/rodinjs/Tween.js';
+import * as RODIN from 'https://cdn.rodinapp.com/rodinjs/RODIN.js';
 
 console.log(RODIN);
 
-import '../../node_modules/three/examples/js/controls/VRControls.js';
-import '../../node_modules/three/examples/js/effects/VREffect.js';
+import 'https://cdn.rodinapp.com/nm/VRControls.js';
+import 'https://cdn.rodinapp.com/nm/VREffect.js';
 
 WTF.is('Rodin.JS v0.0.1');
 
