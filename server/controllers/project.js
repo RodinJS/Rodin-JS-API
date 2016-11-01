@@ -409,6 +409,35 @@ function publishProject(req, res, next) {
 
 }
 
+function unPublishProject(req, res, next) {
+
+    let publishFolder = help.generateFilePath(req, '', 'publish');
+
+    if (fs.existsSync(publishFolder)) {
+        fsExtra.removeSync(publishFolder);
+        Project.updateAsync({_id: req.params.id, owner: req.user.username},{$unset: {publishDate:1}})
+            .then(result => {
+                if (result.nModified === 1) {
+                    return res.status(200).json({success: true, data: 'Project unpublished'})
+                }
+                else {
+                    const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+                    return next(err);
+                }
+            })
+            .catch((e) => {
+                const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+                return next(err);
+            });
+    }
+    else{
+        const err = new APIError('Published project does not exist', httpStatus.BAD_REQUEST, true);
+        return next(err);
+    }
+
+
+}
+
 /**
  *
  * @param req
@@ -448,4 +477,4 @@ function getTemplatesList(req, res, next) {
     });
 }
 
-export default {get, create, update, list, remove, makePublic, publishProject, importOnce, getTemplatesList};
+export default {get, create, update, list, remove, makePublic, publishProject, unPublishProject, importOnce, getTemplatesList};

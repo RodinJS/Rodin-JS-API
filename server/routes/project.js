@@ -289,7 +289,8 @@ router.route('/:id')
  *
  */
 router.route('/publish/:id')
-    .get(check.ifTokenValid, check.project, projectCtrl.publishProject);
+    .get(check.ifTokenValid, check.project, projectCtrl.publishProject)
+    .delete(check.ifTokenValid, check.project, projectCtrl.unPublishProject);
 
 
 /**

@@ -13,6 +13,7 @@ function cleanFileName(name) {
 
 function generateFilePath (req, fileName, rootFolder){
     rootFolder = rootFolder || 'projects';
+
     return rootFolder+'/' + req.user.username + '/' + req.project.root + '/' + cleanUrl(fileName);
 
 }

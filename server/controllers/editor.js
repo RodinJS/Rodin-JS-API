@@ -17,7 +17,8 @@ import config from '../../config/env';
 
 import fsExtra from 'fs-extra';
 import Promise from 'bluebird';
-const fileSearch =  require('nativeFileSearch');
+
+import fileContentSearch from '../helpers/fileSearch';
 
 
 //transpilerScript
@@ -292,17 +293,26 @@ function postFile(req, res, next) {
 
 function searchInsideFiles(req, res, next) {
 
+    if(!req.query.search){
+        const err = new APIError('Empty query', httpStatus.BAD_REQUEST, true);
+        return next(err);
+    }
+
     let mainPath = help.generateFilePath(req, req.query.path);
     let searchWord = req.query.search;
-    fileSearch(mainPath, searchWord, 10000, (error, data) => {
-        if (error) {
+    let caseSensetive = req.query.caseSensitive;
+
+    let fileSearch = new fileContentSearch(mainPath, searchWord, caseSensetive, false);
+
+    fileSearch.search((error, data)=> {
+        if(error){
             const err = new APIError('Search failed', httpStatus.BAD_REQUEST, true);
             return next(err);
         }
-
-        let foundedFiles = mapSearchedFiles(data);
-        res.status(200).send({success:true, data:foundedFiles});
+        res.status(200).send({success:true, data:data});
     });
+
+
 }
 
 function uploadFiles(req, res, next) {
@@ -450,24 +460,6 @@ function readFile(path, callback) {
     } catch (e) {
         callback(e);
     }
-}
-
-function mapSearchedFiles(files) {
-    let output = {};
-
-    for (let i = 0; i < files.length; i++) {
-
-        let splitFilePath = files[i].fileName.split("/");
-
-        let relativePath = splitFilePath.splice(2, splitFilePath.length).join('/');
-
-        if (relativePath && !output[relativePath])
-            output[relativePath] = [];
-
-        output[relativePath].push(_.omit(files[i], 'fileName'));
-
-    }
-    return output;
 }
 
 
