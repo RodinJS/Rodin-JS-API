@@ -11,6 +11,7 @@ import request from 'request';
 import config from '../../config/env';
 import fsExtra from 'fs-extra';
 import utils from '../helpers/common';
+import userCapacity from '../helpers/directorySize';
 
 
 const getStatus = (project, device, cb) => {

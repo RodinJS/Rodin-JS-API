@@ -6,6 +6,8 @@ import APIError from '../helpers/APIError';
 import httpStatus from '../helpers/httpStatus';
 import fs from 'fs';
 import fsExtra from 'fs-extra';
+import userCapacity from '../helpers/directorySize';
+import utils from '../helpers/common';
 
 import config from '../../config/env';
 /**
@@ -31,6 +33,7 @@ function load(req, res, next, username) {
 	});
 }
 
+
 /**
  * Get user
  * @returns {User}
@@ -54,17 +57,25 @@ function get(req, res) {
  * @returns {User}
  */
 function me(req, res) {
-	let response = {
-		"success": true,
-		"data": {
-			email: req.user.email,
-			username: req.user.username,
-			role: req.user.role,
-			profile: req.user.profile
-		}
-	};
 
-	return res.status(200).json(response);
+
+	let rootDir = 'projects/' + req.user.username;
+	console.log(rootDir);
+	userCapacity.readSizeRecursive(rootDir, (err, size)=>{
+		size = err ? 0 : size;
+		let response = {
+			"success": true,
+			"data": {
+				email: req.user.email,
+				username: req.user.username,
+				role: req.user.role,
+				profile: req.user.profile,
+				usedStorage:utils.byteToMb(size)
+			}
+		};
+
+		return res.status(200).json(response);
+	});
 }
 
 /**
@@ -91,8 +102,10 @@ function create(req, res, next) {
                 }
             };
 
-            if(req.body.invitationCode)
-                userObject.role = 'Premium';
+            if(req.body.invitationCode){
+				userObject.role = 'Premium';
+				userObject.storageSize = 500;
+			}
 
 			user = new User(userObject);
 

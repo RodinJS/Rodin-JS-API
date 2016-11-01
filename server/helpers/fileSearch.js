@@ -4,6 +4,7 @@
 
 import fs from 'fs';
 import LineByLineReader from 'line-by-line';
+import utils from '../helpers/common';
 
 class fileContentSearch {
 
@@ -30,7 +31,7 @@ class fileContentSearch {
 
     walk(dir, done) {
         var results = [], _this = this;
-        fs.readdir(dir, function (err, list) {
+        fs.readdir(dir, (err, list)=> {
             if (err) return done(err);
             var i = 0;
             (function next() {
@@ -41,19 +42,21 @@ class fileContentSearch {
 
 
                 file = dir + lastCharacter + file;
-                fs.stat(file, function (err, stat) {
+                fs.stat(file, (err, stat) => {
                     if (stat && stat.isDirectory()) {
-                        _this.walk(file, function (err, res) {
+                        _this.walk(file, (err, res)=> {
                             results = results.concat(res);
                             next();
                         });
                     } else {
                         if (_this.readedLinesLength >= _this.limit) next();
                         else {
-                            _this.searchInsideFile(file, (data)=> {
-                                results.push(file);
-                                next();
-                            });
+                            if (utils.byteToMb(stat.size) < 10) {
+                                _this.searchInsideFile(file, (data)=> {
+                                    results.push(file);
+                                    next();
+                                });
+                            }
                         }
                     }
                 });

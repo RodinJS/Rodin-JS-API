@@ -37,4 +37,8 @@ function getDefTemplatesObject(){
     return defTemplates
 }
 
-export default {generateCode, getDefTemplatesObject};
+function byteToMb(num){
+    return (num / 1024 / 1024).toFixed(2)
+}
+
+export default {generateCode, getDefTemplatesObject, byteToMb};

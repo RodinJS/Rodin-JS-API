@@ -53,7 +53,7 @@ const UserSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: true,
+        required: true
     },
     username: {
         type: String,
@@ -63,8 +63,13 @@ const UserSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['Free', 'Premium', 'Admin', 'God'],
+        enum: ['Free', 'Premium', 'Enterprise', 'Admin', 'God'],
         default: 'Free'
+    },
+    storageSize:{
+        type:Number,
+        enum:[100, 500, 1000],
+        default:100
     },
     profile: {
         firstName: {
