@@ -102,10 +102,16 @@ function create(req, res, next) {
 					let publicDir = 'public/' + savedUser.username;
 					let publishDir = 'publish/' + savedUser.username;
 
-					if (!fs.existsSync(rootDir) && !fs.existsSync(publicDir) && !fs.existsSync(publishDir)) {
+					if (!fs.existsSync(rootDir)) {
 						fs.mkdirSync(rootDir); //creating root dir for project
-						fs.mkdirSync(publicDir);
-						fs.mkdirSync(publishDir);
+					}
+
+					if (!fs.existsSync(publicDir)) {
+						fs.mkdirSync(publicDir); //creating root dir for public
+					}
+
+					if (!fs.existsSync(publishDir)) {
+						fs.mkdirSync(publishDir); //creating root dir for publish
 					}
 
                     InvitationCode.delete(req.body.invitationCode);
