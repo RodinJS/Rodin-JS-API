@@ -320,8 +320,10 @@ function makePublic(req, res, next) {
                     .then(updatedProject => {
                         if (updatedProject.nModified === 1) {
                             if (status === 'true') {
-                                const srcDir = '/var/www/api.rodinapp.com/projects/' + username + '/' + help.cleanUrl(project.root);
-                                const publicDir = '/var/www/api.rodinapp.com/public/' + username + '/' + help.cleanUrl(project.root);
+                                const srcDir = path.join(__dirname, '..', '..', '..', 'projects', username, help.cleanUrl(project.root));
+                                // const srcDir = `/var/www/${req.hostname}/projects/${username}/${help.cleanUrl(project.root)}`;
+                                const publicDir = path.join(__dirname, '..', '..', '..', 'public', username, help.cleanUrl(project.root));
+                                // const publicDir = '/var/www/api.rodinapp.com/public/' + username + '/' + help.cleanUrl(project.root);
                                 const ter = 'ln -s ' + srcDir + ' ' + publicDir;
                                 const code = execSync(ter);
                                 return res.status(200).json({
@@ -330,7 +332,8 @@ function makePublic(req, res, next) {
                                 });
 
                             } else {
-                                const publicDir = '/var/www/api.rodinapp.com/public/' + username + '/' + help.cleanUrl(project.root);
+                                const publicDir = path.join(__dirname, '..', '..', '..', 'public', username, help.cleanUrl(project.root));
+                                // const publicDir = '/var/www/api.rodinapp.com/public/' + username + '/' + help.cleanUrl(project.root);
                                 if (fs.existsSync(publicDir)) {
                                     fs.unlinkSync(publicDir);
                                     return res.status(200).json({
