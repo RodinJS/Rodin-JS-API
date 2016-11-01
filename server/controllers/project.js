@@ -1,5 +1,6 @@
 import {execSync} from 'child_process';
 import fs from 'fs';
+import path from 'path';
 import Project from '../models/project';
 import ProjectTemplates from '../models/projectTemplate';
 import User from '../models/user';
