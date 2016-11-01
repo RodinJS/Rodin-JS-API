@@ -97,7 +97,7 @@ public/*
 publish/*
 !publish/.gitkeap
 
-#uploads files folder
-resrouces/
-!resrouces/.gitkeap
+#uploads
+resrouces/uploads/**/*
+!resrouces/uploads/.gitkeap
 

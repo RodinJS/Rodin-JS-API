@@ -22,18 +22,43 @@ export default {
 	},
   ios: {
     urls: {
-      build: "http://63.135.170.41:8080/api/v1/project",
-      cancel: "http://63.135.170.41:8080/api/v1/project"
+      build: "http://63.135.170.41:9000/api/v1/project",
+      cancel: "http://63.135.170.41:9000/api/v1/project",
+      get: "http://63.135.170.41:9000/api/v1/project",
+      download: "http://63.135.170.41:9000/api/v1/bin",
+      getStatus: "http://63.135.170.41:9000/api/v1/status"
     },
     appId: "2e659ea81e645f84",
     appSecret: "af7cffae-17ce-25b2-8b76-849df75a"
   },
   android: {
     urls: {
-      build: "http://63.135.170.41:8080/api/v1/project",
-      cancel: "http://63.135.170.41:8080/api/v1/project"
+      build: "http://45.55.92.49:9001/api/v1/project",
+      cancel: "http://45.55.92.49:9001/api/v1/project",
+      get: "http://45.55.92.49:9001/api/v1/project",
+      download: "http://45.55.92.49:9001/api/v1/bin",
+      getStatus: "http://45.55.92.49:9001/api/v1/status"
     },
-    appId: "9b0c34423f114d02",
-    appSecret: "497b6d9f-6289-5a4f-5bb7-f4bb2926"
+    appId: "b250ab167fca8e94",
+    appSecret: "6a1e68ce-ea2b-d99d-b5eb-7cbca83a"
+  },
+  oculus: {
+    urls: {
+      build: "http://45.55.92.49:9002/api/v1/project",
+      cancel: "http://45.55.92.49:9002/api/v1/project",
+      get: "http://45.55.92.49:9002/api/v1/project",
+      download: "http://45.55.92.49:9002/api/v1/bin",
+      getStatus: "http://45.55.92.49:9002/api/v1/status"
+    },
+    appId: "8fb0e4c6fdac3847",
+    appSecret: "86bae61d-ddfe-9fbe-e4cd-904fced2"
+  },
+  payments:{
+    tokens:{
+      stripe:{
+        secret:'sk_test_Okevb5aLgncqi6W6lmhItxoV',
+        publish:'pk_test_ubTC5Za2RM1vj2VlRYPhvX2r'
+      }
+    }
   }
 };
