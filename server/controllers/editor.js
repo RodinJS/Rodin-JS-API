@@ -182,11 +182,12 @@ function postFile(req, res, next) {
 
         if (type === 'file') {
             if (!fs.existsSync(filePath)) {
-                fs.writeFile(filePath, '//Created by ' + req.user.username, function (err) {
+                fsExtra.ensureFile(filePath, (err) =>{
                     if (err) {
                         err = new APIError('Can not create file!', httpStatus.COULD_NOT_CREATE_FILE, true);
                         return next(err);
                     }
+                    fs.appendFileSync(filePath, '//Created by ' + req.user.username);
                     res.status(200).send({"success": true, "data": 'The file was created!'});
                 });
             }
@@ -198,11 +199,16 @@ function postFile(req, res, next) {
 
         else if (type === 'directory') {
             if (!fs.existsSync(filePath)) {
-                fs.mkdirSync(filePath);
-                res.status(200).send({"success": true, "data": 'The folder was created!'});
+                fsExtra.ensureDir(filePath, (err)=>{
+                    if (err) {
+                        err = new APIError('Can not create folder!', httpStatus.COULD_NOT_CREATE_FILE, true);
+                        return next(err);
+                    }
+                    res.status(200).send({"success": true, "data": 'The folder was created!'});
+                });
             }
             else {
-                const err = new APIError('File already exist!', httpStatus.FILE_DOES_NOT_EXIST, true);
+                const err = new APIError('folder already exist!', httpStatus.FILE_DOES_NOT_EXIST, true);
                 return next(err);
             }
         }
