@@ -483,7 +483,7 @@ function deleteFile(req, res, next) {
                 });
                 fs.rmdirSync(path);
         };
-        if (fs.existsSync(path)) {
+        if (fs.existsSync(filePath)) {
             deleteFolderRecursive(filePath);
             res.status(200).send({"success": true, "data": filePath});
         } else {
