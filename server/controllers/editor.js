@@ -472,9 +472,7 @@ function deleteFile(req, res, next) {
             return next(err);
         }
     } else { // when folder
-        deleteFolderRecursive(filePath);
         function deleteFolderRecursive(path) {
-            if (fs.existsSync(path)) {
                 fs.readdirSync(path).forEach((file, index) => {
                     var curPath = path + "/" + file;
                     if (fs.lstatSync(curPath).isDirectory()) { // recurse
@@ -484,14 +482,14 @@ function deleteFile(req, res, next) {
                     }
                 });
                 fs.rmdirSync(path);
-                if(!fs.existsSync(path)) {
-                    res.status(200).send({"success": true, "data": filePath});
-                } 
-            } else {
-                const err = new APIError('Path does not exist!', httpStatus.PATH_DOES_NOT_EXIST, true);
-                return next(err);
-            }
         };
+        if (fs.existsSync(path)) {
+            deleteFolderRecursive(filePath);
+            res.status(200).send({"success": true, "data": filePath});
+        } else {
+            const err = new APIError('Path does not exist!', httpStatus.PATH_DOES_NOT_EXIST, true);
+            return next(err);
+        }
     }
 
 }
