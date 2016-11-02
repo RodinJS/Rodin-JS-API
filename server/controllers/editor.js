@@ -17,6 +17,7 @@ import config from '../../config/env';
 
 import fsExtra from 'fs-extra';
 import Promise from 'bluebird';
+import Minizip from 'node-minizip';
 
 import fileContentSearch from '../helpers/fileSearch';
 
@@ -182,7 +183,7 @@ function postFile(req, res, next) {
 
         if (type === 'file') {
             if (!fs.existsSync(filePath)) {
-                fsExtra.ensureFile(filePath, (err) =>{
+                fsExtra.ensureFile(filePath, (err) => {
                     if (err) {
                         err = new APIError('Can not create file!', httpStatus.COULD_NOT_CREATE_FILE, true);
                         return next(err);
@@ -199,7 +200,7 @@ function postFile(req, res, next) {
 
         else if (type === 'directory') {
             if (!fs.existsSync(filePath)) {
-                fsExtra.ensureDir(filePath, (err)=>{
+                fsExtra.ensureDir(filePath, (err)=> {
                     if (err) {
                         err = new APIError('Can not create folder!', httpStatus.COULD_NOT_CREATE_FILE, true);
                         return next(err);
@@ -299,7 +300,7 @@ function postFile(req, res, next) {
 
 function searchInsideFiles(req, res, next) {
 
-    if(!req.query.search){
+    if (!req.query.search) {
         const err = new APIError('Empty query', httpStatus.BAD_REQUEST, true);
         return next(err);
     }
@@ -311,11 +312,11 @@ function searchInsideFiles(req, res, next) {
     let fileSearch = new fileContentSearch(mainPath, searchWord, caseSensetive, false);
 
     fileSearch.search((error, data)=> {
-        if(error){
+        if (error) {
             const err = new APIError('Search failed', httpStatus.BAD_REQUEST, true);
             return next(err);
         }
-        res.status(200).send({success:true, data:data});
+        res.status(200).send({success: true, data: data});
     });
 
 
@@ -339,18 +340,14 @@ function uploadFiles(req, res, next) {
         return next(err);
     }
 
-
+    const type = req.body.type;
     const action = req.body.action;
-    let mainPath = help.generateFilePath(req, req.body.path);
-    let folderPath = mainPath + "/" + (req.body.destination ? help.cleanFileName(req.body.destination) : '');
+    let folderPath = help.generateFilePath(req, req.body.path);
 
-    if (req.body.folderName) {
-
-        folderPath = folderPath + '/' + req.body.folderName;
-
-        if (!fs.existsSync(folderPath))
-            fs.mkdirSync(folderPath)
+    if (!fs.existsSync(folderPath)) {
+        fsExtra.ensureDirSync(folderPath);
     }
+
 
     fs.readdir(folderPath, (err, files) => {
 
@@ -359,55 +356,92 @@ function uploadFiles(req, res, next) {
             return next(err);
         }
 
-        if (action === 'replace')
-            startUpload(folderPath, req.files, res, next);
 
-        else if (action === 'rename') {
-
-            let uploadingFiles = _.map(req.files, function (file) {
-                file.originalname = file.originalname.replace(/(\.[\w\d_-]+)$/i, '_1$1');
-                return file;
-            });
-
-            startUpload(folderPath, uploadingFiles, res, next);
+        if(type === 'directory'){
+            startUpload(folderPath, req.files, 'directory', res, next);
         }
+        else{
 
-        else {
+            if (action === 'replace')
 
-            let uploadingFiles = _.map(req.files, function (file) {
-                return file.originalname;
-            });
+                startUpload(folderPath, req.files, action, res, next);
 
-            let existedFiles = _.intersection(files, uploadingFiles);
+            else if (action === 'rename') {
 
-            if (existedFiles.length > 0) {
-                res.status(200).send({
-                    "success": true,
-                    "data": 'Following files exists, please provide action (replace, rename)',
-                    files: existedFiles
+                let uploadingFiles = _.map(req.files, function (file) {
+                    file.originalname = file.originalname.replace(/(\.[\w\d_-]+)$/i, '_1$1');
+                    return file;
                 });
+
+                startUpload(folderPath, uploadingFiles, action, res, next);
             }
-            else
-                startUpload(folderPath, req.files, res, next);
+
+            else {
+
+                let uploadingFiles = _.map(req.files, function (file) {
+                    return file.originalname;
+                });
+
+                let existedFiles = _.intersection(files, uploadingFiles);
+
+                if (existedFiles.length > 0) {
+                    res.status(200).send({
+                        "success": true,
+                        "data": 'Following files exists, please provide action (replace, rename)',
+                        files: existedFiles
+                    });
+                }
+                else
+                    startUpload(folderPath, req.files, action, res, next);
+            }
+
         }
 
 
     });
 }
 
-function startUpload(folderPath, files, res, next) {
+function startUpload(folderPath, files, action, res, next) {
     const PromisifiedFS = Promise.promisifyAll(fs);
 
     var promises = files.map((file) => {
         return PromisifiedFS.writeFileAsync(folderPath + '/' + file.originalname, new Buffer(file.buffer));
     });
 
-    Promise.all(promises).then(()=> {
-        res.status(200).send({"success": true, "data": 'Files successfuly uploaded!'});
-    }).catch((error) => {
-        const err = new APIError('Upload error', httpStatus.BAD_REQUEST, true);
-        return next(err);
-    });
+    if (action === 'directory') {
+
+        const zipFile = folderPath + '/' + files[0].originalname;
+        Promise.all(promises).then(()=> {
+
+            Minizip.unzip(zipFile, folderPath, (err) =>{
+                if (err){
+                    const err = new APIError('Folder Upload error', httpStatus.BAD_REQUEST, true);
+                    return next(err);
+                }
+                else{
+                    if (fs.existsSync(zipFile)) {
+                        fs.unlink(zipFile, function(err){
+                            res.status(200).send({"success": true, "data": 'Files successfuly uploaded!'});
+                        })
+                    }
+                }
+            });
+
+        }).catch((error) => {
+            const err = new APIError('Upload error', httpStatus.BAD_REQUEST, true);
+            return next(err);
+        });
+    }
+    else {
+
+        Promise.all(promises).then(()=> {
+            res.status(200).send({"success": true, "data": 'Files successfuly uploaded!'});
+        }).catch((error) => {
+            const err = new APIError('Upload error', httpStatus.BAD_REQUEST, true);
+            return next(err);
+        });
+
+    }
 
 }
 
