@@ -81,8 +81,8 @@ router.route('/')
 
   /**
    * @api {post} /api/project Create new project
-   * @apiName CreateUser
-   * @apiGroup User
+   * @apiName CreateProject
+   * @apiGroup Project
    * @apiVersion 0.0.1
    *
    * @apiParam {String} email        User email.
@@ -152,8 +152,8 @@ router.route('/')
 router.route('/:id')
  /**
  * @api {get} /api/project/:projectId Get single project
- * @apiName GetUser
- * @apiGroup User
+ * @apiName GetProject
+ * @apiGroup Project
  * @apiVersion 0.0.1
  *
  * @apiParam {String} username User username.
@@ -221,8 +221,8 @@ router.route('/:id')
 
   /**
    * @api {delete} /api/project/:projectId Delete single project
-   * @apiName DeleteUser
-   * @apiGroup User
+   * @apiName DeleteProject
+   * @apiGroup Project
    * @apiVersion 0.0.1
    *
    * @apiParam {String} username User username.

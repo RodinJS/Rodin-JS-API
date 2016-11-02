@@ -13,9 +13,9 @@ const upload = multer();
 router.route('/serve')
 
     /**
-     * @api {get} /api/editor/serve  get file content
+     * @api {get} /api/editor/serve  Get file content
      * @apiName GetFileContent
-     * @apiGroup Project
+     * @apiGroup Editor
      * @apiVersion 0.0.1
      *
      *
@@ -46,8 +46,8 @@ router.route('/serve')
 
     /**
      * @api {PUT} /api/editor/serve  Edit file
-     * @apiName GetFileContent
-     * @apiGroup Project
+     * @apiName EditFile
+     * @apiGroup Editor
      * @apiVersion 0.0.1
      *
      *
@@ -71,8 +71,8 @@ router.route('/serve')
 
     /**
      * @api {POST} /api/editor/serve  Add file/folder
-     * @apiName GetFileContent
-     * @apiGroup Project
+     * @apiName AddFileFolder
+     * @apiGroup Editor
      * @apiVersion 0.0.1
      *
      * @apiParam {String} id            Project ID.
@@ -100,8 +100,8 @@ router.route('/serve')
 
     /**
      * @api {DELETE} /api/editor/serve  Remove file/folder
-     * @apiName GetFileContent
-     * @apiGroup Project
+     * @apiName RemoveFileFolder
+     * @apiGroup Editor
      * @apiVersion 0.0.1
      *
      * @apiParam {String} id            Project ID.
@@ -127,8 +127,8 @@ router.route('/search')
 
 /**
  * @api {POST} /api/editor/upload  Upload file/folder
- * @apiName GetFileContent
- * @apiGroup Project
+ * @apiName UploadFileFolder
+ * @apiGroup Editor
  * @apiVersion 0.0.1
  *
  * @apiParam {String} id            Project ID.
