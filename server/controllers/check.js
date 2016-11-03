@@ -3,6 +3,9 @@ import Project from '../models/project';
 import jwt from 'jsonwebtoken';
 import httpStatus from '../helpers/httpStatus';
 import APIError from '../helpers/APIError';
+import userCapacity from '../helpers/directorySize';
+import utils from '../helpers/common';
+import _ from 'lodash';
 
 const config = require('../../config/env');
 
@@ -99,7 +102,8 @@ function ifTokenValid(req, res, next) {
 							email: user.email,
 							username: user.username,
 							role: user.role,
-							profile: user.profile
+							profile: user.profile,
+							storageSize:user.storageSize
 						};
 
 						return next();
@@ -161,4 +165,36 @@ function ifSelfUpdate(req, res, next) {
   return next();
 }
 
-export default { ifAdmin, ifPremium, ifTokenValid, project, ifSelfUpdate, isProjectOwn };
+function validateStorage(req, res, next){
+	const role = req.user.role.toLowerCase();
+	if(role == 'Admin' || role == 'God') next();
+	//'Free', 'Premium', 'Enterprise', 'Admin', 'God'
+	const storageSizes = {
+		free:100,
+		premium:500,
+		enterprise:100
+	};
+
+	const storageMaxCapacity = req.user.storageSize || storageSizes[role];
+	const rootDir = 'projects/' + req.user.username;
+
+	userCapacity.readSizeRecursive(rootDir, (err, size)=>{
+		size = err ? 0 : size;
+
+		if(req.files && req.files.length > 0){
+			_.each(req.files, function(file){
+				size += file.size;
+			});
+		}
+
+
+		if(utils.byteToMb(size) >= storageMaxCapacity){
+			const err = new APIError('Storage is full', httpStatus.BAD_REQUEST, true);
+			return next(err);
+		}
+ 		next();
+	});
+}
+
+
+export default { ifAdmin, ifPremium, ifTokenValid, project, ifSelfUpdate, isProjectOwn, validateStorage};

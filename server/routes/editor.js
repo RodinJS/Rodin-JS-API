@@ -66,7 +66,7 @@ router.route('/serve')
      *
      *
      */
-    .put(check.ifTokenValid, check.project, editorCtrl.putFile)
+    .put(check.ifTokenValid, check.project, check.validateStorage, editorCtrl.putFile)
 
 
     /**
@@ -95,7 +95,7 @@ router.route('/serve')
      *
      *
      */
-    .post(check.ifTokenValid, check.project, editorCtrl.postFile)
+    .post(check.ifTokenValid, check.project, check.validateStorage, editorCtrl.postFile)
 
 
     /**
@@ -151,7 +151,7 @@ router.route('/search')
  *
  */
 router.route("/upload")
-    .post(upload.array('file'), check.ifTokenValid, check.project, editorCtrl.uploadFiles);
+    .post(upload.array('file'), check.ifTokenValid, check.project, check.validateStorage, editorCtrl.isUnitTest, editorCtrl.uploadFiles);
 
 router.route('/:id')
     .get(check.ifTokenValid, editorCtrl.getTreeJSON);
