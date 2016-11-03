@@ -9,6 +9,7 @@ services:
 env:
   - CXX=g++-5
 addons:
+  srcclr: true
   apt:
     sources:
       - ubuntu-toolchain-r-test
