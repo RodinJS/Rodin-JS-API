@@ -86,7 +86,7 @@ function getFile(req, res, next) {
 
 function putFile(req, res, next) {
 
-    if (_.isUndefined(req.query.filename)) {
+    if (_.isUndefined(req.body.filename)) {
         const err = new APIError('Provide file name!', httpStatus.BAD_REQUEST, true);
         return next(err);
     }
@@ -96,17 +96,17 @@ function putFile(req, res, next) {
         return next(err);
     }
 
-    // let path = help.cleanUrl(req.query.path);
+    // let path = help.cleanUrl(req.body.path);
     const action = req.query.action;
-    const filePath = help.generateFilePath(req, req.query.filename);
+    const filePath = help.generateFilePath(req, req.body.filename);
 
     if (req.query.action === 'rename') {
-        if (_.isUndefined(req.query.newName)) {
+        if (_.isUndefined(req.body.newName)) {
             const err = new APIError('Provide renaming file!', httpStatus.BAD_REQUEST, true);
             return next(err);
         }
 
-        let newName = help.cleanFileName(req.query.newName);
+        let newName = help.cleanFileName(req.body.newName);
         let newPath = filePath.split(/[\\\/]+/g);
         newPath.splice(newPath.length - 1, 1, newName);
         newPath = newPath.join("/");
@@ -501,9 +501,7 @@ function deleteFile(req, res, next) {
             return next(err);
         }
     } else { // when folder
-        deleteFolderRecursive(filePath);
         function deleteFolderRecursive(path) {
-            if (fs.existsSync(path)) {
                 fs.readdirSync(path).forEach((file, index) => {
                     var curPath = path + "/" + file;
                     if (fs.lstatSync(curPath).isDirectory()) { // recurse
@@ -513,12 +511,14 @@ function deleteFile(req, res, next) {
                     }
                 });
                 fs.rmdirSync(path);
-                res.status(200).send({"success": true, "data": filePath});
-            } else {
-                const err = new APIError('Path does not exist!', httpStatus.PATH_DOES_NOT_EXIST, true);
-                return next(err);
-            }
         };
+        if (fs.existsSync(filePath)) {
+            deleteFolderRecursive(filePath);
+            res.status(200).send({"success": true, "data": filePath});
+        } else {
+            const err = new APIError('Path does not exist!', httpStatus.PATH_DOES_NOT_EXIST, true);
+            return next(err);
+        }
     }
 
 }
