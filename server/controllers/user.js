@@ -60,7 +60,6 @@ function me(req, res) {
 
 
 	let rootDir = 'projects/' + req.user.username;
-	console.log(rootDir);
 	userCapacity.readSizeRecursive(rootDir, (err, size)=>{
 		size = err ? 0 : size;
 		let response = {

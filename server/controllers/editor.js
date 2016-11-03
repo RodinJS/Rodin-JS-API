@@ -86,7 +86,7 @@ function getFile(req, res, next) {
 
 function putFile(req, res, next) {
 
-    if (_.isUndefined(req.query.filename)) {
+    if (_.isUndefined(req.body.filename)) {
         const err = new APIError('Provide file name!', httpStatus.BAD_REQUEST, true);
         return next(err);
     }
@@ -96,17 +96,17 @@ function putFile(req, res, next) {
         return next(err);
     }
 
-    // let path = help.cleanUrl(req.query.path);
+    // let path = help.cleanUrl(req.body.path);
     const action = req.query.action;
-    const filePath = help.generateFilePath(req, req.query.filename);
+    const filePath = help.generateFilePath(req, req.body.filename);
 
     if (req.query.action === 'rename') {
-        if (_.isUndefined(req.query.newName)) {
+        if (_.isUndefined(req.body.newName)) {
             const err = new APIError('Provide renaming file!', httpStatus.BAD_REQUEST, true);
             return next(err);
         }
 
-        let newName = help.cleanFileName(req.query.newName);
+        let newName = help.cleanFileName(req.body.newName);
         let newPath = filePath.split(/[\\\/]+/g);
         newPath.splice(newPath.length - 1, 1, newName);
         newPath = newPath.join("/");
@@ -324,12 +324,6 @@ function searchInsideFiles(req, res, next) {
 
 function uploadFiles(req, res, next) {
 
-    // THIS WORKS ONLY FOR UNIT TEST
-    if (req.body.testUpload)
-        req.files = req.body.files;
-    // THIS WORKS ONLY FOR UNIT TEST
-
-
     if (_.isUndefined(req.files) || req.files.length < 0) {
         const err = new APIError('Please select utleast one file', httpStatus.BAD_REQUEST, true);
         return next(err);
@@ -403,16 +397,14 @@ function uploadFiles(req, res, next) {
 
 function startUpload(folderPath, files, action, res, next) {
     const PromisifiedFS = Promise.promisifyAll(fs);
-
     var promises = files.map((file) => {
         return PromisifiedFS.writeFileAsync(folderPath + '/' + file.originalname, new Buffer(file.buffer));
     });
 
     if (action === 'directory') {
-
         const zipFile = folderPath + '/' + files[0].originalname;
-        Promise.all(promises).then(()=> {
 
+        Promise.all(promises).then(()=> {
             Minizip.unzip(zipFile, folderPath, (err) =>{
                 if (err){
                     const err = new APIError('Folder Upload error', httpStatus.BAD_REQUEST, true);
@@ -420,20 +412,18 @@ function startUpload(folderPath, files, action, res, next) {
                 }
                 else{
                     if (fs.existsSync(zipFile)) {
-                        fs.unlink(zipFile, function(err){
+                        fs.unlink(zipFile, (err)=>{
                             res.status(200).send({"success": true, "data": 'Files successfuly uploaded!'});
                         })
                     }
                 }
             });
-
         }).catch((error) => {
             const err = new APIError('Upload error', httpStatus.BAD_REQUEST, true);
             return next(err);
         });
     }
     else {
-
         Promise.all(promises).then(()=> {
             res.status(200).send({"success": true, "data": 'Files successfuly uploaded!'});
         }).catch((error) => {
@@ -442,6 +432,45 @@ function startUpload(folderPath, files, action, res, next) {
         });
 
     }
+
+}
+
+
+/**
+ * Validate unit test uploading
+ * @param req
+ * @param res
+ * @param next
+ */
+function isUnitTest(req, res, next){
+
+    // THIS WORKS ONLY FOR UNIT TEST
+    if (req.body.testUpload){
+
+        if(req.body.type === 'directory'){
+            //UNIT TEST FOLDER UPLOAD
+            let path = help.generateFilePath(req, req.body.path);
+            let templatePath = 'resources/templates/blank';
+            Minizip.zip(templatePath, path+'/test.zip', (err)=> {
+                if (err){
+                    const err = new APIError('Test failed', httpStatus.BAD_REQUEST, true);
+                    return next(err);
+                }
+                else{
+                    let file = fs.readFileSync(path+'/test.zip');
+                    req.files = [{originalname:'test.zip',  buffer:new Buffer(file)}];
+                    next();
+                }
+            });
+        }
+        //UNIT TEST FOLDER UPLOAD
+        else{
+            req.files = req.body.files;
+            next();
+        }
+    }
+    else next();
+    // THIS WORKS ONLY FOR UNIT TEST
 
 }
 
@@ -503,4 +532,4 @@ function readFile(path, callback) {
 }
 
 
-export default {getTreeJSON, getFile, putFile, postFile, deleteFile, uploadFiles, searchInsideFiles};
+export default {getTreeJSON, getFile, putFile, postFile, deleteFile, uploadFiles, searchInsideFiles, isUnitTest};
