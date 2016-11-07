@@ -84,7 +84,7 @@
     "cz-conventional-changelog": "1.1.5",
     "del": "^2.2.0",
     "eslint": "^3.7.1",
-    "eslint-config-airbnb": "12.0.0",
+    "eslint-config-airbnb": "13.0.0",
     "ghooks": "^1.2.4",
     "gulp": "3.9.1",
     "gulp-apidoc": "^0.2.4",
