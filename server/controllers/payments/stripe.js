@@ -150,6 +150,11 @@ function createCharge(req, res, next){
 
 function createSubscription(req, res, next) {
 
+    if(!_.isUndefined(req.payment.stripe.subscriptionId)){
+        const err = new APIError('Already subscribed!', httpStatus.BAD_REQUEST, true);
+        return next(err);
+    }
+
     if (_.isUndefined(req.body.stripeToken)) {
         const err = new APIError('Provide stripe token!', httpStatus.BAD_REQUEST, true);
         return next(err);
@@ -167,6 +172,34 @@ function createSubscription(req, res, next) {
     };
 
     stripe.subscriptions.create(requestData, (err, subscription) => {
+        if (err) {
+            const err = new APIError('Subscription error!', httpStatus.BAD_REQUEST, true);
+            return next(err);
+        }
+        req.payment = {stripe: req.user.stripe};
+        req.payment.stripe.subscriptionId = subscription.id;
+        req.message = 'Subscription created successfuly';
+        next();
+    });
+}
+
+function updateSubscription(req, res, next){
+
+    if(_.isUndefined(req.payment.stripe.subscriptionId)){
+        const err = new APIError('Not subscribed!', httpStatus.BAD_REQUEST, true);
+        return next(err);
+    }
+
+    if (_.isUndefined(req.body.planId)) {
+        const err = new APIError('Provide planId!', httpStatus.BAD_REQUEST, true);
+        return next(err);
+    }
+
+    const requestData = {
+        plan: req.body.planId
+    };
+
+    stripe.subscriptions.update(req.payment.stripe.subscriptionId, requestData, (err, subscription) => {
         if (err) {
             const err = new APIError('Subscription error!', httpStatus.BAD_REQUEST, true);
             return next(err);
@@ -203,10 +236,6 @@ function deleteSubscription(req, res, next){
 
 }
 
-function checkSubscription(req, res, next) {
-    next();
-}
-
 function updateUser(req, res, next) {
     User.updateAsync({username: req.user.username}, {$set: req.payment})
         .then(() => res.json({
@@ -217,4 +246,4 @@ function updateUser(req, res, next) {
 }
 
 
-export default {createPlan, getPlan, removePlan, createCustomer, createSubscription, getSubscription, checkSubscription, updateUser, deleteSubscription};
+export default {createPlan, getPlan, removePlan, createCustomer, createSubscription, getSubscription, updateSubscription, deleteSubscription, updateUser};

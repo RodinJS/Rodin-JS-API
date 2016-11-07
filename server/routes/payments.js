@@ -18,7 +18,8 @@ router.route('/stripe/customer/create')
     .post(check.ifTokenValid, stripeCtrl.createCustomer, stripeCtrl.updateUser);
 
 router.route('/stripe/subscription')
-    .post(check.ifTokenValid, stripeCtrl.checkSubscription, stripeCtrl.createSubscription, stripeCtrl.updateUser)
+    .post(check.ifTokenValid, stripeCtrl.createSubscription, stripeCtrl.updateUser)
+    .put(check.ifTokenValid, stripeCtrl.updateSubscription, stripeCtrl.updateUser)
     .get(check.ifTokenValid,  stripeCtrl.getSubscription)
     .delete(check.ifTokenValid,  stripeCtrl.deleteSubscription, stripeCtrl.updateUser);
 
