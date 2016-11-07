@@ -69,7 +69,8 @@ function me(req, res) {
 				username: req.user.username,
 				role: req.user.role,
 				profile: req.user.profile,
-				usedStorage:utils.byteToMb(size)
+				usedStorage:utils.byteToMb(size),
+				stripeSubscription:user.stripeSubscription
 			}
 		};
 

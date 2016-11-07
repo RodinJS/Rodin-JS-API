@@ -63,6 +63,26 @@ function ifPremium(req, res, next) {
 	});
 }
 
+function isGod(req, res, next){
+	var token = req.headers['x-access-token']; //TODO: Get from Auth header
+	// verifies secret and checks exp date
+	jwt.verify(token, config.jwtSecret, function(err, decoded) {
+		if (err) {
+			const err = new APIError('You are not authenticated!', httpStatus.UNAUTHORIZED, true);
+			return next(err);
+		} else {
+			// User is an admin => continue to operation.
+			if (decoded.role === "God") {
+				return next();
+			} else {
+				// User is not an admin => send 403 Forbidden.
+				const err = new APIError('You are not authorized to perform this operation!', httpStatus.FORBIDDEN, true);
+				return next(err);
+			}
+		}
+	});
+}
+
 /**
  * Check if email exists.
  * @param req
@@ -103,7 +123,8 @@ function ifTokenValid(req, res, next) {
 							username: user.username,
 							role: user.role,
 							profile: user.profile,
-							storageSize:user.storageSize
+							storageSize:user.storageSize,
+							stripe:user.stripe
 						};
 
 						return next();
@@ -197,4 +218,4 @@ function validateStorage(req, res, next){
 }
 
 
-export default { ifAdmin, ifPremium, ifTokenValid, project, ifSelfUpdate, isProjectOwn, validateStorage};
+export default { ifAdmin, ifPremium, isGod, ifTokenValid, project, ifSelfUpdate, isProjectOwn, validateStorage};
