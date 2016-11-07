@@ -103,7 +103,8 @@ function ifTokenValid(req, res, next) {
 							username: user.username,
 							role: user.role,
 							profile: user.profile,
-							storageSize:user.storageSize
+							storageSize:user.storageSize,
+							creationDate:user.createdAt
 						};
 
 						return next();

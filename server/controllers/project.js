@@ -13,6 +13,7 @@ import config from '../../config/env';
 import fsExtra from 'fs-extra';
 import utils from '../helpers/common';
 import userCapacity from '../helpers/directorySize';
+import  _ from 'lodash';
 
 
 const getStatus = (project, device, cb) => {
@@ -414,6 +415,13 @@ function publishProject(req, res, next) {
 
 }
 
+/**
+ * Unpublish user project
+ * @param req
+ * @param res
+ * @param next
+ * @returns {*}
+ */
 function unPublishProject(req, res, next) {
 
     let publishFolder = help.generateFilePath(req, '', 'publish');
@@ -443,6 +451,35 @@ function unPublishProject(req, res, next) {
 
 }
 
+function getProjectsCount(req, res, next){
+    if(!req.query.projectsCount) return next();
+    let query = {
+        $match: {
+            owner: req.user.username
+        }
+    };
+    let option =  {
+        $group: {
+            _id: { $gt: ["$publishDate", null]},
+            count: { $sum: 1 }
+        }
+    };
+    Project.aggregate(query, option)
+        .then(projects=>{
+            req.projectsCount = {};
+            _.each(projects, (project)=>{
+
+                if(!project._id)
+                    req.projectsCount.unpublished = project.count;
+                else
+                    req.projectsCount.published = project.count;
+            });
+            next();
+        })
+        .catch((e)=>{
+            console.log(e);
+        })
+}
 /**
  *
  * @param req
@@ -482,4 +519,4 @@ function getTemplatesList(req, res, next) {
     });
 }
 
-export default {get, create, update, list, remove, makePublic, publishProject, unPublishProject, importOnce, getTemplatesList};
+export default {get, create, update, list, remove, makePublic, publishProject, unPublishProject, importOnce, getTemplatesList, getProjectsCount};

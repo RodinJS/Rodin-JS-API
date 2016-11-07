@@ -35,4 +35,15 @@ function sum(array){
 }
 
 
-export default{readSizeRecursive}
+function getUserStroageSize(req, res, next){
+    if(!req.query.usedStorage) return next();
+
+    let rootDir = 'projects/' + req.user.username;
+    readSizeRecursive(rootDir, (err, size)=>{
+        req.usedStorage = err ? 0 : size;
+        next();
+    });
+}
+
+
+export default{readSizeRecursive, getUserStroageSize}
