@@ -99,7 +99,10 @@ function createCustomer(req, res, next) {
 
     const requestData = {
         email: req.user.email,
-        source: req.body.stripeToken // obtained with Stripe.js
+        source: req.body.stripeToken,
+        metadata:{
+            username: req.user.username
+        }
     };
 
     stripe.customers.create(requestData, (err, customer) => {
@@ -150,7 +153,7 @@ function createCharge(req, res, next){
 
 function createSubscription(req, res, next) {
 
-    if(!_.isUndefined(req.payment.stripe.subscriptionId)){
+    if(!_.isUndefined(req.user.stripe.subscriptionId)){
         const err = new APIError('Already subscribed!', httpStatus.BAD_REQUEST, true);
         return next(err);
     }
@@ -185,7 +188,7 @@ function createSubscription(req, res, next) {
 
 function updateSubscription(req, res, next){
 
-    if(_.isUndefined(req.payment.stripe.subscriptionId)){
+    if(_.isUndefined(req.user.stripe.subscriptionId)){
         const err = new APIError('Not subscribed!', httpStatus.BAD_REQUEST, true);
         return next(err);
     }
@@ -199,7 +202,7 @@ function updateSubscription(req, res, next){
         plan: req.body.planId
     };
 
-    stripe.subscriptions.update(req.payment.stripe.subscriptionId, requestData, (err, subscription) => {
+    stripe.subscriptions.update(req.user.stripe.subscriptionId, requestData, (err, subscription) => {
         if (err) {
             const err = new APIError('Subscription error!', httpStatus.BAD_REQUEST, true);
             return next(err);
