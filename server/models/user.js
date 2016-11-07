@@ -77,7 +77,11 @@ const UserSchema = new mongoose.Schema({
         },
         lastName: {
             type: String
-        }
+        },
+        city:String,
+        about:String,
+        website:String,
+        skills:[String]
     },
     projects: [
         {

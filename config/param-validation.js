@@ -20,7 +20,11 @@ export default {
       username: Joi.string().optional(),
       profile: {
         firstName: Joi.string().optional().allow(''),
-        lastName: Joi.string().optional().allow('')
+        lastName: Joi.string().optional().allow(''),
+        city: Joi.string().optional().allow(''),
+        about: Joi.string().optional().allow(''),
+        website: Joi.string().optional().allow(''),
+        skills: Joi.array().optional().allow([])
       },
       editorSettings: {
         theme: {
