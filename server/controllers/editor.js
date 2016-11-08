@@ -108,6 +108,13 @@ function putFile(req, res, next) {
 
         let newName = help.cleanFileName(req.body.newName);
         let newPath = filePath.split(/[\\\/]+/g);
+
+
+        if(!_.last(newPath)){
+            const err = new APIError('Cannot rename project folder!', httpStatus.BAD_REQUEST, true);
+            return next(err);
+        }
+
         newPath.splice(newPath.length - 1, 1, newName);
         newPath = newPath.join("/");
 
@@ -259,6 +266,12 @@ function postFile(req, res, next) {
         }
 
         else if (type === 'directory') {
+
+            if(!req.body.srcPath && req.body.name == req.project.root){
+                const err = new APIError('Cant copy project in self!', httpStatus.BAD_REQUEST, true);
+                return next(err);
+            }
+
             if (fs.existsSync(srcPath)) {
 
 
@@ -267,7 +280,8 @@ function postFile(req, res, next) {
                         if (err) {
                             const err = new APIError('Folder copy error!', httpStatus.BAD_REQUEST, true);
                             return next(err);
-                        } else {
+                        }
+                        else {
                             res.status(200).send({"success": true, "data": 'The folder was copeid!'});
                         }
                     });
@@ -477,6 +491,12 @@ function deleteFile(req, res, next) {
     const filePath = help.generateFilePath(req, req.query.filename);
     if (!fs.existsSync(filePath)) {
         const err = new APIError('Path or file does not exist!', httpStatus.FILE_OR_PATH_DOES_NOT_EXIST, true);
+        return next(err);
+    }
+
+
+    if(!_.last(filePath.split(/[\\\/]+/g))){
+        const err = new APIError('Cannot delete project folder!', httpStatus.BAD_REQUEST, true);
         return next(err);
     }
 
