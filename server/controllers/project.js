@@ -62,8 +62,13 @@ function get(req, res, next) {
                     "success": true,
                     "data": project
                 };
-
-                return res.status(200).json(response);
+                if(req.query.projectSize) {
+                    req.project = project.toObject();
+                    return next();
+                }
+                else{
+                    return res.status(200).json(response);
+                }
             } else {
                 const err = new APIError('Project is empty', httpStatus.NOT_FOUND, true);
                 return next(err);
@@ -87,7 +92,12 @@ function get(req, res, next) {
                             "data": project
                         };
 
-                        return res.status(200).json(response);
+                        if(req.query.projectSize) {
+                            req.project = project.toObject();
+                            return next();
+                        }
+                        else
+                            return res.status(200).json(response);
                     } else {
                         const err = new APIError('Project is empty', httpStatus.NOT_FOUND, true);
                         return next(err);
@@ -121,7 +131,9 @@ function create(req, res, next) {
 
         .then((savedProject) => {
 
-            let rootDir = 'projects/' + req.user.username + '/' + savedProject.root;
+            let project = savedProject.toObject();
+
+            let rootDir = 'projects/' + req.user.username + '/' + project.root;
 
             if (!fs.existsSync(rootDir)) {
 
@@ -142,17 +154,37 @@ function create(req, res, next) {
 
                                 //copy tempate
                                 fsExtra.copy(templateDir, rootDir, function (err) {
-                                    if(err)
-                                        fs.appendFileSync(rootDir+'/error.log', err+'\n');
+                                    if (err)
+                                        fs.appendFileSync(rootDir + '/error.log', err + '\n');
+                                    else {
+                                        Project.updateAsync(
+                                            {
+                                                _id: project._id,
+                                                owner: req.user.username
+                                            },
+                                            {
+                                                $set: {
+                                                    updatedAt: new Date(),
+                                                    templateOf: templateProject.name
+
+                                                }
+                                            }
+                                        ).then(result => {
+                                            })
+                                            .catch((e) => {
+                                                fs.appendFileSync(rootDir + '/error.log', e + '\n');
+                                            });
+                                    }
+
                                 });
 
                             }
-                            else{
-                                fs.appendFileSync(rootDir+'/error.log', 'Template not exist'+'\n');
+                            else {
+                                fs.appendFileSync(rootDir + '/error.log', 'Template not exist' + '\n');
                             }
                         }
                         else {
-                            fs.appendFileSync(rootDir+'/error.log', 'Template not exist'+'\n');
+                            fs.appendFileSync(rootDir + '/error.log', 'Template not exist' + '\n');
                         }
 
                     });
@@ -391,7 +423,7 @@ function publishProject(req, res, next) {
                 return next(err);
             }
 
-            Project.updateAsync({_id: req.params.id, owner: req.user.username},{$set: {publishDate:new Date()}})
+            Project.updateAsync({_id: req.params.id, owner: req.user.username}, {$set: {publishDate: new Date()}})
                 .then(result => {
                     if (result.nModified === 1) {
                         return res.status(200).json({success: true, data: 'Project published'})
@@ -428,7 +460,7 @@ function unPublishProject(req, res, next) {
 
     if (fs.existsSync(publishFolder)) {
         fsExtra.removeSync(publishFolder);
-        Project.updateAsync({_id: req.params.id, owner: req.user.username},{$unset: {publishDate:1}})
+        Project.updateAsync({_id: req.params.id, owner: req.user.username}, {$unset: {publishDate: 1}})
             .then(result => {
                 if (result.nModified === 1) {
                     return res.status(200).json({success: true, data: 'Project unpublished'})
@@ -443,7 +475,7 @@ function unPublishProject(req, res, next) {
                 return next(err);
             });
     }
-    else{
+    else {
         const err = new APIError('Published project does not exist', httpStatus.BAD_REQUEST, true);
         return next(err);
     }
@@ -451,32 +483,32 @@ function unPublishProject(req, res, next) {
 
 }
 
-function getProjectsCount(req, res, next){
-    if(!req.query.projectsCount) return next();
+function getProjectsCount(req, res, next) {
+    if (!req.query.projectsCount) return next();
     let query = {
         $match: {
             owner: req.user.username
         }
     };
-    let option =  {
+    let option = {
         $group: {
-            _id: { $gt: ["$publishDate", null]},
-            count: { $sum: 1 }
+            _id: {$gt: ["$publishDate", null]},
+            count: {$sum: 1}
         }
     };
     Project.aggregate(query, option)
-        .then(projects=>{
+        .then(projects=> {
             req.projectsCount = {};
-            _.each(projects, (project)=>{
+            _.each(projects, (project)=> {
 
-                if(!project._id)
+                if (!project._id)
                     req.projectsCount.unpublished = project.count;
                 else
                     req.projectsCount.published = project.count;
             });
             next();
         })
-        .catch((e)=>{
+        .catch((e)=> {
             console.log(e);
         })
 }
@@ -519,4 +551,34 @@ function getTemplatesList(req, res, next) {
     });
 }
 
-export default {get, create, update, list, remove, makePublic, publishProject, unPublishProject, importOnce, getTemplatesList, getProjectsCount};
+function getProjectSize(req, res, next){
+    if(!req.query.projectSize) return next();
+    let rootDir = 'projects/' + req.user.username+'/'+req.project.root;
+
+    userCapacity.readSizeRecursive(rootDir, (err, size)=>{
+        size = err ? 0 : size;
+
+        req.project.projectSize = utils.byteToMb(size);
+
+        let response = {
+            "success": true,
+            "data": req.project
+        };
+        return res.status(200).json(response);
+    });
+}
+
+export default {
+    get,
+    create,
+    update,
+    list,
+    remove,
+    makePublic,
+    publishProject,
+    unPublishProject,
+    importOnce,
+    getTemplatesList,
+    getProjectsCount,
+    getProjectSize
+};

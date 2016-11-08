@@ -21,6 +21,9 @@ const ProjectSchema = new mongoose.Schema({
   thumbnail: {
     type: String
   },
+  templateOf:{
+    type:String,
+  },
   root: {
     type: String,
     required: true

@@ -214,7 +214,7 @@ router.route('/:id')
 	 *          }
 	 *      }
  */
-  .get(check.ifTokenValid, projectCtrl.get)
+  .get(check.ifTokenValid, projectCtrl.get, projectCtrl.getProjectSize)
 
   /** PUT /api/project/:projectId - Update project */
   .put(check.ifTokenValid, validate(paramValidation.updateProject), projectCtrl.update)
