@@ -124,7 +124,8 @@ function ifTokenValid(req, res, next) {
 							role: user.role,
 							profile: user.profile,
 							storageSize:user.storageSize,
-							stripe:user.stripe
+							stripe:user.stripe,
+							creationDate:user.createdAt
 						};
 
 						return next();

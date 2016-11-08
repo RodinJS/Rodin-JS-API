@@ -175,7 +175,6 @@ function postFile(req, res, next) {
     }
 
     let mainPath = help.generateFilePath(req, req.body.path);
-
     const type = req.body.type;
     let filePath = mainPath + "/" + help.cleanFileName(req.body.name);
 
@@ -222,26 +221,23 @@ function postFile(req, res, next) {
 
     else if (action === 'copy') {
 
-        if (_.isUndefined(req.body.copyName)) {
-            const err = new APIError('Provide copy name!', httpStatus.BAD_REQUEST, true);
+        if (_.isUndefined(req.body.srcPath)) {
+            const err = new APIError('Provide source path!', httpStatus.BAD_REQUEST, true);
             return next(err);
         }
+        let srcPath = help.generateFilePath(req, req.body.srcPath);
 
         if (type === 'file') {
-
-            readFile(filePath, (err, content) => {
+            readFile(srcPath, (err, content) => {
                 if (err) {
                     const err = new APIError('File does not exist!', httpStatus.FILE_DOES_NOT_EXIST, true);
                     return next(err);
                 }
                 else {
-
-                    let newFilePath = mainPath + "/" + help.cleanFileName(req.body.copyName);
-
-                    readFile(newFilePath, (err, content)=> {
+                    readFile(filePath, (err, content)=> {
 
                         if (err && err.code === "ENOENT") {
-                            fs.writeFile(newFilePath, content, (err) => {
+                            fs.writeFile(filePath, content, (err) => {
                                 if (err) {
                                     const e = new APIError('Could not write to file!', httpStatus.COULD_NOT_WRITE_TO_FILE, true);
                                     return next(e);
@@ -263,13 +259,11 @@ function postFile(req, res, next) {
         }
 
         else if (type === 'directory') {
+            if (fs.existsSync(srcPath)) {
 
-            if (fs.existsSync(filePath)) {
 
-                let newFolderPath = mainPath + "/" + help.cleanFileName(req.body.copyName);
-
-                if (!fs.existsSync(newFolderPath)) {
-                    fsExtra.copy(filePath, newFolderPath, function (err) {
+                if (!fs.existsSync(filePath)) {
+                    fsExtra.copy(srcPath, filePath, function (err) {
                         if (err) {
                             const err = new APIError('Folder copy error!', httpStatus.BAD_REQUEST, true);
                             return next(err);

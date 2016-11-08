@@ -3,6 +3,8 @@ import validate from 'express-validation';
 import paramValidation from '../../config/param-validation';
 import userCtrl from '../controllers/user';
 import check from '../controllers/check';
+import projectCtrl from '../controllers/project';
+import userCapacity from '../helpers/directorySize';
 // import '../../config/passport';
 // import passport from 'passport';
 
@@ -153,8 +155,18 @@ router.route('/')
 	 */
 	.post(validate(paramValidation.createUser), userCtrl.validateInvitationCode,  userCtrl.create);
 
+
+
 router.route('/me')
-	.get(check.ifTokenValid, userCtrl.me);
+	/**
+	 * @api {get} /api/user/me get current user info by jwt
+	 * @apiName CreateUser
+	 * @apiGroup User
+	 * @apiVersion 0.0.1
+	 * @apiParam (200) {Boolean} projectsCount Published unpublished project count
+	 * @apiParam (200) {Boolean} usedStorage   User used storage
+	 */
+	.get(check.ifTokenValid, userCapacity.getUserStroageSize, projectCtrl.getProjectsCount, userCtrl.me);
 
 router.route('/:username')
 	/**

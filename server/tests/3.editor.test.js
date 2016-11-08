@@ -16,6 +16,13 @@ let filesMocks = {
        type: 'file',
        name: 'testfile.js'
    },
+   COPY:{
+       path: '.',
+       type: 'file',
+       srcPath: 'testfile.js',
+       name: 'testfile_copy.js',
+       action:'copy'
+   },
    EDIT:{
        path: '.',
        filename: 'testfile.js',
@@ -34,8 +41,8 @@ const requestMocks = {
         action: 'copy',
         path: '.',
         type: 'directory',
-        name: 'testfolder',
-        copyName: 'testfolder_copy'
+        name: 'testfolder_copy',
+        srcPath: 'testfolder'
     },
     UPLOAD_FILES: {
         path: '.',
@@ -48,7 +55,7 @@ const requestMocks = {
 };
 
 requestMocks.CREATE_FILE = _.assignIn({action: 'create'}, filesMocks.CREATE);
-requestMocks.COPY_FILE = _.assignIn({action: 'copy', copyName: 'testfile_copy.js'}, filesMocks.CREATE);
+requestMocks.COPY_FILE = filesMocks.COPY;
 requestMocks.EDIT_FILE = _.assignIn({action: 'save'}, filesMocks.EDIT);
 requestMocks.RENAME_FILE = _.assignIn({action: 'rename', newName: 'testfile_rename.js'}, filesMocks.EDIT);
 requestMocks.REPLACE_UPLOAD_FILES = _.assignIn({action: 'replace', type:'file'}, requestMocks.UPLOAD_FILES);

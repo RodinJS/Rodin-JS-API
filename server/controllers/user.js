@@ -6,7 +6,6 @@ import APIError from '../helpers/APIError';
 import httpStatus from '../helpers/httpStatus';
 import fs from 'fs';
 import fsExtra from 'fs-extra';
-import userCapacity from '../helpers/directorySize';
 import utils from '../helpers/common';
 
 import config from '../../config/env';
@@ -59,23 +58,32 @@ function get(req, res) {
 function me(req, res) {
 
 
-	let rootDir = 'projects/' + req.user.username;
-	userCapacity.readSizeRecursive(rootDir, (err, size)=>{
-		size = err ? 0 : size;
-		let response = {
-			"success": true,
-			"data": {
-				email: req.user.email,
-				username: req.user.username,
-				role: req.user.role,
-				profile: req.user.profile,
-				usedStorage:utils.byteToMb(size),
-				stripeSubscription:user.stripeSubscription
-			}
-		};
+	let response = {
+		"success": true,
+		"data": {
+			email: req.user.email,
+			username: req.user.username,
+			role: req.user.role,
+			profile: req.user.profile,
+			creationDate:req.user.creationDate
+		}
+	};
 
-		return res.status(200).json(response);
-	});
+	//concat stripe
+	if(req.user.stripe)
+		response.data.stripe = req.user.stripe;
+
+	//concat projects count
+	if(req.query.projectsCount)
+		response.data.projects = req.projectsCount;
+
+	//concat usedStorage
+	if(req.query.usedStorage)
+		response.data.usedStorage = utils.byteToMb(req.usedStorage);
+
+
+
+	return res.status(200).json(response);
 }
 
 /**

@@ -58,6 +58,11 @@ export default {
       stripe:{
         secret:'sk_test_Okevb5aLgncqi6W6lmhItxoV',
         publish:'pk_test_ubTC5Za2RM1vj2VlRYPhvX2r'
+      },
+      paypal:{
+        mode:'sandbox',
+        clientId:'AcILaf8OIR1IFIG5bCG6OaS7WI3DISrJHVkGgWWYjQ22Dwl-Covb1byyxI7zzy6ks9rLMLDNsbwIFqye',
+        clientSecret:'EFpzVs5Sad5mOnsqZqcJnw2X4MVozbD4iUzfD9K8AOrkdQl06_dx5VNkR80cy0f7Edyi5dUccTpz6rXb'
       }
     }
   }
