@@ -128,8 +128,13 @@ function create(req, res, next) {
     });
 
     project.saveAsync()
-
+        .catch((e)=>{
+            const message = e.code === 11000 ? 'Project exist' : httpStatus[400];
+            const err = new APIError(message, httpStatus.BAD_REQUEST, true);
+            return next(err);
+        })
         .then((savedProject) => {
+            if(!savedProject) return;
 
             let project = savedProject.toObject();
 
@@ -219,7 +224,7 @@ function create(req, res, next) {
         })
         .error((e) => {
             const err = new APIError("Something went wrong!", 312, true);
-            return next(e);
+            return next(err);
         });
 }
 

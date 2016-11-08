@@ -50,7 +50,8 @@ export default {
     body: {
       name: Joi.string().required(),
       description: Joi.string().required(),
-      tags: Joi.array().optional()
+      tags: Joi.array().optional(),
+      templateId: Joi.string().optional()
     }
   },
 
