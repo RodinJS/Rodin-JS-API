@@ -101,6 +101,9 @@ const ProjectSchema = new mongoose.Schema({
   },
   publishDate:{
     type:Date
+  },
+  publishedPublic:{
+    type:Boolean
   }
 });
 
@@ -170,7 +173,7 @@ ProjectSchema.statics = {
    * @param {number} limit - Limit number of projects to be returned.
    * @returns {Promise<Project[]>}
    */
-  list({skip = 0, limit = 50} = {}, owner, _queryString = null) {
+  list({skip = 0, limit = 50} = {}, owner, _queryString = null, published) {
     const query = {};
     if(owner) {
       query.owner = owner;
@@ -185,6 +188,12 @@ ProjectSchema.statics = {
         {
           description: re
         }
+      ]
+    }
+    if(published){
+      query.$and = [
+        {publishDate: {$exists: true }},
+        {publishedPublic:{$eq:true}}
       ]
     }
 

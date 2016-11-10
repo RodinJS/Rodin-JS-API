@@ -62,11 +62,11 @@ function get(req, res, next) {
                     "success": true,
                     "data": project
                 };
-                if(req.query.projectSize) {
+                if (req.query.projectSize) {
                     req.project = project.toObject();
                     return next();
                 }
-                else{
+                else {
                     return res.status(200).json(response);
                 }
             } else {
@@ -92,7 +92,7 @@ function get(req, res, next) {
                             "data": project
                         };
 
-                        if(req.query.projectSize) {
+                        if (req.query.projectSize) {
                             req.project = project.toObject();
                             return next();
                         }
@@ -128,13 +128,13 @@ function create(req, res, next) {
     });
 
     project.saveAsync()
-        .catch((e)=>{
+        .catch((e)=> {
             const message = e.code === 11000 ? 'Project exist' : httpStatus[400];
             const err = new APIError(message, httpStatus.BAD_REQUEST, true);
             return next(err);
         })
         .then((savedProject) => {
-            if(!savedProject) return;
+            if (!savedProject) return;
 
             let project = savedProject.toObject();
 
@@ -428,7 +428,15 @@ function publishProject(req, res, next) {
                 return next(err);
             }
 
-            Project.updateAsync({_id: req.params.id, owner: req.user.username}, {$set: {publishDate: new Date()}})
+            //Todo implement published public mechanizm
+            let publishedPublic = req.body.publishedPublic || true;
+
+            Project.updateAsync({_id: req.params.id, owner: req.user.username}, {
+                    $set: {
+                        publishDate: new Date(),
+                        publishedPublic: publishedPublic
+                    }
+                })
                 .then(result => {
                     if (result.nModified === 1) {
                         return res.status(200).json({success: true, data: 'Project published'})
@@ -465,7 +473,12 @@ function unPublishProject(req, res, next) {
 
     if (fs.existsSync(publishFolder)) {
         fsExtra.removeSync(publishFolder);
-        Project.updateAsync({_id: req.params.id, owner: req.user.username}, {$unset: {publishDate: 1}})
+        Project.updateAsync({_id: req.params.id, owner: req.user.username}, {
+                $unset: {
+                    publishDate: 1,
+                    publishedPublic: 1
+                }
+            })
             .then(result => {
                 if (result.nModified === 1) {
                     return res.status(200).json({success: true, data: 'Project unpublished'})
@@ -488,6 +501,37 @@ function unPublishProject(req, res, next) {
 
 }
 
+/**
+ * Get published public projects
+ * @param req
+ * @param res
+ * @param next
+ */
+function getPublishedProjects(req, res, next) {
+
+    const skip = req.query.skip || 0;
+    const limit = req.query.limit || 10;
+
+
+    Project.list({skip: skip, limit: limit}, false, false, true)
+        .then(publishedProject=> {
+            return res.status(200).json({success: true, data: _.map(publishedProject, (project)=>{
+                return _.pick(project, ['name', 'owner', 'id', 'thumbnail', 'description', 'root'])
+            })});
+        })
+        .catch((error)=> {
+            const err = new APIError('Can\'t get published projects', httpStatus.BAD_REQUEST, true);
+            return next(err);
+        });
+}
+
+/**
+ * Get projects count
+ * @param req
+ * @param res
+ * @param next
+ * @returns {*}
+ */
 function getProjectsCount(req, res, next) {
     if (!req.query.projectsCount) return next();
     let query = {
@@ -556,11 +600,11 @@ function getTemplatesList(req, res, next) {
     });
 }
 
-function getProjectSize(req, res, next){
-    if(!req.query.projectSize) return next();
-    let rootDir = 'projects/' + req.user.username+'/'+req.project.root;
+function getProjectSize(req, res, next) {
+    if (!req.query.projectSize) return next();
+    let rootDir = 'projects/' + req.user.username + '/' + req.project.root;
 
-    userCapacity.readSizeRecursive(rootDir, (err, size)=>{
+    userCapacity.readSizeRecursive(rootDir, (err, size)=> {
         size = err ? 0 : size;
 
         req.project.projectSize = utils.byteToMb(size);
@@ -582,6 +626,7 @@ export default {
     makePublic,
     publishProject,
     unPublishProject,
+    getPublishedProjects,
     importOnce,
     getTemplatesList,
     getProjectsCount,
