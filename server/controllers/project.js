@@ -509,8 +509,8 @@ function unPublishProject(req, res, next) {
  */
 function getPublishedProjects(req, res, next) {
 
-    const skip = req.query.skip || 0;
-    const limit = req.query.limit || 10;
+    const skip = parseInt(req.query.skip) || 0;
+    const limit = parseInt(req.query.limit) || 10;
 
 
     Project.list({skip: skip, limit: limit}, false, false, true)
@@ -520,7 +520,33 @@ function getPublishedProjects(req, res, next) {
             })});
         })
         .catch((error)=> {
+            console.log(error);
             const err = new APIError('Can\'t get published projects', httpStatus.BAD_REQUEST, true);
+            return next(err);
+        });
+}
+
+
+/**
+ * Get published public project
+ * @param req
+ * @param res
+ * @param next
+ */
+function getPublishedProject(req, res, next) {
+
+    if(!req.params.id){
+        const err = new APIError('Provide project id', httpStatus.BAD_REQUEST, true);
+        return next(err);
+    }
+
+
+    Project.get(req.params.id)
+        .then(publishedProject=> {
+            return res.status(200).json({success: true, data: _.pick(publishedProject, ['name', 'owner', 'id', 'thumbnail', 'description', 'root'])});
+        })
+        .catch((error)=> {
+            const err = new APIError('Can\'t get published project', httpStatus.BAD_REQUEST, true);
             return next(err);
         });
 }
@@ -626,6 +652,7 @@ export default {
     makePublic,
     publishProject,
     unPublishProject,
+    getPublishedProject,
     getPublishedProjects,
     importOnce,
     getTemplatesList,

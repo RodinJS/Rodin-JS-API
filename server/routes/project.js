@@ -295,6 +295,10 @@ router.route('/publish/:id')
 router.route('/published/list')
     .get(projectCtrl.getPublishedProjects);
 
+router.route('/published/:id')
+    .get(projectCtrl.getPublishedProject);
+
+
 /**
  * templates
  */
