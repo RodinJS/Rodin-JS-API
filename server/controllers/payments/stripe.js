@@ -120,55 +120,77 @@ function createCustomer(req, res, next) {
 
 function getCustomer(req, res, next) {
     if (req.user.stripe && req.user.stripe.customerId) {
-        stripe.customers.retrieve(req.user.stripe.customerId,  (err, customer)=> {
+        stripe.customers.retrieve(req.user.stripe.customerId, (err, customer)=> {
             if (err) {
                 const err = new APIError('Customer error!', httpStatus.BAD_REQUEST, true);
                 return next(err);
             }
-            res.status(200).json({success:true, data:customer});
+            res.status(200).json({success: true, data: customer});
         });
     }
-    else{
-        res.status(200).json({success:true, data:null});
+    else {
+        res.status(200).json({success: true, data: null});
     }
 }
 
-function createCard(req, res, next){
+function updateCustomer(req, res, next) {
+
+    if (_.isUndefined(req.query.default_source)) {
+        const err = new APIError('Provide default card', httpStatus.BAD_REQUEST, true);
+        return next(err);
+    }
+
+    if (req.user.stripe && req.user.stripe.customerId) {
+        stripe.customers.update(req.user.stripe.customerId, {default_source: req.query.default_source}, (err, customer)=> {
+            if (err) {
+                const err = new APIError('Customer update error!', httpStatus.BAD_REQUEST, true);
+                return next(err);
+            }
+            res.status(200).json({success: true, data: customer});
+        });
+    }
+    else {
+        const err = new APIError('No Customer!', httpStatus.BAD_REQUEST, true);
+        return next(err);
+    }
+}
+
+function createCard(req, res, next) {
     if (_.isUndefined(req.body.stripeToken)) {
         const err = new APIError('Provide stripe token!', httpStatus.BAD_REQUEST, true);
         return next(err);
     }
     if (req.user.stripe && req.user.stripe.customerId) {
         stripe.customers.createSource(req.user.stripe.customerId, {source: req.body.stripeToken}, (err, card) => {
-            if(err){
+            if (err) {
                 const err = new APIError('Card creation error!', httpStatus.BAD_REQUEST, true);
                 return next(err);
             }
-            res.status(200).json({success:true, data:card});
+            res.status(200).json({success: true, data: card});
         });
     }
-    else{
+    else {
         const err = new APIError('Customer does not exist!', httpStatus.BAD_REQUEST, true);
         return next(err);
     }
 
 }
 
-function deleteCard(req, res, next){
+function deleteCard(req, res, next) {
     if (_.isUndefined(req.query.cardId)) {
         const err = new APIError('Provide card id!', httpStatus.BAD_REQUEST, true);
         return next(err);
     }
     if (req.user.stripe && req.user.stripe.customerId) {
         stripe.customers.deleteCard(req.user.stripe.customerId, req.query.cardId, (err, confirmation) => {
-            if(err){
+            if (err) {
                 const err = new APIError('Card deletion error!', httpStatus.BAD_REQUEST, true);
                 return next(err);
             }
-            res.status(200).json({success:true, data:'Card successfuly deleted'});
+            res.status(200).json({success: true, data: 'Card successfuly deleted'});
         });
     }
-    else{
+    else {
         const err = new APIError('Customer does not exist!', httpStatus.BAD_REQUEST, true);
         return next(err);
     }
@@ -214,10 +236,10 @@ function createSubscription(req, res, next) {
         return next(err);
     }
 
-    if (_.isUndefined(req.body.stripeToken)) {
+   /* if (_.isUndefined(req.body.stripeToken)) {
         const err = new APIError('Provide stripe token!', httpStatus.BAD_REQUEST, true);
         return next(err);
-    }
+    }*/
 
     if (_.isUndefined(req.body.planId)) {
         const err = new APIError('Provide planId!', httpStatus.BAD_REQUEST, true);
@@ -227,7 +249,7 @@ function createSubscription(req, res, next) {
     const requestData = {
         customer: req.user.stripe.customerId,
         plan: req.body.planId,
-        source: req.body.stripeToken
+        //source: req.body.stripeToken
     };
 
     stripe.subscriptions.create(requestData, (err, subscription) => {
@@ -311,6 +333,7 @@ export default {
     removePlan,
     createCustomer,
     getCustomer,
+    updateCustomer,
     createSubscription,
     getSubscription,
     updateSubscription,

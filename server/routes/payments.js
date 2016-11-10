@@ -16,6 +16,7 @@ router.route('/stripe/plan')
 
 router.route('/stripe/customer')
     .get(check.ifTokenValid, stripeCtrl.getCustomer)
+    .put(check.ifTokenValid, stripeCtrl.updateCustomer)
     .post(check.ifTokenValid, stripeCtrl.createCustomer, stripeCtrl.updateUser);
 
 router.route('/stripe/card')
