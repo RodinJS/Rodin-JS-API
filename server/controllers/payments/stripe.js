@@ -100,7 +100,7 @@ function createCustomer(req, res, next) {
     const requestData = {
         email: req.user.email,
         source: req.body.stripeToken,
-        metadata:{
+        metadata: {
             username: req.user.username
         }
     };
@@ -112,48 +112,104 @@ function createCustomer(req, res, next) {
         }
         req.payment = {stripe: {}};
         req.payment.stripe.customerId = customer.id;
-        req.message = 'Customer created successfuly';
+        req.message = customer;
         next();
     });
 
 }
 
-/*
-function createCharge(req, res, next){
+function getCustomer(req, res, next) {
+    if (req.user.stripe && req.user.stripe.customerId) {
+        stripe.customers.retrieve(req.user.stripe.customerId,  (err, customer)=> {
+            if (err) {
+                const err = new APIError('Customer error!', httpStatus.BAD_REQUEST, true);
+                return next(err);
+            }
+            res.status(200).json({success:true, data:customer});
+        });
+    }
+    else{
+        res.status(200).json({success:true, data:null});
+    }
+}
 
+function createCard(req, res, next){
     if (_.isUndefined(req.body.stripeToken)) {
         const err = new APIError('Provide stripe token!', httpStatus.BAD_REQUEST, true);
         return next(err);
     }
-
-    if (_.isUndefined(req.body.amount)) {
-        const err = new APIError('Provide amount!', httpStatus.BAD_REQUEST, true);
+    if (req.user.stripe && req.user.stripe.customerId) {
+        stripe.customers.createSource(req.user.stripe.customerId, {source: req.body.stripeToken}, (err, card) => {
+            if(err){
+                const err = new APIError('Card creation error!', httpStatus.BAD_REQUEST, true);
+                return next(err);
+            }
+            res.status(200).json({success:true, data:card});
+        });
+    }
+    else{
+        const err = new APIError('Customer does not exist!', httpStatus.BAD_REQUEST, true);
         return next(err);
     }
 
-    if (_.isUndefined(req.body.currency)) {
-        const err = new APIError('Provide currency!', httpStatus.BAD_REQUEST, true);
-        return next(err);
-    }
-
-
-
-    const requestData = {
-        amount: req.body.amount,
-        currency: req.body.currency,
-        source: req.body.stripeToken,
-        description: "Charge for emily.garcia@example.com"
-    };
-
-    stripe.charges.create(requestData, function(err, charge) {
-        // asynchronously called
-    });
 }
-*/
+
+function deleteCard(req, res, next){
+    if (_.isUndefined(req.query.cardId)) {
+        const err = new APIError('Provide card id!', httpStatus.BAD_REQUEST, true);
+        return next(err);
+    }
+    if (req.user.stripe && req.user.stripe.customerId) {
+        stripe.customers.deleteCard(req.user.stripe.customerId, req.query.cardId, (err, confirmation) => {
+            if(err){
+                const err = new APIError('Card deletion error!', httpStatus.BAD_REQUEST, true);
+                return next(err);
+            }
+            res.status(200).json({success:true, data:'Card successfuly deleted'});
+        });
+    }
+    else{
+        const err = new APIError('Customer does not exist!', httpStatus.BAD_REQUEST, true);
+        return next(err);
+    }
+}
+
+/*
+ function createCharge(req, res, next){
+
+ if (_.isUndefined(req.body.stripeToken)) {
+ const err = new APIError('Provide stripe token!', httpStatus.BAD_REQUEST, true);
+ return next(err);
+ }
+
+ if (_.isUndefined(req.body.amount)) {
+ const err = new APIError('Provide amount!', httpStatus.BAD_REQUEST, true);
+ return next(err);
+ }
+
+ if (_.isUndefined(req.body.currency)) {
+ const err = new APIError('Provide currency!', httpStatus.BAD_REQUEST, true);
+ return next(err);
+ }
+
+
+
+ const requestData = {
+ amount: req.body.amount,
+ currency: req.body.currency,
+ source: req.body.stripeToken,
+ description: "Charge for emily.garcia@example.com"
+ };
+
+ stripe.charges.create(requestData, function(err, charge) {
+ // asynchronously called
+ });
+ }
+ */
 
 function createSubscription(req, res, next) {
 
-    if(!_.isUndefined(req.user.stripe.subscriptionId)){
+    if (!_.isUndefined(req.user.stripe.subscriptionId)) {
         const err = new APIError('Already subscribed!', httpStatus.BAD_REQUEST, true);
         return next(err);
     }
@@ -171,7 +227,7 @@ function createSubscription(req, res, next) {
     const requestData = {
         customer: req.user.stripe.customerId,
         plan: req.body.planId,
-        source:req.body.stripeToken
+        source: req.body.stripeToken
     };
 
     stripe.subscriptions.create(requestData, (err, subscription) => {
@@ -186,9 +242,9 @@ function createSubscription(req, res, next) {
     });
 }
 
-function updateSubscription(req, res, next){
+function updateSubscription(req, res, next) {
 
-    if(_.isUndefined(req.user.stripe.subscriptionId)){
+    if (_.isUndefined(req.user.stripe.subscriptionId)) {
         const err = new APIError('Not subscribed!', httpStatus.BAD_REQUEST, true);
         return next(err);
     }
@@ -214,17 +270,17 @@ function updateSubscription(req, res, next){
     });
 }
 
-function getSubscription(req, res, next){
+function getSubscription(req, res, next) {
     stripe.subscriptions.retrieve(req.user.stripe.subscriptionId, (err, subscription)=> {
         if (err) {
             const err = new APIError('Subscription error!', httpStatus.BAD_REQUEST, true);
             return next(err);
         }
-        res.status(200).json({success:true, data:subscription});
+        res.status(200).json({success: true, data: subscription});
     });
 }
 
-function deleteSubscription(req, res, next){
+function deleteSubscription(req, res, next) {
 
     stripe.subscriptions.del(req.user.stripe.subscriptionId, (err, confirmation)=> {
         if (err) {
@@ -249,4 +305,17 @@ function updateUser(req, res, next) {
 }
 
 
-export default {createPlan, getPlan, removePlan, createCustomer, createSubscription, getSubscription, updateSubscription, deleteSubscription, updateUser};
+export default {
+    createPlan,
+    getPlan,
+    removePlan,
+    createCustomer,
+    getCustomer,
+    createSubscription,
+    getSubscription,
+    updateSubscription,
+    deleteSubscription,
+    updateUser,
+    createCard,
+    deleteCard
+};

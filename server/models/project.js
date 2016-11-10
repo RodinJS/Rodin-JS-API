@@ -96,7 +96,8 @@ const ProjectSchema = new mongoose.Schema({
     default: Date.now
   },
   publishDate:{
-    type:Date
+    type:Date,
+    default: Date.now
   }
 });
 

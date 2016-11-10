@@ -14,8 +14,13 @@ router.route('/stripe/plan')
     .post(check.isGod, stripeCtrl.createPlan)
     .delete(check.isGod, stripeCtrl.removePlan);
 
-router.route('/stripe/customer/create')
+router.route('/stripe/customer')
+    .get(check.ifTokenValid, stripeCtrl.getCustomer)
     .post(check.ifTokenValid, stripeCtrl.createCustomer, stripeCtrl.updateUser);
+
+router.route('/stripe/card')
+    .post(check.ifTokenValid, stripeCtrl.createCard)
+    .delete(check.ifTokenValid, stripeCtrl.deleteCard);
 
 router.route('/stripe/subscription')
     .post(check.ifTokenValid, stripeCtrl.createSubscription, stripeCtrl.updateUser)
