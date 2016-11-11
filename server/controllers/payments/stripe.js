@@ -231,15 +231,15 @@ function deleteCard(req, res, next) {
 
 function createSubscription(req, res, next) {
 
-    if (!_.isUndefined(req.user.stripe.subscriptionId)) {
+    if (req.user.stripe && req.user.stripe.subscriptionId) {
         const err = new APIError('Already subscribed!', httpStatus.BAD_REQUEST, true);
         return next(err);
     }
 
-   /* if (_.isUndefined(req.body.stripeToken)) {
-        const err = new APIError('Provide stripe token!', httpStatus.BAD_REQUEST, true);
-        return next(err);
-    }*/
+    /* if (_.isUndefined(req.body.stripeToken)) {
+     const err = new APIError('Provide stripe token!', httpStatus.BAD_REQUEST, true);
+     return next(err);
+     }*/
 
     if (_.isUndefined(req.body.planId)) {
         const err = new APIError('Provide planId!', httpStatus.BAD_REQUEST, true);
@@ -248,7 +248,7 @@ function createSubscription(req, res, next) {
 
     const requestData = {
         customer: req.user.stripe.customerId,
-        plan: req.body.planId,
+        plan: req.body.planId
         //source: req.body.stripeToken
     };
 
@@ -257,7 +257,7 @@ function createSubscription(req, res, next) {
             const err = new APIError('Subscription error!', httpStatus.BAD_REQUEST, true);
             return next(err);
         }
-        req.payment = {stripe: req.user.stripe};
+        req.payment = {stripe: req.user.stripe, planId:subscription.plan.id};
         req.payment.stripe.subscriptionId = subscription.id;
         req.message = 'Subscription created successfuly';
         next();
@@ -285,7 +285,7 @@ function updateSubscription(req, res, next) {
             const err = new APIError('Subscription error!', httpStatus.BAD_REQUEST, true);
             return next(err);
         }
-        req.payment = {stripe: req.user.stripe};
+        req.payment = {stripe: req.user.stripe, planId:subscription.plan.id};
         req.payment.stripe.subscriptionId = subscription.id;
         req.message = 'Subscription created successfuly';
         next();
@@ -309,8 +309,7 @@ function deleteSubscription(req, res, next) {
             const err = new APIError('Subscription deletion error!', httpStatus.BAD_REQUEST, true);
             return next(err);
         }
-        req.payment = {stripe: req.user.stripe};
-        req.payment.stripe.subscriptionId = false;
+        req.payment = {stripe: _.omit(req.user.stripe.toObject(), 'subscriptionId'), planId:'Free'};
         req.message = 'Subscription deleted successfuly';
         next();
     });
@@ -318,12 +317,25 @@ function deleteSubscription(req, res, next) {
 }
 
 function updateUser(req, res, next) {
-    User.updateAsync({username: req.user.username}, {$set: req.payment})
-        .then(() => res.json({
+
+    let updatingData = req.payment;
+
+    if(req.payment.planId){
+        updatingData.role = req.payment.planId;
+        delete updatingData.planId;
+    }
+
+    User.findOneAndUpdate({username: req.user.username}, {$set: updatingData}, {new: true}, (err, user)=> {
+        if (err) {
+            const err = new APIError('Update error!', httpStatus.BAD_REQUEST, true);
+            return next(err);
+        }
+        res.json({
             "success": true,
-            "data": req.message || {}
-        }))
-        .error((e) => next(e));
+            "data": user//req.message || {}
+        })
+    })
+
 }
 
 
