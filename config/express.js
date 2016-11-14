@@ -16,6 +16,7 @@ import socketRoutes from '../server/routes/socket';
 import previewRoutes from '../server/routes/preview';
 import config from './env';
 import APIError from '../server/helpers/APIError';
+import passport from 'passport';
 
 const app = express();
 
@@ -27,7 +28,7 @@ if (config.env === 'development') {
 // app.use(bodyParser.json());
 app.use(bodyParser.json({limit: '20mb'}));
 app.use(bodyParser.urlencoded({ extended: true }));
-
+app.use(passport.initialize());
 app.use(cookieParser());
 app.use(compress());
 app.use(methodOverride());

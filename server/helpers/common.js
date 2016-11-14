@@ -20,7 +20,11 @@ const defTemplates = [
     }
 ];
 
+function getUserNameFromEmail(email){
+  const reMatch = /^([^@]*)@/;
+  return email.match(reMatch)[1].replace(/[^0-9a-z]/gi, '');
 
+}
 
 function generateCode(codeLength) {
     codeLength = codeLength || 5;
@@ -41,4 +45,4 @@ function byteToMb(num){
     return (num / 1024 / 1024).toFixed(2)
 }
 
-export default {generateCode, getDefTemplatesObject, byteToMb};
+export default {generateCode, getDefTemplatesObject, byteToMb, getUserNameFromEmail};

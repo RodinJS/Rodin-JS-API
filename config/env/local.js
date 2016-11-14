@@ -5,9 +5,9 @@ export default {
   port: 3000,
   social: {
     facebook: {
-      clientID: "216982868736046",
-      clientSecret: "12377e383557cecdc463f202cdc89758",
-      callbackURL: "https://rodin.space/api/auth/facebook/callback"
+      clientID: "216861662081500",
+      clientSecret: "e0803e562e860785852c6c3c72238f68",
+      callbackURL: "http://localhost:3000/api/auth/facebook/callback"
     },
     google: {
       clientID: "test",

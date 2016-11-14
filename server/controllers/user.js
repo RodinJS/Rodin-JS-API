@@ -65,7 +65,7 @@ function me(req, res) {
 			username: req.user.username,
 			role: req.user.role,
 			profile: req.user.profile,
-			creationDate:req.user.creationDate,
+			creationDate:req.user.creationDate
 		}
 	};
 
@@ -101,7 +101,8 @@ function create(req, res, next) {
                 profile: {
                     firstName: req.body.firstName,
                     lastName: req.body.lastName
-                }
+                },
+				usernameConfirmed:true
             };
 
             if(req.body.invitationCode){

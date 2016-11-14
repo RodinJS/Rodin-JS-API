@@ -5,8 +5,8 @@ import paramValidation from '../../config/param-validation';
 import authCtrl from '../controllers/auth';
 import check from '../controllers/check';
 import config from '../../config/env';
-// import '../../config/passport';
-// import passport from 'passport';
+
+import passport from '../../config/passport';
 
 const router = express.Router();	// eslint-disable-line new-cap
 
@@ -96,6 +96,9 @@ router.route('/login')
 router.route('/verify')
 	.post(authCtrl.verify);
 
+
+
+
 /**
  * @api {post} /api/auth/verify/email Verify if email exists
  * @apiName VerifyIfEmailExists
@@ -156,6 +159,18 @@ router.route('/verify')
 router.route('/logout')
 	.post(authCtrl.logout);
 
+
+
+// =====================================
+// FACEBOOK ROUTES =====================
+// =====================================
+// route for facebook authentication and login
+
+router.route('/facebook')
+	.get(passport.authenticate("facebook", {scope: ["email"], session: false}));
+
+router.route('/facebook/callback')
+	.get(passport.authenticate('facebook', {failureRedirect: '/login'}), authCtrl.socialLogin);
 
 /**
  *
