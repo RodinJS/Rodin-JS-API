@@ -5,6 +5,7 @@ import userCtrl from '../controllers/user';
 import check from '../controllers/check';
 import projectCtrl from '../controllers/project';
 import userCapacity from '../helpers/directorySize';
+import authCtrl from '../controllers/auth';
 // import '../../config/passport';
 // import passport from 'passport';
 
@@ -155,8 +156,6 @@ router.route('/')
 	 */
 	.post(validate(paramValidation.createUser), userCtrl.validateInvitationCode,  userCtrl.create);
 
-
-
 router.route('/me')
 	/**
 	 * @api {get} /api/user/me get current user info by jwt
@@ -302,6 +301,11 @@ router.route('/:username')
 	 *      }
 	 */
 	.delete(check.ifTokenValid, userCtrl.remove);
+
+
+router.route('/confirmUsername')
+	.post(check.ifTokenValid, userCtrl.confirmUsername, authCtrl.finalizeUser);
+
 
 /** Load user when API with username route parameter is hit */
 // router.param('username', userCtrl.load);

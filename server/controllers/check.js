@@ -104,7 +104,8 @@ function ifTokenValid(req, res, next) {
 							role: user.role,
 							profile: user.profile,
 							storageSize:user.storageSize,
-							creationDate:user.createdAt
+							creationDate:user.createdAt,
+							usernameConfirmed:user.usernameConfirmed
 						};
 
 						return next();

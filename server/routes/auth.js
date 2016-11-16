@@ -59,7 +59,7 @@ const router = express.Router();	// eslint-disable-line new-cap
  *      }
  */
 router.route('/login')
-	.post(validate(paramValidation.login), authCtrl.login);
+	.post(validate(paramValidation.login), authCtrl.login, authCtrl.finalizeUser);
 
 /**
  * @api {post} /api/auth/verify Verify token
@@ -161,16 +161,9 @@ router.route('/logout')
 
 
 
-// =====================================
-// FACEBOOK ROUTES =====================
-// =====================================
-// route for facebook authentication and login
+router.route('/socialAuth')
+	.post(authCtrl.socialAuth, authCtrl.finalizeUser);
 
-router.route('/facebook')
-	.get(passport.authenticate("facebook", {scope: ["email"], session: false}));
-
-router.route('/facebook/callback')
-	.get(passport.authenticate('facebook', {failureRedirect: '/login'}), authCtrl.socialLogin);
 
 /**
  *
