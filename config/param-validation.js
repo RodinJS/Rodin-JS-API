@@ -6,7 +6,7 @@ export default {
     body: {
       email: Joi.string().required(),
       username: Joi.string().required(),
-      password: Joi.string().required()
+      password: Joi.string().regex(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/).required()
     }
   },
 
@@ -40,7 +40,7 @@ export default {
       allowUnknownBody: false
     },
     body: {
-      password: Joi.string().required().min(3)
+      password: Joi.string().regex(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/).required()
     }
   },
 
