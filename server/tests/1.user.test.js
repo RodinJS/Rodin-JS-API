@@ -12,7 +12,7 @@ describe('## User APIs', () => {
         user: {
             email: 'gago@test.me',
             username: 'gagas',
-            password: '1234567890',
+            password: '1234567890AAa',
             role: 'Free'
         }
     };

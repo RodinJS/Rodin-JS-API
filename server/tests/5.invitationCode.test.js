@@ -12,7 +12,7 @@ describe('## Invitation APIs', () => {
         user: {
             email: 'test2@test.me',
             username: 'test2',
-            password: '1234567890'
+            password: '1234567890AAa'
         }
     };
 

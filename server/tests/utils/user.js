@@ -12,7 +12,7 @@ function login(done) {
 
     let user = {
         username: 'gagas',
-        password: '1234567890'
+        password: '1234567890AAa'
     };
 
     request(app)

@@ -47,7 +47,7 @@ describe('## Misc', () => {
         .post('/api/user')
         .send({
           username:'someUserName',
-          password: '123456'
+          password: '1234567890AAa'
         })
         .expect(httpStatus.BAD_REQUEST)
         .then(res => {
