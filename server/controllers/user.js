@@ -1,5 +1,6 @@
 import User from '../models/user';
 import InvitationCode from '../models/invitationCode';
+import PreSignUp from '../models/preSignUp';
 import Project from '../models/project';
 import jwt from 'jsonwebtoken';
 import APIError from '../helpers/APIError';
@@ -161,6 +162,10 @@ function create(req, res, next) {
                 userObject.storageSize = 500;
             }
 
+            if(req.preSignUpData){
+                userObject[req.preSignUpData.type] = req.preSignUpData.userId;
+            }
+
             user = new User(userObject);
 
             user.saveAsync()
@@ -181,7 +186,11 @@ function create(req, res, next) {
                         fs.mkdirSync(publishDir); //creating root dir for publish
                     }
 
-                    InvitationCode.delete(req.body.invitationCode);
+                    if (req.body.invitationCode)
+                        InvitationCode.delete(req.body.invitationCode);
+
+                    if(req.preSignUpData)
+                        PreSignUp.delete(req.preSignUpData.code);
 
                     const token = jwt.sign({
                         username: savedUser.username,
@@ -345,4 +354,42 @@ function validateInvitationCode(req, res, next) {
 
 }
 
-export default {load, get, create, update, updatePassword, list, remove, me, validateInvitationCode, confirmUsername};
+function validatePreSignUpCode(req, res, next) {
+    if (!req.body.signUpCode) return next();
+
+    PreSignUp.get(req.body.signUpCode)
+        .then((preSignUp)=> {
+
+            if (preSignUp) {
+
+                preSignUp = preSignUp.toObject();
+                let type = '';
+                switch(preSignUp.source){
+                    case 'steam':
+                        type = 'steamId';
+                        break;
+                    case 'oculus':
+                        type = 'oculusId';
+                        break;
+                }
+
+                req.preSignUpData = {
+                    userId:preSignUp.userId,
+                    type:type,
+                    code:req.body.signUpCode
+                };
+                return next();
+            }
+            else {
+                const err = new APIError('Sign up code wrong or does not exist', httpStatus.BAD_REQUEST, true);
+                return next(err);
+            }
+        },
+        e=>{
+            const err = new APIError('Sign up code wrong or does not exist', httpStatus.BAD_REQUEST, true);
+            return next(err);
+        });
+
+}
+
+export default {load, get, create, update, updatePassword, list, remove, me, validateInvitationCode, validatePreSignUpCode, confirmUsername};

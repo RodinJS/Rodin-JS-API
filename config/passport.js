@@ -7,6 +7,7 @@ import {ExtractJwt} from 'passport-jwt';
 import {Strategy as JwtStrategy} from 'passport-jwt';
 import {Strategy as FacebookStrategy} from 'passport-facebook';
 import {Strategy as GoogleStrategy} from 'passport-google-oauth2';
+import {Strategy as SteamStrategy} from 'passport-steam';
 // Setting JWT strategy options
 const jwtOptions = {
     // Telling Passport to check headers for JWT
@@ -95,9 +96,23 @@ const googleLogin = new GoogleStrategy({
     }
 );
 
+
+const steamLogin = new SteamStrategy({
+        returnURL: config.social.steam.callbackURL,
+        realm: 'http://localhost:3000/',
+        apiKey: config.social.steam.key
+    },
+    (identifier, profile, done) => {
+        console.log(identifier, profile);
+        User.findOne({steamId: identifier}, (err, user) => {
+            return done(err, user);
+        });
+    });
+
 passport.use(jwtLogin);
 passport.use(fbLogin);
 passport.use(googleLogin);
+passport.use(steamLogin);
 
 passport.serializeUser(function(user, done) {
     done(null, user);

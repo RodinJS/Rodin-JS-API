@@ -1,9 +1,11 @@
 import User from '../models/user';
+import PreSignUp from '../models/preSignUp';
 import InvitationCode from '../models/invitationCode';
 import jwt from 'jsonwebtoken';
 import httpStatus from '../helpers/httpStatus';
 import APIError from '../helpers/APIError';
 import Utils from '../helpers/common';
+import _    from 'lodash';
 
 
 import commonHelpers from '../helpers/common';
@@ -36,7 +38,6 @@ function login(req, res, next) {
             }
         });
 }
-
 
 /**
  * Handling user info from
@@ -75,6 +76,13 @@ function finalizeUser(req, res, next) {
     });
 }
 
+/**
+ *
+ * @param req
+ * @param res
+ * @param next
+ * @returns {*}
+ */
 function socialAuth(req, res, next){
     let queryMethod = {}, userObject = {
         email:req.body.email,
@@ -175,6 +183,36 @@ function logout(req, res) {
     return res.status(200).json({success: true}); //TODO: remove token from Redis!
 }
 
+
+function preSignUp(req, res, next){
+
+    if (_.isUndefined(req.body.userId)) {
+        const err = new APIError('Please provide userId', httpStatus.BAD_REQUEST, true);
+        return next(err);
+    }
+    if (_.isUndefined(req.body.source)) {
+        const err = new APIError('Please provide source (steam, oculus)', httpStatus.BAD_REQUEST, true);
+        return next(err);
+    }
+    const code = commonHelpers.generateCode(10);
+
+    let preSignUp = new PreSignUp({userId:req.body.userId, source:req.body.source, code:code});
+    preSignUp.save((err)=> {
+        if (err) {
+            const err = new APIError('Something wrong', httpStatus.BAD_REQUEST, true);
+            return next(err);
+        }
+        res.status(200).json({success: true, signUpCode: code});
+    })
+}
+
+/**
+ *
+ * @param req
+ * @param res
+ * @param next
+ * @returns {*}
+ */
 function generateInvitationCode(req, res, next) {
     if (!req.body.email) {
         const err = new APIError('Please provide email address', httpStatus.BAD_REQUEST, true);
@@ -193,6 +231,13 @@ function generateInvitationCode(req, res, next) {
 
 }
 
+/**
+ *
+ * @param req
+ * @param res
+ * @param next
+ * @returns {*}
+ */
 function removeInvitationCode(req, res, next) {
     let invitationCode = req.body.invitationCode;
     return InvitationCode.delete(invitationCode)
@@ -212,4 +257,4 @@ function removeInvitationCode(req, res, next) {
 }
 
 
-export default {login, logout, verify, generateInvitationCode, removeInvitationCode, finalizeUser, socialAuth};
+export default {login, logout, verify, generateInvitationCode, removeInvitationCode, finalizeUser, socialAuth, preSignUp};

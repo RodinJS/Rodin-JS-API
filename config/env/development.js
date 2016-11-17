@@ -13,6 +13,11 @@ export default {
       clientID: "test",
       clientSecret: "test",
       callbackURL: "http://yourdormain:3000/auth/google/callback"
+    },
+    steam: {
+      key: "D62596D7F75C45FFCFA07B938478844F",
+      clientSecret: "12377e383557cecdc463f202cdc89758",
+      callbackURL: "http://localhost:3000/api/auth/steam/callback"
     }
   },
   urlshortenerkey: "AIzaSyCe5zVHHHhhv40N-WzeffxWva377dPQnH8",
@@ -65,5 +70,6 @@ export default {
         clientSecret:'EFpzVs5Sad5mOnsqZqcJnw2X4MVozbD4iUzfD9K8AOrkdQl06_dx5VNkR80cy0f7Edyi5dUccTpz6rXb'
       }
     }
-  }
+  },
+  mandrill:'ouOYaHWxlDaabLYVjrG1BA'
 };

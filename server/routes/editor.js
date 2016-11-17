@@ -121,7 +121,9 @@ router.route('/serve')
      */
     .delete(check.ifTokenValid, check.project, editorCtrl.deleteFile);
 
-
+/**
+ *
+ */
 router.route('/search')
     .get(check.ifTokenValid, check.project, editorCtrl.searchInsideFiles);
 

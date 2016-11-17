@@ -120,6 +120,12 @@ const UserSchema = new mongoose.Schema({
     googleId: {
         type: String
     },
+    steamId:{
+        type:String
+    },
+    oculusId:{
+        type:String
+    },
     editorSettings: {
         theme: {
             name: {

@@ -130,6 +130,7 @@ function putFile(req, res, next) {
                         return next(err);
                     }
                     // console.log('stats: ' + JSON.stringify(stats));
+                    updateProjectDate(req);
                     res.status(200).send({"success": true});
                 });
             });
@@ -151,8 +152,7 @@ function putFile(req, res, next) {
                 const e = new APIError('Could not write to file!', httpStatus.COULD_NOT_WRITE_TO_FILE, true);
                 return next(e);
             }
-            /*transpiler.requestTranspile(filePath, folderPath, ()=>{
-             });*/
+            updateProjectDate(req);
             res.status(200).send({"success": true});
 
         });
@@ -195,6 +195,7 @@ function postFile(req, res, next) {
                         return next(err);
                     }
                     fs.appendFileSync(filePath, '//Created by ' + req.user.username);
+                    updateProjectDate(req);
                     res.status(200).send({"success": true, "data": 'The file was created!'});
                 });
             }
@@ -211,6 +212,7 @@ function postFile(req, res, next) {
                         err = new APIError('Can not create folder!', httpStatus.COULD_NOT_CREATE_FILE, true);
                         return next(err);
                     }
+                    updateProjectDate(req);
                     res.status(200).send({"success": true, "data": 'The folder was created!'});
                 });
             }
@@ -249,6 +251,7 @@ function postFile(req, res, next) {
                                     const e = new APIError('Could not write to file!', httpStatus.COULD_NOT_WRITE_TO_FILE, true);
                                     return next(e);
                                 }
+                                updateProjectDate(req);
                                 res.status(200).send({"success": true, "data": 'The file was copeid!'});
                             });
                         }
@@ -282,6 +285,7 @@ function postFile(req, res, next) {
                             return next(err);
                         }
                         else {
+                            updateProjectDate(req);
                             res.status(200).send({"success": true, "data": 'The folder was copeid!'});
                         }
                     });
@@ -360,22 +364,22 @@ function uploadFiles(req, res, next) {
 
 
         if(type === 'directory'){
-            startUpload(folderPath, req.files, 'directory', res, next);
+            startUpload(folderPath, req, 'directory', res, next);
         }
         else{
 
             if (action === 'replace')
 
-                startUpload(folderPath, req.files, action, res, next);
+                startUpload(folderPath, req, action, res, next);
 
             else if (action === 'rename') {
 
-                let uploadingFiles = _.map(req.files, function (file) {
+                req.files = _.map(req.files, function (file) {
                     file.originalname = file.originalname.replace(/(\.[\w\d_-]+)$/i, '_1$1');
                     return file;
                 });
 
-                startUpload(folderPath, uploadingFiles, action, res, next);
+                startUpload(folderPath, req, action, res, next);
             }
 
             else {
@@ -394,7 +398,7 @@ function uploadFiles(req, res, next) {
                     });
                 }
                 else
-                    startUpload(folderPath, req.files, action, res, next);
+                    startUpload(folderPath, req, action, res, next);
             }
 
         }
@@ -403,14 +407,14 @@ function uploadFiles(req, res, next) {
     });
 }
 
-function startUpload(folderPath, files, action, res, next) {
+function startUpload(folderPath, req, action, res, next) {
     const PromisifiedFS = Promise.promisifyAll(fs);
-    var promises = files.map((file) => {
+    var promises = req.files.map((file) => {
         return PromisifiedFS.writeFileAsync(folderPath + '/' + file.originalname, new Buffer(file.buffer));
     });
 
     if (action === 'directory') {
-        const zipFile = folderPath + '/' + files[0].originalname;
+        const zipFile = folderPath + '/' + req.files[0].originalname;
 
         Promise.all(promises).then(()=> {
             Minizip.unzip(zipFile, folderPath, (err) =>{
@@ -421,6 +425,7 @@ function startUpload(folderPath, files, action, res, next) {
                 else{
                     if (fs.existsSync(zipFile)) {
                         fs.unlink(zipFile, (err)=>{
+                            updateProjectDate(req);
                             res.status(200).send({"success": true, "data": 'Files successfuly uploaded!'});
                         })
                     }
@@ -433,6 +438,7 @@ function startUpload(folderPath, files, action, res, next) {
     }
     else {
         Promise.all(promises).then(()=> {
+            updateProjectDate(req);
             res.status(200).send({"success": true, "data": 'Files successfuly uploaded!'});
         }).catch((error) => {
             const err = new APIError('Upload error', httpStatus.BAD_REQUEST, true);
@@ -507,6 +513,7 @@ function deleteFile(req, res, next) {
                     const err = new APIError('Could not delete object!', httpStatus.COULD_NOT_DELETE_OBJECT, true);
                     return next(err);
                 } else {
+                    updateProjectDate(req);
                     res.status(200).send({"success": true, "data": filePath});
                 }
             });
@@ -528,6 +535,7 @@ function deleteFile(req, res, next) {
         };
         if (fs.existsSync(filePath)) {
             deleteFolderRecursive(filePath);
+            updateProjectDate(req);
             res.status(200).send({"success": true, "data": filePath});
         } else {
             const err = new APIError('Path does not exist!', httpStatus.PATH_DOES_NOT_EXIST, true);
@@ -543,6 +551,28 @@ function readFile(path, callback) {
     } catch (e) {
         callback(e);
     }
+}
+
+function updateProjectDate(req, cb){
+
+    Project.updateAsync({
+            _id: req.query.id || req.params.id,
+            name: req.project.name
+        },
+        {
+            $set: {updatedAt:new Date()}
+        })
+       /* .then(result => {
+            if (result.nModified === 1) {
+                console.log('success');
+            }
+            else {
+                console.log('error');
+            }
+        })
+        .catch((e) => {
+            console.log(e);
+        });*/
 }
 
 

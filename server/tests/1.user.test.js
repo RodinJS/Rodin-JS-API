@@ -14,6 +14,15 @@ describe('## User APIs', () => {
             username: 'gagas',
             password: '1234567890AAa',
             role: 'Free'
+        },
+        preSignUpData:{
+            userId:76561198135309542,
+            source:'steam'
+        },
+        preSignUpUser:{
+            email:'presignupuser@test.me',
+            username:'x40steamid',
+            password:'1234567890AAa'
         }
     };
 
@@ -30,6 +39,50 @@ describe('## User APIs', () => {
                 });
         });
     });
+
+    describe('# PRE SIGN UP AND SIGN UP FLOW', () => {
+
+        it('should create pre sign up user code', (done) => {
+            request(app)
+                .post('/api/auth/preSignUp')
+                .send(info.preSignUpData)
+                .expect(httpStatus.OK)
+                .then(res => {
+                    expect(res.body.success).to.equal(true);
+                    expect(res.body.signUpCode).to.be.a('string');
+                    info.preSignUpUser.signUpCode = res.body.signUpCode;
+                    done();
+                });
+        });
+
+        it('should create a new user with signUpCode', (done) => {
+            request(app)
+                .post('/api/user')
+                .send(info.preSignUpUser)
+                //.expect(httpStatus.OK)
+                .then(res => {
+                    console.log(res.body);
+                    expect(res.body.data.user.email).to.equal(info.preSignUpUser.email);
+                    expect(res.body.data.user.role).to.equal('Free');
+                    info.token = res.body.data.token;
+                    done();
+                });
+        });
+
+        it('should delete a signed up code user', (done) => {
+            request(app)
+                .delete('/api/user/'+info.preSignUpUser.username)
+                .set({ 'x-access-token':info.token})
+                .expect(httpStatus.OK)
+                .then(res => {
+                    expect(res.body.success).to.equal(true);
+                    done();
+                });
+        });
+
+
+    });
+
 
     // describe('# GET /api/user/:userEmail', () => {
     //   it('should get user details', (done) => {

@@ -164,6 +164,17 @@ router.route('/logout')
 router.route('/socialAuth')
 	.post(authCtrl.socialAuth, authCtrl.finalizeUser);
 
+router.route('/preSignUp')
+	.post(authCtrl.preSignUp)
+
+
+/*router.route('/steam')
+	.get(passport.authenticate("steam"));
+
+router.route('/steam/callback')
+	.get(passport.authenticate('steam', {failureRedirect: '/login'}));*/
+
+
 
 /**
  *
