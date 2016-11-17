@@ -15,13 +15,23 @@ describe('## User APIs', () => {
             password: '1234567890AAa',
             role: 'Free'
         },
-        preSignUpData:{
+        preSignUpDataSteam:{
             userId:76561198135309542,
             source:'steam'
         },
-        preSignUpUser:{
+        preSignUpUserSteam:{
             email:'presignupuser@test.me',
             username:'x40steamid',
+            password:'1234567890AAa'
+        },
+
+        preSignUpDataOculus:{
+            userId:494910104949,
+            source:'oculus'
+        },
+        preSignUpUserOculus:{
+            email:'presignupuseroculus@test.me',
+            username:'x40oculusId',
             password:'1234567890AAa'
         }
     };
@@ -40,39 +50,103 @@ describe('## User APIs', () => {
         });
     });
 
-    describe('# PRE SIGN UP AND SIGN UP FLOW', () => {
+    describe('#SOCIAL (oculus, steam) SIGN UP / LOG IN', () => {
 
-        it('should create pre sign up user code', (done) => {
+        it('should create pre sign up steam user code', (done) => {
             request(app)
                 .post('/api/auth/preSignUp')
-                .send(info.preSignUpData)
+                .send(info.preSignUpDataSteam)
                 .expect(httpStatus.OK)
                 .then(res => {
                     expect(res.body.success).to.equal(true);
                     expect(res.body.signUpCode).to.be.a('string');
-                    info.preSignUpUser.signUpCode = res.body.signUpCode;
+                    info.preSignUpUserSteam.signUpCode = res.body.signUpCode;
                     done();
                 });
         });
 
-        it('should create a new user with signUpCode', (done) => {
+        it('should create a new steam user with signUpCode', (done) => {
             request(app)
                 .post('/api/user')
-                .send(info.preSignUpUser)
-                //.expect(httpStatus.OK)
+                .send(info.preSignUpUserSteam)
+                .expect(httpStatus.OK)
                 .then(res => {
-                    console.log(res.body);
-                    expect(res.body.data.user.email).to.equal(info.preSignUpUser.email);
+                    expect(res.body.data.user.email).to.equal(info.preSignUpUserSteam.email);
                     expect(res.body.data.user.role).to.equal('Free');
-                    info.token = res.body.data.token;
+                    //info.preSignUpUserSteam.token = res.body.data.token;
                     done();
                 });
         });
 
-        it('should delete a signed up code user', (done) => {
+        it('should login steam user', (done) => {
             request(app)
-                .delete('/api/user/'+info.preSignUpUser.username)
-                .set({ 'x-access-token':info.token})
+                .post('/api/auth/social/steam')
+                .send({id:info.preSignUpDataSteam.userId})
+                .expect(httpStatus.OK)
+                .then(res => {
+                    expect(res.body.data.user.email).to.equal(info.preSignUpUserSteam.email);
+                    expect(res.body.data.user.role).to.equal('Free');
+                    info.preSignUpUserSteam.token = res.body.data.token;
+                    done();
+                });
+        });
+
+        it('should delete steam user', (done) => {
+            request(app)
+                .delete('/api/user/'+info.preSignUpUserSteam.username)
+                .set({ 'x-access-token':info.preSignUpUserSteam.token})
+                .expect(httpStatus.OK)
+                .then(res => {
+                    expect(res.body.success).to.equal(true);
+                    done();
+                });
+        });
+
+
+
+        it('should create pre sign up oculus user code', (done) => {
+            request(app)
+                .post('/api/auth/preSignUp')
+                .send(info.preSignUpDataOculus)
+                .expect(httpStatus.OK)
+                .then(res => {
+                    expect(res.body.success).to.equal(true);
+                    expect(res.body.signUpCode).to.be.a('string');
+                    info.preSignUpUserOculus.signUpCode = res.body.signUpCode;
+                    done();
+                });
+        });
+
+        it('should create a new oculus user with signUpCode', (done) => {
+            request(app)
+                .post('/api/user')
+                .send(info.preSignUpUserOculus)
+                .expect(httpStatus.OK)
+                .then(res => {
+                    expect(res.body.data.user.email).to.equal(info.preSignUpUserOculus.email);
+                    expect(res.body.data.user.role).to.equal('Free');
+                    //info.preSignUpUserSteam.token = res.body.data.token;
+                    done();
+                });
+        });
+
+        it('should login oculus user', (done) => {
+            request(app)
+                .post('/api/auth/social/oculus')
+                .send({id:info.preSignUpDataOculus.userId})
+                .expect(httpStatus.OK)
+                .then(res => {
+                    expect(res.body.data.user.email).to.equal(info.preSignUpUserOculus.email);
+                    expect(res.body.data.user.role).to.equal('Free');
+                    info.preSignUpUserOculus.token = res.body.data.token;
+                    done();
+                });
+        });
+
+        it('should delete oculus user', (done) => {
+            request(app)
+                .delete('/api/user/'+info.preSignUpUserOculus.username)
+                .set({ 'x-access-token':info.preSignUpUserOculus.token})
                 .expect(httpStatus.OK)
                 .then(res => {
                     expect(res.body.success).to.equal(true);

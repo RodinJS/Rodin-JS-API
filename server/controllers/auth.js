@@ -96,14 +96,24 @@ function socialAuth(req, res, next){
         usernameConfirmed:false
     };
 
-    if(req.body.type == 'facebook'){
+    if(req.params.socialName == 'facebook'){
       queryMethod = {$or: [{facebookId: req.body.id}, {email: req.body.email}]};
       userObject.facebookId = req.body.id;
     }
 
-    else if(req.body.type == 'google'){
+    else if(req.params.socialName == 'google'){
         queryMethod = {$or: [{googleId: req.body.id}, {email: req.body.email}]};
         userObject.googleId = req.body.id;
+    }
+
+    else if(req.params.socialName == 'steam'){
+        queryMethod = {$or: [{steamId: req.body.id}, {email: req.body.email}]};
+        userObject.steamId = req.body.id;
+    }
+
+    else if(req.params.socialName == 'oculus'){
+        queryMethod = {$or: [{oculusId: req.body.id}, {email: req.body.email}]};
+        userObject.oculusId = req.body.id;
     }
 
     else {
@@ -132,10 +142,10 @@ function socialAuth(req, res, next){
         else{
             let userUpdate = false;
 
-            if(req.body.type == 'facebook' && !user.facebookId){
+            if(req.params.socialName == 'facebook' && !user.facebookId){
                userUpdate  = {$set: {facebookId:req.body.id}}
             }
-            else if(req.body.type == 'google' && !user.googleId){
+            else if(req.params.socialName == 'google' && !user.googleId){
               userUpdate = {$set: {googleId:req.body.id}}
             }
 

@@ -161,7 +161,7 @@ router.route('/logout')
 
 
 
-router.route('/socialAuth')
+router.route('/social/:socialName')
 	.post(authCtrl.socialAuth, authCtrl.finalizeUser);
 
 router.route('/preSignUp')
