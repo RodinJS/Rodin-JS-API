@@ -130,7 +130,14 @@ const UserSchema = new mongoose.Schema({
         }
     },
     resetPasswordToken: {type: String},
-    resetPasswordExpires: {type: Date}
+    resetPasswordExpires: {type: Date},
+    usernameConfirmed:{
+        type:Boolean
+    },
+    stripe:{
+        customerId:String,
+        subscriptionId:String
+    }
 });
 
 // Pre-save of user to database, hash password if password is modified or new

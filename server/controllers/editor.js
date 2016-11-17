@@ -244,7 +244,7 @@ function postFile(req, res, next) {
                     readFile(filePath, (err, content)=> {
 
                         if (err && err.code === "ENOENT") {
-                            fs.writeFile(filePath, content, (err) => {
+                            fsExtra.copy(srcPath, filePath,  (err) => {
                                 if (err) {
                                     const e = new APIError('Could not write to file!', httpStatus.COULD_NOT_WRITE_TO_FILE, true);
                                     return next(e);
@@ -253,7 +253,7 @@ function postFile(req, res, next) {
                             });
                         }
                         else {
-                            const e = new APIError('Cannot create  ' + req.body.copyName + ' file already exist', httpStatus.COULD_NOT_WRITE_TO_FILE, true);
+                            const e = new APIError('Cannot create  ' + req.body.name + ' file already exist', httpStatus.COULD_NOT_WRITE_TO_FILE, true);
                             return next(e);
                         }
 

@@ -5,9 +5,9 @@ export default {
   port: 3000,
   social: {
     facebook: {
-      clientID: "test",
-      clientSecret: "test",
-      callbackURL: "http://localhost:3000/auth/facebook/callback"
+      clientID: "216982868736046",
+      clientSecret: "12377e383557cecdc463f202cdc89758",
+      callbackURL: "https://rodin.space/api/auth/facebook/callback"
     },
     google: {
       clientID: "test",
@@ -58,6 +58,11 @@ export default {
       stripe:{
         secret:'sk_test_Okevb5aLgncqi6W6lmhItxoV',
         publish:'pk_test_ubTC5Za2RM1vj2VlRYPhvX2r'
+      },
+      paypal:{
+        mode:'sandbox',
+        clientId:'AcILaf8OIR1IFIG5bCG6OaS7WI3DISrJHVkGgWWYjQ22Dwl-Covb1byyxI7zzy6ks9rLMLDNsbwIFqye',
+        clientSecret:'EFpzVs5Sad5mOnsqZqcJnw2X4MVozbD4iUzfD9K8AOrkdQl06_dx5VNkR80cy0f7Edyi5dUccTpz6rXb'
       }
     }
   }

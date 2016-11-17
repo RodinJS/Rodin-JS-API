@@ -7,29 +7,30 @@ import httpStatus from '../helpers/httpStatus';
 import fs from 'fs';
 import fsExtra from 'fs-extra';
 import utils from '../helpers/common';
+import _ from 'lodash';
 
 import config from '../../config/env';
 /**
  * Load user and append to req.
  */
 function load(req, res, next, username) {
-	jwt.verify(req.headers['x-access-token'], config.jwtSecret, function(err, decoded) {
-		if(err) {
-			const err = new APIError('Invalid token or secret', httpStatus.BAD_REQUEST, true);
-			return res.status(httpStatus.BAD_REQUEST).json(err);
-		} else {
-			User.get(decoded.username).then((user) => {
-				req.user = {
-					email: user.email,
-					username: user.username,
-					role: user.role,
-					profile: user.profile
-				};
+    jwt.verify(req.headers['x-access-token'], config.jwtSecret, function (err, decoded) {
+        if (err) {
+            const err = new APIError('Invalid token or secret', httpStatus.BAD_REQUEST, true);
+            return res.status(httpStatus.BAD_REQUEST).json(err);
+        } else {
+            User.get(decoded.username).then((user) => {
+                req.user = {
+                    email: user.email,
+                    username: user.username,
+                    role: user.role,
+                    profile: user.profile
+                };
 
-				return next();
-			}).error((e) => next(e));
-		}
-	});
+                return next();
+            }).error((e) => next(e));
+        }
+    });
 }
 
 
@@ -38,17 +39,17 @@ function load(req, res, next, username) {
  * @returns {User}
  */
 function get(req, res) {
-	let response = {
-		"success": true,
-		"data": {
-			email: req.user.email,
-			username: req.user.username,
-			role: req.user.role,
-			profile: req.user.profile
-		}
-	};
+    let response = {
+        "success": true,
+        "data": {
+            email: req.user.email,
+            username: req.user.username,
+            role: req.user.role,
+            profile: req.user.profile
+        }
+    };
 
-	return res.status(200).json(response);
+    return res.status(200).json(response);
 }
 
 /**
@@ -58,26 +59,76 @@ function get(req, res) {
 function me(req, res) {
 
 
-	let response = {
-		"success": true,
-		"data": {
-			email: req.user.email,
-			username: req.user.username,
-			role: req.user.role,
-			profile: req.user.profile,
-			creationDate:req.user.creationDate,
-		}
-	};
+    let response = {
+        "success": true,
+        "data": {
+            email: req.user.email,
+            username: req.user.username,
+            role: req.user.role,
+            profile: req.user.profile,
+            creationDate: req.user.creationDate,
+            usernameConfirmed: req.user.usernameConfirmed
+        }
+    };
 
+	//concat stripe
+	if(req.user.stripe)
+		response.data.stripe = req.user.stripe;
+
+	//concat projects count
 	if(req.query.projectsCount)
 		response.data.projects = req.projectsCount;
 
+	//concat usedStorage
 	if(req.query.usedStorage)
 		response.data.usedStorage = utils.byteToMb(req.usedStorage);
 
 
+    return res.status(200).json(response);
+}
 
-	return res.status(200).json(response);
+
+/**
+ * Confirm User name
+ * @param req
+ * @param res
+ */
+function confirmUsername(req, res, next) {
+
+    if(req.user.usernameConfirmed){
+        const err = new APIError('Username updated', httpStatus.BAD_REQUEST, true);
+        return res.status(httpStatus.BAD_REQUEST).json(err);
+    }
+
+    if (_.isUndefined(req.body.username)) {
+        const err = new APIError('Please provide username', httpStatus.BAD_REQUEST, true);
+        return res.status(httpStatus.BAD_REQUEST).json(err);
+    }
+    req.body.usernameConfirmed = true;
+    User.findOneAndUpdate({username: req.user.username}, {$set: req.body}, {new: true}, (err, user)=> {
+        if (err) {
+            const err = new APIError('Something went wrong', httpStatus.BAD_REQUEST, true);
+            return res.status(httpStatus.BAD_REQUEST).json(err);
+        }
+        let rootDir = 'projects/' + user.username;
+        let publicDir = 'public/' + user.username;
+        let publishDir = 'publish/' + user.username;
+
+        if (!fs.existsSync(rootDir)) {
+            fs.mkdirSync(rootDir); //creating root dir for project
+        }
+
+        if (!fs.existsSync(publicDir)) {
+            fs.mkdirSync(publicDir); //creating root dir for public
+        }
+
+        if (!fs.existsSync(publishDir)) {
+            fs.mkdirSync(publishDir); //creating root dir for publish
+        }
+
+        req.user = user;
+        next();
+    });
 }
 
 /**
@@ -87,12 +138,12 @@ function me(req, res) {
  * @returns {User}
  */
 function create(req, res, next) {
-	User.get(req.body.username)
-		.then(user => {
-			if (user) {
-				const err = new APIError('User exists', 311);
-				return next(err);
-			}
+    User.get(req.body.username)
+        .then(user => {
+            if (user) {
+                const err = new APIError('User exists', 311);
+                return next(err);
+            }
 
             let userObject = {
                 email: req.body.email,
@@ -101,63 +152,64 @@ function create(req, res, next) {
                 profile: {
                     firstName: req.body.firstName,
                     lastName: req.body.lastName
-                }
+                },
+                usernameConfirmed: true
             };
 
-            if(req.body.invitationCode){
-				userObject.role = 'Premium';
-				userObject.storageSize = 500;
-			}
+            if (req.body.invitationCode) {
+                userObject.role = 'Premium';
+                userObject.storageSize = 500;
+            }
 
-			user = new User(userObject);
+            user = new User(userObject);
 
-			user.saveAsync()
-				.then((savedUser) => {
-					let rootDir = 'projects/' + savedUser.username;
-					let publicDir = 'public/' + savedUser.username;
-					let publishDir = 'publish/' + savedUser.username;
+            user.saveAsync()
+                .then((savedUser) => {
+                    let rootDir = 'projects/' + savedUser.username;
+                    let publicDir = 'public/' + savedUser.username;
+                    let publishDir = 'publish/' + savedUser.username;
 
-					if (!fs.existsSync(rootDir)) {
-						fs.mkdirSync(rootDir); //creating root dir for project
-					}
+                    if (!fs.existsSync(rootDir)) {
+                        fs.mkdirSync(rootDir); //creating root dir for project
+                    }
 
-					if (!fs.existsSync(publicDir)) {
-						fs.mkdirSync(publicDir); //creating root dir for public
-					}
+                    if (!fs.existsSync(publicDir)) {
+                        fs.mkdirSync(publicDir); //creating root dir for public
+                    }
 
-					if (!fs.existsSync(publishDir)) {
-						fs.mkdirSync(publishDir); //creating root dir for publish
-					}
+                    if (!fs.existsSync(publishDir)) {
+                        fs.mkdirSync(publishDir); //creating root dir for publish
+                    }
 
                     InvitationCode.delete(req.body.invitationCode);
 
                     const token = jwt.sign({
-						username: savedUser.username,
-						role: savedUser.role,
-						random: savedUser.password.slice(-15)
-					}, config.jwtSecret, {
-						expiresIn: "7d"
-					});
+                        username: savedUser.username,
+                        role: savedUser.role,
+                        random: savedUser.password.slice(-15)
+                    }, config.jwtSecret, {
+                        expiresIn: "7d"
+                    });
 
-					return res.json({
-						"success": true,
-						"data": {
-							token,
-							user: {
-								email: savedUser.email,
-								username: savedUser.username,
-								role: savedUser.role,
-								profile: savedUser.profile
-							}
-						}
-					});
-				})
-				.error((e) => {
-					const err = new APIError("Something went wrong!", httpStatus.SOMETHING_WENT_WRONG, true);
-					return next(err);
-				});
-		})
-		.error((e) => next(e));
+                    return res.json({
+                        "success": true,
+                        "data": {
+                            token,
+                            user: {
+                                email: savedUser.email,
+                                username: savedUser.username,
+                                role: savedUser.role,
+                                profile: savedUser.profile
+                            }
+                        }
+                    });
+                })
+                .error((e) => {
+                    const err = new APIError("Something went wrong!", httpStatus.SOMETHING_WENT_WRONG, true);
+                    return next(err);
+                });
+        })
+        .error((e) => next(e));
 }
 
 /**
@@ -167,35 +219,35 @@ function create(req, res, next) {
  * @returns {User}
  */
 function update(req, res, next) {
-  User.updateAsync(
-    {
-      username: req.params.username,
-    },
-    {
-      $set: req.body
-    }
-  ).then(() => res.json({
-    "success": true,
-    "data": {}
-  }))
-    .error((e) => next(e));
+    User.updateAsync(
+        {
+            username: req.params.username
+        },
+        {
+            $set: req.body
+        }
+    ).then(() => res.json({
+            "success": true,
+            "data": {}
+        }))
+        .error((e) => next(e));
 }
 
 function updatePassword(req, res, next) {
-  User.findOneAsync(
-    {
-      username: req.user.username
-    }
-  ).then((user) => {
-    user.password = req.body.password;
-    user.saveAsync()
-      .then(() => {
-        res.json({
-          "success": true,
-          "data": {}
-        });
-      }).error((e) => next(e));
-  }).error((e) => next(e));
+    User.findOneAsync(
+        {
+            username: req.user.username
+        }
+    ).then((user) => {
+        user.password = req.body.password;
+        user.saveAsync()
+            .then(() => {
+                res.json({
+                    "success": true,
+                    "data": {}
+                });
+            }).error((e) => next(e));
+    }).error((e) => next(e));
 }
 
 /**
@@ -205,9 +257,9 @@ function updatePassword(req, res, next) {
  * @returns {User[]}
  */
 function list(req, res, next) {
-	const { limit = 50, skip = 0 } = req.query;
-	User.list({ limit, skip }).then((users) =>	res.json(users))
-		.error((e) => next(e));
+    const { limit = 50, skip = 0 } = req.query;
+    User.list({limit, skip}).then((users) => res.json(users))
+        .error((e) => next(e));
 }
 
 /**
@@ -215,11 +267,11 @@ function list(req, res, next) {
  * @returns {User}
  */
 function remove(req, res, next) {
-	const username = req.user.username;
+    const username = req.user.username;
 
-	User.get(username)
-	    .then(user => {
-	    	if (user) {
+    User.get(username)
+        .then(user => {
+            if (user) {
                 let rootDir = 'projects/' + username;
                 let publicDir = 'public/' + username;
                 let publishDir = 'publish/' + username;
@@ -228,48 +280,48 @@ function remove(req, res, next) {
                 fsExtra.removeSync(publicDir);
                 fsExtra.removeSync(publishDir);
 
-	      		for(let i = 0; i < user.projects.length; i++) {
+                for (let i = 0; i < user.projects.length; i++) {
 
-                    Project.removeAsync({ _id : user.projects[i] })
+                    Project.removeAsync({_id: user.projects[i]})
                         .then((deletedProject) => {
                         }).error((e) => next(e));
-	      		}
-	        } else {
-				const err = new APIError("Something went wrong!", 312, true);
-				return next(err);
-			}
-			User.removeAsync({ username : username })
-				.then((deletedUser) => res.status(200).json({
-					"success": true,
-					"data": deletedUser
-				}))
-				.error((e) => next(e));
-	    })
-		.catch((e) => {
-			const err = new APIError('User not found!', httpStatus.BAD_REQUEST, true);
-			return next(err);
-		});
+                }
+            } else {
+                const err = new APIError("Something went wrong!", 312, true);
+                return next(err);
+            }
+            User.removeAsync({username: username})
+                .then((deletedUser) => res.status(200).json({
+                    "success": true,
+                    "data": deletedUser
+                }))
+                .error((e) => next(e));
+        })
+        .catch((e) => {
+            const err = new APIError('User not found!', httpStatus.BAD_REQUEST, true);
+            return next(err);
+        });
 
 
 }
 
-function validateInvitationCode(req, res, next){
-	if(!req.body.invitationCode) return next();
+function validateInvitationCode(req, res, next) {
+    if (!req.body.invitationCode) return next();
 
     InvitationCode.get(req.body.invitationCode)
-        .then((invitationCode)=>{
+        .then((invitationCode)=> {
 
-            if(invitationCode){
+            if (invitationCode) {
 
                 invitationCode = invitationCode.toObject();
                 let dateDiff = dateDiffInDays(invitationCode.creationDate, new Date());
-                if(invitationCode.email == req.body.email && dateDiff < 7){
+                if (invitationCode.email == req.body.email && dateDiff < 7) {
                     return next();
                 }
-                else{
+                else {
                     delete req.body.invitationCode;
 
-                    if(dateDiff > 7)
+                    if (dateDiff > 7)
                         InvitationCode.delete(invitationCode.invitationCode);
 
                     return next();
@@ -284,7 +336,7 @@ function validateInvitationCode(req, res, next){
 
     // a and b are javascript Date objects
     function dateDiffInDays(a, b) {
-        let  MS_PER_DAY = 1000 * 60 * 60 * 24;
+        let MS_PER_DAY = 1000 * 60 * 60 * 24;
         // Discard the time and time-zone information.
         let utc1 = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
         let utc2 = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate());
@@ -293,4 +345,4 @@ function validateInvitationCode(req, res, next){
 
 }
 
-export default { load, get, create, update, updatePassword, list, remove, me, validateInvitationCode};
+export default {load, get, create, update, updatePassword, list, remove, me, validateInvitationCode, confirmUsername};

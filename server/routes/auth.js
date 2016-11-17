@@ -5,8 +5,8 @@ import paramValidation from '../../config/param-validation';
 import authCtrl from '../controllers/auth';
 import check from '../controllers/check';
 import config from '../../config/env';
-// import '../../config/passport';
-// import passport from 'passport';
+
+import passport from '../../config/passport';
 
 const router = express.Router();	// eslint-disable-line new-cap
 
@@ -59,7 +59,7 @@ const router = express.Router();	// eslint-disable-line new-cap
  *      }
  */
 router.route('/login')
-	.post(validate(paramValidation.login), authCtrl.login);
+	.post(validate(paramValidation.login), authCtrl.login, authCtrl.finalizeUser);
 
 /**
  * @api {post} /api/auth/verify Verify token
@@ -95,6 +95,9 @@ router.route('/login')
  */
 router.route('/verify')
 	.post(authCtrl.verify);
+
+
+
 
 /**
  * @api {post} /api/auth/verify/email Verify if email exists
@@ -155,6 +158,11 @@ router.route('/verify')
  */
 router.route('/logout')
 	.post(authCtrl.logout);
+
+
+
+router.route('/socialAuth')
+	.post(authCtrl.socialAuth, authCtrl.finalizeUser);
 
 
 /**
