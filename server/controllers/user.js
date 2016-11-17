@@ -71,11 +71,17 @@ function me(req, res) {
         }
     };
 
-    if (req.query.projectsCount)
-        response.data.projects = req.projectsCount;
+	//concat stripe
+	if(req.user.stripe)
+		response.data.stripe = req.user.stripe;
 
-    if (req.query.usedStorage)
-        response.data.usedStorage = utils.byteToMb(req.usedStorage);
+	//concat projects count
+	if(req.query.projectsCount)
+		response.data.projects = req.projectsCount;
+
+	//concat usedStorage
+	if(req.query.usedStorage)
+		response.data.usedStorage = utils.byteToMb(req.usedStorage);
 
 
     return res.status(200).json(response);

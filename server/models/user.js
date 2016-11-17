@@ -133,6 +133,10 @@ const UserSchema = new mongoose.Schema({
     resetPasswordExpires: {type: Date},
     usernameConfirmed:{
         type:Boolean
+    },
+    stripe:{
+        customerId:String,
+        subscriptionId:String
     }
 });
 
