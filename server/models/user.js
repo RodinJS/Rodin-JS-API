@@ -190,7 +190,10 @@ UserSchema.statics = {
      * @param {ObjectId} id - The objectId of user.
      * @returns {Promise<User, APIError>}
      */
+
     get(username) {
+
+        username= username.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
         return this.findOne({username: new RegExp('^' + username + '$', "i")})
             .execAsync().then((user) => {
                 if (user) {
