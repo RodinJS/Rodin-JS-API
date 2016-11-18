@@ -213,6 +213,7 @@ UserSchema.statics = {
      * @returns {Promise<User, APIError>}
      */
     getPermission(username, id) {
+        username= username.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
         return this.findOne({username: new RegExp('^' + username + '$', "i")}) // eslint-disable-line
             .execAsync().then((user) => {
                 if (user) {

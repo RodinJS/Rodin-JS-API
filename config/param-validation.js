@@ -40,7 +40,7 @@ export default {
       allowUnknownBody: false
     },
     body: {
-      password: Joi.string().regex(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/).required()
+      password: Joi.string().regex(/^(?=.*[A-Za-z])(?=.*\d)[a-zA-Z0-9#?!@$%^&*\-\\d]{8,}$/).required()
     }
   },
 
