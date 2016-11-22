@@ -562,17 +562,6 @@ function updateProjectDate(req, cb){
         {
             $set: {updatedAt:new Date()}
         })
-       /* .then(result => {
-            if (result.nModified === 1) {
-                console.log('success');
-            }
-            else {
-                console.log('error');
-            }
-        })
-        .catch((e) => {
-            console.log(e);
-        });*/
 }
 
 

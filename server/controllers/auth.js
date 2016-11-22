@@ -5,6 +5,8 @@ import jwt from 'jsonwebtoken';
 import httpStatus from '../helpers/httpStatus';
 import APIError from '../helpers/APIError';
 import Utils from '../helpers/common';
+import mandrill from '../helpers/mandrill';
+import fs from 'fs';
 import _    from 'lodash';
 
 
@@ -84,36 +86,23 @@ function finalizeUser(req, res, next) {
  * @returns {*}
  */
 function socialAuth(req, res, next){
-    let queryMethod = {}, userObject = {
-        email:req.body.email,
-        username: req.body.id,//Utils.getUserNameFromEmail(profile._json.email),
-        password:Utils.generateCode(8),
-        profile: {
-            firstName:req.body.first_name || '',
-            lastName:req.body.last_name || ''
-        },
-        role:'Free',
-        usernameConfirmed:false
-    };
+
+    let queryMethod = {};
 
     if(req.params.socialName == 'facebook'){
       queryMethod = {$or: [{facebookId: req.body.id}, {email: req.body.email}]};
-      userObject.facebookId = req.body.id;
     }
 
     else if(req.params.socialName == 'google'){
         queryMethod = {$or: [{googleId: req.body.id}, {email: req.body.email}]};
-        userObject.googleId = req.body.id;
     }
 
     else if(req.params.socialName == 'steam'){
         queryMethod = {$or: [{steamId: req.body.id}, {email: req.body.email}]};
-        userObject.steamId = req.body.id;
     }
 
     else if(req.params.socialName == 'oculus'){
         queryMethod = {$or: [{oculusId: req.body.id}, {email: req.body.email}]};
-        userObject.oculusId = req.body.id;
     }
 
     else {
@@ -128,16 +117,101 @@ function socialAuth(req, res, next){
         }
 
         if(!user){
+
+            if (_.isUndefined(req.body.id)) {
+                const err = new APIError('Please provide userId', httpStatus.BAD_REQUEST, true);
+                return next(err);
+            }
+            if (_.isUndefined(req.body.email)) {
+                const err = new APIError('Please provide email', httpStatus.BAD_REQUEST, true);
+                return next(err);
+            }
+
+
+            let userObject = {
+                email:req.body.email,
+                username: req.body.username || req.body.id,
+                password:Utils.generateCode(8),
+                profile: {
+                    firstName:req.body.first_name || '',
+                    lastName:req.body.last_name || ''
+                },
+                role:'Free',
+                usernameConfirmed:req.body.username ? true : false
+            };
+
+            if(req.params.socialName == 'facebook'){
+                userObject.facebookId = req.body.id;
+            }
+
+            else if(req.params.socialName == 'google'){
+                userObject.googleId = req.body.id;
+            }
+
+            else if(req.params.socialName == 'steam'){
+                userObject.steamId = req.body.id;
+            }
+
+            else if(req.params.socialName == 'oculus'){
+                userObject.oculusId = req.body.id;
+            }
+
+            else {
+                const err = new APIError('Wrong login method', httpStatus.BAD_REQUEST, true);
+                return next(err);
+            }
+
+
             user = new User(userObject);
             user.saveAsync(userObject)
                 .then((savedUser) => {
+
+                    if(userObject.usernameConfirmed){
+
+                        let rootDir = 'projects/' + savedUser.username;
+                        let publicDir = 'public/' + savedUser.username;
+                        let publishDir = 'publish/' + savedUser.username;
+
+                        if (!fs.existsSync(rootDir)) {
+                            fs.mkdirSync(rootDir); //creating root dir for project
+                        }
+
+                        if (!fs.existsSync(publicDir)) {
+                            fs.mkdirSync(publicDir); //creating root dir for public
+                        }
+
+                        if (!fs.existsSync(publishDir)) {
+                            fs.mkdirSync(publishDir); //creating root dir for publish
+                        }
+
+                    }
+
+
+                    req.mailSettings = {
+                        to:savedUser.email,
+                        from:'team@rodin.space',
+                        fromName:'Rodin team',
+                        templateName:'rodin_signup',
+                        subject:'Welcome to Rodin platform',
+                        handleBars:[{
+                            name:'dateTime',
+                            content:Utils.convertDate()
+                        },{
+                            name:'userName',
+                            content: savedUser.username
+                        }]
+                    };
                     req.user = savedUser;
-                    return next();
+                    mandrill.sendMail(req, res, (result)=>{
+                        return next();
+                    });
                 })
                 .error((e) => {
                     const err = new APIError('Something wrong!', httpStatus.BAD_REQUEST, true);
                     return next(err);
                 });
+
+
         }
         else{
             let userUpdate = false;
@@ -193,29 +267,6 @@ function logout(req, res) {
     return res.status(200).json({success: true}); //TODO: remove token from Redis!
 }
 
-
-function preSignUp(req, res, next){
-
-    if (_.isUndefined(req.body.userId)) {
-        const err = new APIError('Please provide userId', httpStatus.BAD_REQUEST, true);
-        return next(err);
-    }
-    if (_.isUndefined(req.body.source)) {
-        const err = new APIError('Please provide source (steam, oculus)', httpStatus.BAD_REQUEST, true);
-        return next(err);
-    }
-    const code = commonHelpers.generateCode(10);
-
-    let preSignUp = new PreSignUp({userId:req.body.userId, source:req.body.source, code:code});
-    preSignUp.save((err)=> {
-        if (err) {
-            const err = new APIError('Something wrong', httpStatus.BAD_REQUEST, true);
-            return next(err);
-        }
-        res.status(200).json({success: true, signUpCode: code});
-    })
-}
-
 /**
  *
  * @param req
@@ -267,4 +318,4 @@ function removeInvitationCode(req, res, next) {
 }
 
 
-export default {login, logout, verify, generateInvitationCode, removeInvitationCode, finalizeUser, socialAuth, preSignUp};
+export default {login, logout, verify, generateInvitationCode, removeInvitationCode, finalizeUser, socialAuth};

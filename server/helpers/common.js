@@ -45,4 +45,20 @@ function byteToMb(num){
     return (num / 1024 / 1024).toFixed(2)
 }
 
-export default {generateCode, getDefTemplatesObject, byteToMb, getUserNameFromEmail};
+function convertDate(){
+    var monthNames = [
+        "January", "February", "March",
+        "April", "May", "June", "July",
+        "August", "September", "October",
+        "November", "December"
+    ];
+
+    var date = new Date();
+    var day = date.getDate();
+    var monthIndex = date.getMonth();
+    var year = date.getFullYear();
+
+    return (monthIndex+1) +' / '+day+' / '+year;
+}
+
+export default {generateCode, getDefTemplatesObject, byteToMb, getUserNameFromEmail, convertDate};

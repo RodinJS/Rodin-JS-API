@@ -7,21 +7,22 @@ import mandrill from 'mandrill-api/mandrill';
 const mandrillClient = new mandrill.Mandrill(config.mandrill);
 
 
-function mailOptions() {
+function sendMail(req, res, done) {
 
     let options = {
-        from_email: 'team@kemvi.com',
-        from_name: "Kemvi",
+        from_email:req.mailSettings.from,
+        from_name: req.mailSettings.fromName,
         "to": [{
-            "email": 'to@email.com',
+            "email": req.mailSettings.to,
             "type": "to"
         }],
         "merge": true,
         "merge_language": "handlebars",
-        "global_merge_vars": [],
-        subject: '',
-        template_name: 'default'
+        "global_merge_vars": req.mailSettings.handleBars,
+        "subject": req.mailSettings.subject,
+        "template_name": req.mailSettings.templateName
     };
+    composeMail(options, done);
 }
 
 
@@ -41,16 +42,7 @@ function composeMail(mailOptions, cb) {
         "send_at": send_at
     };
 
-    mandrillClient.messages.sendTemplate(mailData, onSuccess, onError)
+    mandrillClient.messages.sendTemplate(mailData, cb, cb)
 }
 
-function onSuccess(result) {
-
-}
-
-function onError(error) {
-
-}
-
-
-export default {};
+export default {sendMail};

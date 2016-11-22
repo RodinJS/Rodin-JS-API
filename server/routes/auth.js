@@ -6,6 +6,7 @@ import authCtrl from '../controllers/auth';
 import check from '../controllers/check';
 import config from '../../config/env';
 
+
 import passport from '../../config/passport';
 
 const router = express.Router();	// eslint-disable-line new-cap
@@ -163,10 +164,6 @@ router.route('/logout')
 
 router.route('/social/:socialName')
 	.post(authCtrl.socialAuth, authCtrl.finalizeUser);
-
-router.route('/preSignUp')
-	.post(authCtrl.preSignUp)
-
 
 /*router.route('/steam')
 	.get(passport.authenticate("steam"));

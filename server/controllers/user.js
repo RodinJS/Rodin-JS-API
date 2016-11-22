@@ -9,6 +9,7 @@ import fs from 'fs';
 import fsExtra from 'fs-extra';
 import utils from '../helpers/common';
 import _ from 'lodash';
+import mandrill from '../helpers/mandrill'
 
 import config from '../../config/env';
 /**
@@ -39,18 +40,28 @@ function load(req, res, next, username) {
  * Get user
  * @returns {User}
  */
-function get(req, res) {
-    let response = {
-        "success": true,
-        "data": {
-            email: req.user.email,
-            username: req.user.username,
-            role: req.user.role,
-            profile: req.user.profile
-        }
-    };
+function get(req, res, next) {
 
-    return res.status(200).json(response);
+    User.get(req.params.username).then((user) => {
+        if(!user) {
+            const err = new APIError('Not found', httpStatus.NOT_FOUND, true);
+            return next(err);
+        }
+        let response = {
+            "success": true,
+            "data": {
+                email: user.email,
+                username: user.username,
+                role: user.role,
+                profile: user.profile
+            }
+        };
+
+        return res.status(200).json(response);
+    }).error((e) => {
+        const err = new APIError('Something happen', httpStatus.BAD_REQUEST, true);
+        return next(err);
+    });
 }
 
 /**
@@ -199,18 +210,35 @@ function create(req, res, next) {
                     }, config.jwtSecret, {
                         expiresIn: "7d"
                     });
+                    req.mailSettings = {
+                        to:savedUser.email,
+                        from:'team@rodin.space',
+                        fromName:'Rodin team',
+                        templateName:'rodin_signup',
+                        subject:'Welcome to Rodin platform',
+                        handleBars:[{
+                            name:'dateTime',
+                            content:utils.convertDate()
+                        },{
+                            name:'userName',
+                            content: savedUser.username
+                        }]
+                    };
 
-                    return res.json({
-                        "success": true,
-                        "data": {
-                            token,
-                            user: {
-                                email: savedUser.email,
-                                username: savedUser.username,
-                                role: savedUser.role,
-                                profile: savedUser.profile
+                    mandrill.sendMail(req, res, (result)=>{
+                        return res.json({
+                            "success": true,
+                            "data": {
+                                token,
+                                user: {
+                                    email: savedUser.email,
+                                    username: savedUser.username,
+                                    role: savedUser.role,
+                                    profile: savedUser.profile
+                                }
                             }
-                        }
+                        });
+
                     });
                 })
                 .error((e) => {
