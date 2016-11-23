@@ -68,7 +68,7 @@
     "passport-jwt": "^2.1.0",
     "passport-steam": "^1.0.7",
     "paypal-rest-sdk": "^1.7.0",
-    "request": "^2.76.0",
+    "request": "^2.79.0",
     "request-promise": "^4.1.1",
     "shortid": "^2.2.6",
     "socket.io": "^1.6.0",
