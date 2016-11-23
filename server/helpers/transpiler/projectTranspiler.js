@@ -7,24 +7,21 @@ import babel from 'gulp-babel';
 import rename from 'gulp-rename';
 
 process.on('message', (message) => {
-    const file = message.file;
-    const folder = message.folder;
+    const project = message.project;
 
     gulp.task('transpiler', () => {
-        return gulp.src(file)
-
+        return gulp.src(project+'/**/*.js')
             .pipe(babel({
                 presets: ['es2015']
             }))
-            .pipe(rename({suffix: '_c'}))
+            //.pipe(rename({suffix: '_c'}))
 
-            .pipe(gulp.dest(folder))
-
+            .pipe(gulp.dest(project+'/build'))
     });
 
 
     gulp.start('transpiler', ()=>{
-        process.send({'success':message});
+        process.send({'success':true});
         process.exit();
     });
 

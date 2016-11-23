@@ -312,6 +312,9 @@ router.route('/templates/list')
     .get(check.ifTokenValid, projectCtrl.getTemplatesList);
 
 
+router.route('/:id/build/transpile')
+    .get(check.ifTokenValid, check.isProjectOwn, projectCtrl.transpile);
+
 router.use('/:id/build', check.ifTokenValid, check.isProjectOwn, buildRouter);
 router.use('/:id/download', check.ifTokenValid, check.isProjectOwn, downloadRouter);
 

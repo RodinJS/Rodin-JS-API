@@ -13,6 +13,7 @@ import config from '../../config/env';
 import fsExtra from 'fs-extra';
 import utils from '../helpers/common';
 import userCapacity from '../helpers/directorySize';
+import transpiler from '../helpers/transpiler';
 import  _ from 'lodash';
 
 
@@ -654,6 +655,16 @@ function getProjectSize(req, res, next) {
     });
 }
 
+
+function transpile(req, res, next){
+    Project.getOne(req.params.id, req.user.username)
+        .then(project =>{
+            req.project = project;
+            transpiler.projectTranspile(req);
+        });
+    res.status(200).json({success:true});
+}
+
 export default {
     get,
     create,
@@ -668,5 +679,6 @@ export default {
     importOnce,
     getTemplatesList,
     getProjectsCount,
-    getProjectSize
+    getProjectSize,
+    transpile
 };
