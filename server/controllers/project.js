@@ -77,9 +77,9 @@ function get(req, res, next) {
             }
         })
         .catch((e) => {
-            const err = new APIError('Project not found', httpStatus.NOT_FOUND, true);
-            return next(e);
-           /* Project.getByName(req.params.id, req.user.username)
+            //const err = new APIError('Project not found', httpStatus.NOT_FOUND, true);
+            //return next(e);
+            Project.getByName(req.params.id, req.user.username)
                 .then((project) => {
                     if (project) {
                         if (req.query.device) {
@@ -108,8 +108,9 @@ function get(req, res, next) {
                     }
                 })
                 .catch((e) => {
-
-                });*/
+                    const err = new APIError('Project not found', httpStatus.NOT_FOUND, true);
+                    return next(e);
+                });
         });
 }
 

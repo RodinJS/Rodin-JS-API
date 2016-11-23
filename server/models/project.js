@@ -134,7 +134,7 @@ ProjectSchema.statics = {
      * @returns {Promise<User, APIError>}
      */
     getByName(name, owner) {
-        return this.findOne({name: name, owner: owner})  //new RegExp('^' + id + '$', "i")
+        return this.findOne({root: name, owner: owner})  //new RegExp('^' + id + '$', "i")
             .execAsync().then((project) => {
                 if (project) {
                     return project;
@@ -151,11 +151,22 @@ ProjectSchema.statics = {
      * @returns {Promise<User, APIError>}
      */
     getOne(id, owner) {
-        return this.findOne({_id: id, owner: owner})  //new RegExp('^' + id + '$', "i")
+
+        let query = {
+            $and: [
+                { owner: owner },
+                {
+                    $or: [ {_id: id}, {root: id} ]
+                }
+            ]
+        };
+        return this.findOne(query)  //new RegExp('^' + id + '$', "i")
             .execAsync().then((project) => {
+
                 if (project) {
                     return project;
-                } else {
+                }
+                else {
                     const err = new APIError('No such project exists!----', httpStatus.NOT_FOUND, true);
                     return Promise.reject(err);
                 }
