@@ -70,13 +70,16 @@ function get(req, res, next) {
                 else {
                     return res.status(200).json(response);
                 }
-            } else {
+            }
+            else {
                 const err = new APIError('Project is empty', httpStatus.NOT_FOUND, true);
                 return next(err);
             }
         })
         .catch((e) => {
-            Project.getByName(req.params.id, req.user.username)
+            const err = new APIError('Project not found', httpStatus.NOT_FOUND, true);
+            return next(e);
+           /* Project.getByName(req.params.id, req.user.username)
                 .then((project) => {
                     if (project) {
                         if (req.query.device) {
@@ -105,9 +108,8 @@ function get(req, res, next) {
                     }
                 })
                 .catch((e) => {
-                    const err = new APIError('Project not found', httpStatus.NOT_FOUND, true);
-                    return next(e);
-                });
+
+                });*/
         });
 }
 
@@ -119,115 +121,129 @@ function get(req, res, next) {
  * @returns {Project}
  */
 function create(req, res, next) {
-    let project = new Project({
-        name: req.body.name,
-        tags: req.body.tags,
-        root: req.body.name,
-        owner: req.user.username,
-        description: req.body.description,
-        isNew: true
-    });
-
-    project.saveAsync()
-        .catch((e)=> {
-            const message = e.code === 11000 ? 'Project exist' : httpStatus[400];
-            const errorCode = e.code === 11000 ? httpStatus.PROJECT_EXIST : httpStatus.BAD_REQUEST;
-            const err = new APIError(message, errorCode, true);
-            return next(err);
-        })
-        .then((savedProject) => {
-            if (!savedProject) return;
-
-            let project = savedProject.toObject();
-
-            let rootDir = 'projects/' + req.user.username + '/' + project.root;
-
-            if (!fs.existsSync(rootDir)) {
-
-                fs.mkdirSync(rootDir); //creating root dir for project
-
-                if (req.body.templateId) {
-
-                    ProjectTemplates.getOne(req.body.templateId).then((templateProject)=> {
-
-                        if (templateProject) {
-
-                            templateProject = templateProject.toObject();
-
-                            let templateDir = 'resources/templates/' + templateProject.root;
-
-                            // Check template exist
-                            if (fs.existsSync(templateDir)) {
-
-                                //copy tempate
-                                fsExtra.copy(templateDir, rootDir, function (err) {
-                                    if (err)
-                                        fs.appendFileSync(rootDir + '/error.log', err + '\n');
-                                    else {
-                                        Project.updateAsync(
-                                            {
-                                                _id: project._id,
-                                                owner: req.user.username
-                                            },
-                                            {
-                                                $set: {
-                                                    updatedAt: new Date(),
-                                                    templateOf: templateProject.name
-
-                                                }
-                                            }
-                                        ).then(result => {
-                                            })
-                                            .catch((e) => {
-                                                fs.appendFileSync(rootDir + '/error.log', e + '\n');
-                                            });
-                                    }
-
-                                });
-
-                            }
-                            else {
-                                fs.appendFileSync(rootDir + '/error.log', 'Template not exist' + '\n');
-                            }
-                        }
-                        else {
-                            fs.appendFileSync(rootDir + '/error.log', 'Template not exist' + '\n');
-                        }
-
-                    });
-                }
-
+    Project.getByName(req.body.name, req.user.username)
+        .then(projectExist=>{
+            if(projectExist){
+                const message = 'Project exist';
+                const errorCode = httpStatus.PROJECT_EXIST;
+                const err = new APIError(message, errorCode, true);
+                return next(err);
             }
 
-            User.get(req.user.username)
-                .then(user => {
-                    if (user) {
-                        User.updateAsync({username: req.user.username}, {
-                                $push: {
-                                    "projects": savedProject._id
+            let project = new Project({
+                name: req.body.name,
+                tags: req.body.tags,
+                root: req.body.name,
+                owner: req.user.username,
+                description: req.body.description,
+                isNew: true
+            });
+            project.saveAsync()
+                .catch((e)=> {
+                    const message = e.code === 11000 ? 'Project exist' : httpStatus[400];
+                    const errorCode = e.code === 11000 ? httpStatus.PROJECT_EXIST : httpStatus.BAD_REQUEST;
+                    const err = new APIError(message, errorCode, true);
+                    return next(err);
+                })
+                .then((savedProject) => {
+                    if (!savedProject) return;
+
+                    let project = savedProject.toObject();
+
+                    let rootDir = 'projects/' + req.user.username + '/' + project.root;
+
+                    if (!fs.existsSync(rootDir)) {
+
+                        fs.mkdirSync(rootDir); //creating root dir for project
+
+                        if (req.body.templateId) {
+
+                            ProjectTemplates.getOne(req.body.templateId).then((templateProject)=> {
+
+                                if (templateProject) {
+
+                                    templateProject = templateProject.toObject();
+
+                                    let templateDir = 'resources/templates/' + templateProject.root;
+
+                                    // Check template exist
+                                    if (fs.existsSync(templateDir)) {
+
+                                        //copy tempate
+                                        fsExtra.copy(templateDir, rootDir, function (err) {
+                                            if (err)
+                                                fs.appendFileSync(rootDir + '/error.log', err + '\n');
+                                            else {
+                                                Project.updateAsync(
+                                                    {
+                                                        _id: project._id,
+                                                        owner: req.user.username
+                                                    },
+                                                    {
+                                                        $set: {
+                                                            updatedAt: new Date(),
+                                                            templateOf: templateProject.name
+
+                                                        }
+                                                    }
+                                                ).then(result => {
+                                                    })
+                                                    .catch((e) => {
+                                                        fs.appendFileSync(rootDir + '/error.log', e + '\n');
+                                                    });
+                                            }
+
+                                        });
+
+                                    }
+                                    else {
+                                        fs.appendFileSync(rootDir + '/error.log', 'Template not exist' + '\n');
+                                    }
                                 }
-                            })
-                            .then(updatedUser => {
-                                return res.status(201).json({
-                                    "success": true,
-                                    "data": savedProject.outcome()
-                                });
-                            })
-                            .catch((e) => {
-                                const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
-                                return next(err);
+                                else {
+                                    fs.appendFileSync(rootDir + '/error.log', 'Template not exist' + '\n');
+                                }
+
                             });
-                    } else {
-                        const err = new APIError('User not found!', 310);
-                        return next(err);
+                        }
+
                     }
 
+                    User.get(req.user.username)
+                        .then(user => {
+                            if (user) {
+                                User.updateAsync({username: req.user.username}, {
+                                        $push: {
+                                            "projects": savedProject._id
+                                        }
+                                    })
+                                    .then(updatedUser => {
+                                        return res.status(201).json({
+                                            "success": true,
+                                            "data": savedProject.outcome()
+                                        });
+                                    })
+                                    .catch((e) => {
+                                        const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+                                        return next(err);
+                                    });
+                            } else {
+                                const err = new APIError('User not found!', 310);
+                                return next(err);
+                            }
+
+                        });
+                })
+                .error((e) => {
+                    const err = new APIError("Something went wrong!", 312, true);
+                    return next(err);
                 });
-        })
-        .error((e) => {
-            const err = new APIError("Something went wrong!", 312, true);
+        },
+        e=>{
+            const err = new APIError("Bad request", 400, true);
             return next(err);
-        });
+        }
+    );
 }
 
 /**
