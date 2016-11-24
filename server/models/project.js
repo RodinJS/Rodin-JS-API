@@ -156,10 +156,14 @@ ProjectSchema.statics = {
             $and: [
                 { owner: owner },
                 {
-                    $or: [ {_id: id}, {root: id} ]
+                    $or: [{root: id} ]
                 }
             ]
         };
+
+        if(new RegExp("^[0-9a-fA-F]{24}$").test(id)) {
+            query.$and[1].$or.push({_id: mongoose.Types.ObjectId(id)})
+        }
         return this.findOne(query)  //new RegExp('^' + id + '$', "i")
             .execAsync().then((project) => {
 
