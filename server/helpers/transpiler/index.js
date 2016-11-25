@@ -10,7 +10,9 @@ function projectTranspile(req){
     let folderPath = help.generateFilePath(req, '/');
     const executor = cp.fork(`${__dirname}/projectTranspiler.js`, { detached: true});
     executor.send({project:folderPath});
-    executor.on('message', () => pushSocket(req))
+    executor.on('message', () => pushSocket(req));
+    executor.unref();
+
 }
 
 function pushSocket(req){
