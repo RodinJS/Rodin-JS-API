@@ -105,7 +105,7 @@
     "gulp-sourcemaps": "^2.2.0",
     "gulp-util": "^3.0.7",
     "isparta": "4.0.0",
-    "mocha": "3.1.0",
+    "mocha": "3.2.0",
     "run-sequence": "^1.1.5",
     "supertest": "^2.0.1",
     "supertest-as-promised": "4.0.2",
