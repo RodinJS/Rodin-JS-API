@@ -45,7 +45,6 @@ class RodinSocketConstructor {
     }
 
     broadcastToRoom(roomName, eventName, data) {
-       console.log('COnnected room', this.io.to(roomName));
         this.io.to(roomName).emit(eventName, data);
     }
 
