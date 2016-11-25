@@ -39,6 +39,7 @@ function projectTranspile(req) {
 function pushSocket(req, message) {
   const activeUser = apiSockets.Service.io.findUser(req.user.username);
   console.log('Active socket user', activeUser);
+  apiSockets.Service.io.broadcastToRoom(req.user.username, 'projectTranspiled', message);
   if (activeUser) {
     apiSockets.Service.io.emitToUser(activeUser.id, 'projectTranspiled', message);
   }
