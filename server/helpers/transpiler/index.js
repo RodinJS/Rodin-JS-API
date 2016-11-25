@@ -8,13 +8,34 @@ import help from '../../helpers/editor';
 
 function projectTranspile(req){
     let folderPath = help.generateFilePath(req, '/');
-    const executor = cp.fork(`${__dirname}/projectTranspiler.js`);
+    let fork, child;
+    fork = cp.fork;
+    child = fork(`${__dirname}/projectTranspiler.js`);
+    child.send({project:folderPath});
+
+    child.on('message', ()=>{
+      let spawn = cp.spawn;
+      spawn('kill', [child.pid]);
+      pushSocket(req);
+    });
+
+  /*const executor = cp.fork(`${__dirname}/projectTranspiler.js`);
     executor.send({project:folderPath});
     executor.on('message', () => {
       executor.kill();
       pushSocket(req)
-    });
+    });*/
 
+
+
+
+  //var fork, child;
+  //fork = process.fork;
+  //child = fork('./index');
+
+ // var spawn;
+ // spawn = process.spawn;
+  //spawn('kill', [child.pid]);
 }
 
 function pushSocket(req){
