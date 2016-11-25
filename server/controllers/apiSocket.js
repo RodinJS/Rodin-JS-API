@@ -49,7 +49,6 @@ class RodinSocketConstructor {
     }
 
     emitToUser(socketId, eventName, data){
-      console.log('connected Socket', this.io.connected[socketId]);
       this.io.connected[socketId].emit(eventName, data);
     }
 
