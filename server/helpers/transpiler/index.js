@@ -16,6 +16,7 @@ function projectTranspile(req){
     child.on('message', ()=>{
       let spawn = cp.spawn;
       spawn('kill', [child.pid]);
+      console.log(child.pid);
       pushSocket(req);
     });
 
@@ -40,7 +41,9 @@ function projectTranspile(req){
 
 function pushSocket(req){
     const activeUser = apiSockets.Service.io.findUser(req.user.username);
-    apiSockets.Service.io.emitToUser(activeUser.id, 'projectTranspiled', {message:req.project.name+' build complete'});
+    if(activeUser){
+      apiSockets.Service.io.emitToUser(activeUser.id, 'projectTranspiled', {message:req.project.name+' build complete'});
+    }
 }
 
 export default {projectTranspile};
