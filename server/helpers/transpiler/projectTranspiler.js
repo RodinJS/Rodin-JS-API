@@ -12,7 +12,8 @@ process.on('message', (message) => {
     gulp.task('transpiler', () => {
         return gulp.src(project+'/**/*.js')
             .pipe(babel({
-                presets: ['es2015']
+                "presets": ["es2015"], 
+                "plugins": ["transform-es2015-modules-systemjs"]
             }))
             //.pipe(rename({suffix: '_c'}))
 
