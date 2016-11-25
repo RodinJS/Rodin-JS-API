@@ -8,10 +8,12 @@ import help from '../../helpers/editor';
 
 function projectTranspile(req){
     let folderPath = help.generateFilePath(req, '/');
-    const executor = cp.fork(`${__dirname}/projectTranspiler.js`, { detached: true});
+    const executor = cp.fork(`${__dirname}/projectTranspiler.js`);
     executor.send({project:folderPath});
-    executor.on('message', () => pushSocket(req));
-    executor.unref();
+    executor.on('message', () => {
+      executor.kill();
+      pushSocket(req)
+    });
 
 }
 
