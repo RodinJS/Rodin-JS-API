@@ -16,7 +16,7 @@ process.on('message', (message) => {
         "plugins": ["transform-es2015-modules-systemjs"]
       }))
       .on('error',  (error) => {
-        console.error('ERROR' + error);
+        console.log('ERROR' + error);
         process.send({'success': false, error:error});
         process.exit(1);
       })
@@ -24,7 +24,7 @@ process.on('message', (message) => {
 
       .pipe(gulp.dest(project + '/build'))
       .on('error',  (error) => {
-        console.error('PIPE ERROR' + error);
+        console.log('PIPE ERROR' + error);
         process.send({'success': false, error:error});
         process.exit(1);
       });
