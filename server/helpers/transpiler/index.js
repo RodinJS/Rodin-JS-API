@@ -7,7 +7,7 @@ const userBuffer = {};
 /**
  * Activate child process for transpiling ES6 to ES5
  * Response will be via socket emit.
- * After finishing process fork process will be killed1
+ * After finishing process fork process will be killed
  * @param req
  * @returns {*}
  */
