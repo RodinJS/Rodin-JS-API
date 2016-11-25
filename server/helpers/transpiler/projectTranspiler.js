@@ -23,8 +23,7 @@ process.on('message', (message) => {
 
     gulp.start('transpiler', ()=>{
         process.send({'success':true});
-        //process.exit();
-        process._channel.destroy(); // or pause()
+        process.exit();
     });
 
 });
