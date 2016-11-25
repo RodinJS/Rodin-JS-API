@@ -7,7 +7,7 @@ const userBuffer = {};
 /**
  * Activate child process for transpiling ES6 to ES5
  * Response will be via socket emit.
- * After finishing process fork process will be killed
+ * After finishing process fork process will be killed1
  * @param req
  * @returns {*}
  */
@@ -26,7 +26,6 @@ function projectTranspile(req) {
       let parsedMessage = message.error.message.substring(trimRootPath);
       message.error = _.pick(message.error, ['name', 'message']);
       message.error.message = parsedMessage;
-
     }
     else {
       message.message = req.project.name + ' build complete';

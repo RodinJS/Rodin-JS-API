@@ -11,7 +11,7 @@ process.on('message', (message) => {
   const project = message.project;
 
   gulp.task('transpiler', () => {
-    return gulp.src(project + '/**/*.js')
+    return gulp.src([project + '/**/*.js', '!'+project+'/build'])
       .pipe(babel({
         "presets": ["es2015"],
         "plugins": ["transform-es2015-modules-systemjs"]
