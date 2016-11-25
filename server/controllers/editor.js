@@ -423,11 +423,15 @@ function startUpload(folderPath, req, action, res, next) {
                     return next(err);
                 }
                 else{
-                  fs.chmodSync(folderPath, 0o755);
                   if (fs.existsSync(zipFile)) {
                         fs.unlink(zipFile, (err)=>{
-                            updateProjectDate(req);
-                            res.status(200).send({"success": true, "data": 'Files successfuly uploaded!'});
+                          updateProjectDate(req);
+                          fs.readdirSync(folderPath).forEach((file, index) => {
+                            var curPath = folderPath + "/" + file;
+                            fs.chmodSync(curPath, 0o755);
+                          });
+
+                          res.status(200).send({"success": true, "data": 'Files successfuly uploaded!'});
                         })
                     }
                 }
