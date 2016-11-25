@@ -11,6 +11,7 @@ function projectTranspile(req){
     const executor = cp.fork(`${__dirname}/projectTranspiler.js`);
     executor.send({project:folderPath});
     executor.on('message', () => {
+      console.log('executor finish');
       //executor._channel.destroy();
       //executor.destroy();
       executor.kill();
