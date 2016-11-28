@@ -41,6 +41,12 @@ function generateHeaders(){
     }
 }
 
+function generateHookHeader(){
+  return {
+    'x-access-token':'K7rd6FzEZwzcc6dQr3cv9kz4tTTZzAc9hdXYJpukvEnxmbdB42V4b6HePs5ZDTYLW_4000dram'
+  }
+}
+
 function getToken(){
     return common.token;
 }
@@ -50,4 +56,4 @@ function getProject(){
 }
 
 
-export default {login, getToken, getTestProjects, getProject, generateHeaders}
+export default {login, getToken, getTestProjects, getProject, generateHeaders, generateHookHeader}
