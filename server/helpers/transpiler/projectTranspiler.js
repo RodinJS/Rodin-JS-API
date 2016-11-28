@@ -17,14 +17,14 @@ process.on('message', (message) => {
         "plugins": ["transform-es2015-modules-systemjs"]
       }))
       .on('error',  (error) => {
-        process.send({success: false, data:error});
+        process.send({success: false, error:error});
         process.exit(1);
       })
       //.pipe(rename({suffix: '_c'}))
 
       .pipe(gulp.dest(project + '/build'))
       .on('error',  (error) => {
-        process.send({success: false, data:error});
+        process.send({success: false, error:error});
         process.exit(1);
       });
   });

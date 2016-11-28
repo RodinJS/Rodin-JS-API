@@ -1,6 +1,8 @@
 import _ from 'lodash';
 import cp from 'child_process';
 import apiSockets from '../../controllers/apiSocket';
+import APIError from '../APIError';
+import httpStatus from '../httpStatus';
 import help from '../../helpers/editor';
 const userBuffer = {};
 
@@ -14,19 +16,28 @@ const userBuffer = {};
 function projectTranspile(req) {
 
   if (userBuffer[req.user.username]) {
-    return pushSocket(req, {success: false, data: "Please wait until build complete"});
+    const error = {
+      status: httpStatus.SOCKET_ACTION_IN_PROGRESS,
+      message: 'Please wait until build complete',
+      type: httpStatus[httpStatus.SOCKET_ACTION_IN_PROGRESS]
+    };
+    return pushSocket(req, {success: false, error: error});
   }
   userBuffer[req.user.username] = {process: true};
   let folderPath = help.generateFilePath(req, '');
   const executor = cp.fork(`${__dirname}/projectTranspiler.js`);
   executor.send({project: folderPath});
   executor.on('message', (message) => {
-    if (!message.success) {
-      let trimRootPath = message.data.message.indexOf(req.project.root);
-      let parsedMessage = message.data.message.substring(trimRootPath);
-      message.data = _.pick(message.error, ['name', 'message']);
-      message.data.message = parsedMessage;
+
+    if (message.error) {
+      let trimRootPath = message.error.message.indexOf(req.project.root);
+      let parsedMessage = message.error.message.substring(trimRootPath);
+      message.error = _.pick(message.error, ['name', 'message']);
+      message.error.message = parsedMessage;
+      message.error.status = httpStatus.SOCKET_ACTION_FAILED;
+      message.error.type = httpStatus[message.error.status];
     }
+
     else {
       message.data = req.project.name + ' build complete';
     }

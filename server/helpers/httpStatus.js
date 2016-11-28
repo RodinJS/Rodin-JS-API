@@ -44,6 +44,13 @@ const httpStatus = {
   504: 'Gateway Time-out',
   505: 'HTTP Version not Supported',
   507: 'Insufficient Storage',
+
+  600:'Bad socket Request',
+  605:'Socket action complete',
+  606:'Socket action failed',
+  607:'Socket action in progress',
+
+
   CONTINUE: 100,
   SWITCHING_PROTOCOLS: 101,
   OK: 200,
@@ -121,11 +128,17 @@ const httpStatus = {
   COULD_NOT_WRITE_TO_FILE: 336,
   COULD_NOT_CREATE_FILE: 337,
   NOT_A_FILE: 338,
+
 // working with sockets
+  BAD_SOCKET_REQUEST: 600,
+  BAD_SOCKET_CHANNEL: 601,
   UNKNOWN_SOCKET_CHANNEL: 601,
   UNKNOWN_SOCKET_ROOM: 602,
   PERMISSION_SOCKET_DENIED: 603,
-  UNKNOWN_SOCKET_ACTION: 604
+  UNKNOWN_SOCKET_ACTION: 604,
+  SOCKET_ACTION_COMPLETE : 605,
+  SOCKET_ACTION_FAILED: 606,
+  SOCKET_ACTION_IN_PROGRESS:607
 };
 
 export default httpStatus;
