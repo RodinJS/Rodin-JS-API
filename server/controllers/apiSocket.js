@@ -4,10 +4,8 @@
 
 
 import config from '../../config/env';
-import check from './check';
 import sio from 'socket.io';
 import _ from 'lodash';
-import http from 'http';
 import jwt from 'jsonwebtoken';
 
 

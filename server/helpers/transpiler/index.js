@@ -4,6 +4,7 @@ import apiSockets from '../../controllers/apiSocket';
 import APIError from '../APIError';
 import httpStatus from '../httpStatus';
 import help from '../../helpers/editor';
+import notifications from '../../controllers/notifications';
 const userBuffer = {};
 
 /**
@@ -16,19 +17,25 @@ const userBuffer = {};
 function projectTranspile(req) {
 
   if (userBuffer[req.user.username]) {
-    const error = {
-      status: httpStatus.SOCKET_ACTION_IN_PROGRESS,
-      message: 'Please wait until build complete',
-      type: httpStatus[httpStatus.SOCKET_ACTION_IN_PROGRESS]
-    };
-    return pushSocket(req, {success: false, error: error});
+    /*const error = {
+     status: httpStatus.SOCKET_ACTION_IN_PROGRESS,
+     message: 'Please wait until build complete',
+     type: httpStatus[httpStatus.SOCKET_ACTION_IN_PROGRESS]
+     };
+     req.notification = {success: false, error: error};
+     return pushSocket(req);*/
+    userBuffer[req.user.username].kill();
+    delete  userBuffer[req.user.username];
   }
-  userBuffer[req.user.username] = {process: true};
   let folderPath = help.generateFilePath(req, '');
-  const executor = cp.fork(`${__dirname}/projectTranspiler.js`);
+  let excecutorParams = {};
+  /*if(process.env.DEBUG){
+   excecutorParams =  {execArgv: ['--debug-brk=6676']}
+   }*/
+  const executor = cp.fork(`${__dirname}/projectTranspiler.js`, excecutorParams);
+  userBuffer[req.user.username] = executor;
   executor.send({project: folderPath});
   executor.on('message', (message) => {
-
     if (message.error) {
       let trimRootPath = message.error.message.indexOf(req.project.root);
       let parsedMessage = message.error.message.substring(trimRootPath);
@@ -37,18 +44,19 @@ function projectTranspile(req) {
       message.error.status = httpStatus.SOCKET_ACTION_FAILED;
       message.error.type = httpStatus[message.error.status];
     }
-
     else {
       message.data = req.project.name + ' build complete';
     }
+    req.notification = message;
     executor.kill();
     delete userBuffer[req.user.username];
-    pushSocket(req, message)
+    notifications.create(req, false, false);
+    return pushSocket(req)
   });
 }
 
-function pushSocket(req, message) {
-  apiSockets.Service.io.broadcastToRoom(req.user.username, 'projectTranspiled', message);
+function pushSocket(req) {
+  apiSockets.Service.io.broadcastToRoom(req.user.username, 'projectTranspiled', req.notification);
 }
 
 export default {projectTranspile};

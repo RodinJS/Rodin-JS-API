@@ -6,6 +6,7 @@ import editorRoutes from './editor';
 import iosRoutes from './ios';
 import paymentsRoutes from './payments';
 import hooksRoutes from './hooks';
+import notificationsRoute from './notifications';
 
 const router = express.Router();	// eslint-disable-line new-cap
 
@@ -33,8 +34,11 @@ router.use('/ios', iosRoutes);
 //mount stripe payments routes
 router.use('/payments', paymentsRoutes);
 
-//mount hooks payments routes
+//mount hooks  routes
 router.use('/hooks', hooksRoutes);
+
+//mount notifications  routes
+router.use('/notifications', notificationsRoute);
 
 
 export default router;

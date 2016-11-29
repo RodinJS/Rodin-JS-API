@@ -20,6 +20,8 @@ function login(done) {
         .send(user)
         .then(res => {
             common.token = res.body.data.token;
+            common.username = user.username;
+            common.passowrd = user.password;
             done();
         });
 
@@ -55,5 +57,9 @@ function getProject(){
     return common.project;
 }
 
+function getUserName(){
+  return common.username;
+}
 
-export default {login, getToken, getTestProjects, getProject, generateHeaders, generateHookHeader}
+
+export default {login, getToken, getTestProjects, getProject, generateHeaders, generateHookHeader, getUserName}

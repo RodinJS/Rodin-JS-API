@@ -46,9 +46,9 @@ function getTreeJSON(req, res, next) {
         function dirTree(filename) {
           let stats = fs.lstatSync(filename),
             info = {
-              parent: path.relative(rootPath, path.dirname( filename ) ),
-              path: path.relative( "./" + rootPath, "./" + filename ),
-              name: path.basename( filename )
+              parent: path.relative(rootPath, path.dirname(filename)),
+              path: path.relative("./" + rootPath, "./" + filename),
+              name: path.basename(filename)
             };
           if (stats.isDirectory()) {
             info.type = "directory";

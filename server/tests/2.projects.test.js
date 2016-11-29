@@ -155,7 +155,7 @@ describe('## Projects APIs', () => {
         .expect(httpStatus.OK)
         .then(res => {
           expect(res.body.success).to.equal(true);
-          expect(res.body.data).to.equal('' + validDevices[i] + ' build hook complete');
+          expect(res.body.data).to.equal(project.info.name+' ' + validDevices[i] + ' build complete');
           if (i+1 == validDevices.length) {
             done();
           }

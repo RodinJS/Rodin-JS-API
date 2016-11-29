@@ -10,6 +10,7 @@ import User from '../models/user';
 import mandrill from '../helpers/mandrill';
 import Utils from '../helpers/common';
 import apiSockets from '../controllers/apiSocket';
+import notifications from '../controllers/notifications';
 const HookSecretKey = 'K7rd6FzEZwzcc6dQr3cv9kz4tTTZzAc9hdXYJpukvEnxmbdB42V4b6HePs5ZDTYLW_4000dram';
 
 
@@ -86,22 +87,21 @@ function build(req, res, next) {
       };
       req.user = user;
 
+      req.notification = {
+        success: true,
+        data: project.name + ' ' + req.params.device + ' build complete'
+      };
+
       mandrill.sendMail(req, res, () => {
 
         const activeUser = apiSockets.Service.io.findUser(req.user.username);
 
         if (activeUser) {
-          const message = {
-            success: true,
-            data: project.name + ' ' + req.params.device + ' ' + complete
-          };
-          apiSockets.Service.io.broadcastToRoom(req.user.username, 'probjectBuild', message);
-        }
 
-        return res.status(200).json({
-          "success": true,
-          "data": req.params.device+' build hook complete'
-        });
+          apiSockets.Service.io.broadcastToRoom(req.user.username, 'probjectBuild', req.notification);
+        }
+        notifications.create(req, false, false);
+        return res.status(200).json(req.notification);
 
       })
     }).error((e) => {
