@@ -3,19 +3,11 @@ dist: trusty
 language: node_js
 node_js:
   - "6.9.1"
-  - "7.0.0"
+  - "7.2.0"
 services:
   - mongodb
-env:
-  - CXX=g++-5
 addons:
   srcclr: true
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - g++-5
-      - libboost-filesystem-dev
 cache:
   directories:
   - node_modules
