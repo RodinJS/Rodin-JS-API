@@ -2,7 +2,7 @@
  * Created by xgharibyan on 11/29/16.
  */
 
-import Notifications from '../models/Notifications';
+import Notifications from '../models/notifications';
 import APIError from '../helpers/APIError';
 import httpStatus from '../helpers/httpStatus';
 import config from '../../config/env';
