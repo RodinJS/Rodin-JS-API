@@ -90,7 +90,7 @@ function build(req, res, next) {
       req.project = project;
       req.notification = {
         success: true,
-        data: project.name + ' ' + req.params.device + ' build complete'
+        data: `${project.name} ${req.params.device} build complete`
       };
 
       mandrill.sendMail(req, res, () => {
