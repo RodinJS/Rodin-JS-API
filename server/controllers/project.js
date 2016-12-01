@@ -4,7 +4,6 @@ import path from 'path';
 import Project from '../models/project';
 import ProjectTemplates from '../models/projectTemplate';
 import User from '../models/user';
-import jwt from 'jsonwebtoken';
 import APIError from '../helpers/APIError';
 import httpStatus from '../helpers/httpStatus';
 import help from '../helpers/editor';
@@ -12,6 +11,7 @@ import request from 'request';
 import config from '../../config/env';
 import fsExtra from 'fs-extra';
 import utils from '../helpers/common';
+import mandrill from '../helpers/mandrill';
 import userCapacity from '../helpers/directorySize';
 import transpiler from '../helpers/transpiler';
 import  _ from 'lodash';
@@ -437,7 +437,26 @@ function publishProject(req, res, next) {
       })
         .then(result => {
           if (result.nModified === 1) {
+            //Send Mail
+            req.mailSettings = {
+              to:req.user.email,
+              from:'team@rodin.space',
+              fromName:'Rodin team',
+              templateName:'rodin_publish',
+              subject:`${req.project.name} published`,
+              handleBars:[{
+                name:'userName',
+                content: req.user.username
+              },{
+                name:'publishUrl',
+                content:`${config.clientURL}/publish/${req.user.username}/${req.project.name}`
+              }]
+            };
+            mandrill.sendMail(req, res, (response)=>{
+              //console.log(response);
+            });
             return res.status(200).json({success: true, data: 'Project published'})
+
           }
           else {
             const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
@@ -645,7 +664,6 @@ function getProjectSize(req, res, next) {
     return res.status(200).json(response);
   });
 }
-
 
 function transpile(req, res, next) {
   Project.getOne(req.params.id, req.user.username)

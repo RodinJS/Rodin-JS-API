@@ -210,6 +210,7 @@ function create(req, res, next) {
                     }, config.jwtSecret, {
                         expiresIn: "7d"
                     });
+
                     req.mailSettings = {
                         to:savedUser.email,
                         from:'team@rodin.space',
@@ -225,7 +226,7 @@ function create(req, res, next) {
                         }]
                     };
 
-                    mandrill.sendMail(req, res, (result)=>{
+                    mandrill.sendMail(req, res, ()=>{
                         return res.json({
                             "success": true,
                             "data": {

@@ -202,7 +202,7 @@ function socialAuth(req, res, next){
                         }]
                     };
                     req.user = savedUser;
-                    mandrill.sendMail(req, res, (result)=>{
+                    mandrill.sendMail(req, res, ()=>{
                         return next();
                     });
                 })

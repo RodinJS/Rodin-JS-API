@@ -2,6 +2,7 @@ export default {
     env: 'production',
     jwtSecret: '4DNSrMPuQ3Y3McBu96wd2GzGheDXuft8gDqLEQVWHnXQfcaGFtM2ZBgyNYzPN7CK',
     db: 'mongodb://localhost/rodin-js-api-production',
+    clientURL:'https://rodin.io',
     port: 3000,
     social: {
         facebook: {
