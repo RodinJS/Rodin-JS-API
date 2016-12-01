@@ -36,23 +36,24 @@ function projectTranspile(req) {
   userBuffer[req.user.username] = executor;
   executor.send({project: folderPath});
   executor.on('message', (message) => {
+    req.notification = message;
     if (message.error) {
-      let trimRootPath = message.error.message.indexOf(req.project.root);
-      let parsedMessage = message.error.message.substring(trimRootPath);
-      message.error = _.pick(message.error, ['name', 'message']);
-      message.error.message = parsedMessage;
-      message.error.status = httpStatus.SOCKET_ACTION_FAILED;
-      message.error.type = httpStatus[message.error.status];
+      let trimRootPath = req.notification.error.message.indexOf(req.project.root);
+      let parsedMessage = req.notification.error.message.substring(trimRootPath);
+      req.notification.error = _.pick(req.notification.error, ['name', 'message']);
+      req.notification.error.message = parsedMessage;
+      req.notification.error.status = httpStatus.SOCKET_ACTION_FAILED;
+      req.notification.error.type = httpStatus[message.error.status];
+      notifications.create(req, false, false);
     }
     else {
-      message.data = req.project.name + ' build complete';
+      req.notification.data = req.project.name + ' build complete';
     }
-    req.notification = message;
     executor.kill();
     delete userBuffer[req.user.username];
-    notifications.create(req, false, false);
     return pushSocket(req)
   });
+
 }
 
 function pushSocket(req) {

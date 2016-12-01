@@ -4,6 +4,7 @@
 
 import Notifications from '../models/notifications';
 import APIError from '../helpers/APIError';
+import _  from 'lodash';
 import httpStatus from '../helpers/httpStatus';
 import config from '../../config/env';
 
@@ -13,10 +14,11 @@ import config from '../../config/env';
  */
 function create(req, res, next) {
   const label = req.notification.error ? req.notification.error.message : req.notification.data;
-
+  const project = req.project ? _.pick(req.project, ['_id', 'name']) : undefined;
   const notification = new Notifications({
     username: req.user.username,
     label: label,
+    project:project,
     error: req.notification.error || false
   });
 
@@ -46,7 +48,7 @@ function get(req, res, next) {
 }
 
 function update(req, res, next) {
-  Notifications.updateAsync({_id: req.body.id}, {$set: {isRead:true}})
+  Notifications.updateAsync({_id: req.body.id || req.query.id}, {$set: {isRead:true}})
     .then(() => res.json({
       "success": true,
       "data": {}

@@ -19,6 +19,9 @@ const NotificationsSchema = new mongoose.Schema({
   error: {
     type: Mixed
   },
+  project:{
+    type:Object
+  },
   isRead: {
     type: Boolean,
     default: false

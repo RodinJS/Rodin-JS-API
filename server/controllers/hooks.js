@@ -11,6 +11,7 @@ import mandrill from '../helpers/mandrill';
 import Utils from '../helpers/common';
 import apiSockets from '../controllers/apiSocket';
 import notifications from '../controllers/notifications';
+import _ from 'lodash';
 const HookSecretKey = 'K7rd6FzEZwzcc6dQr3cv9kz4tTTZzAc9hdXYJpukvEnxmbdB42V4b6HePs5ZDTYLW_4000dram';
 
 
@@ -86,7 +87,7 @@ function build(req, res, next) {
           }]
       };
       req.user = user;
-
+      req.project = project;
       req.notification = {
         success: true,
         data: project.name + ' ' + req.params.device + ' build complete'
@@ -97,8 +98,13 @@ function build(req, res, next) {
         const activeUser = apiSockets.Service.io.findUser(req.user.username);
 
         if (activeUser) {
-
-          apiSockets.Service.io.broadcastToRoom(req.user.username, 'probjectBuild', req.notification);
+          let socketPushData = {
+            username: req.user.username,
+            label: req.notification.error ? req.notification.error.message : req.notification.data,
+            project:_.pick(req.project, ['_id', 'name']),
+            error: req.notification.error || false
+          };
+          apiSockets.Service.io.broadcastToRoom(req.user.username, 'probjectBuild', socketPushData);
         }
         notifications.create(req, false, false);
         return res.status(200).json(req.notification);
