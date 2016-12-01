@@ -39,9 +39,10 @@ function getTreeJSON(req, res, next) {
           }
         };
 
-
         const folderPath = req.query.folderPath ? '/' + req.query.folderPath : '';
-        const rootPath = 'projects/' + req.user.username + '/' + project.root + folderPath;
+        const rootPath = `projects/${req.user.username}/${project.root}`;
+
+        let isSetFolderPath = !!folderPath;
 
         function dirTree(filename) {
           let stats = fs.lstatSync(filename),
@@ -52,11 +53,15 @@ function getTreeJSON(req, res, next) {
             };
           if (stats.isDirectory()) {
             info.type = "directory";
-            if (rootPath == filename) {
+
+            if (rootPath == filename || isSetFolderPath) {
+              isSetFolderPath = false;
+
               info.children = fs.readdirSync(filename).map(function (child) {
                 return dirTree(filename + '/' + child);
               });
             }
+
           }
           else {
             info.type = "file";
@@ -79,7 +84,7 @@ function getTreeJSON(req, res, next) {
             });
         }
         else {
-          response.data.tree = dirTree(rootPath);
+          response.data.tree = dirTree((isSetFolderPath ? rootPath + folderPath : rootPath));
           return res.status(200).json(response);
         }
 
@@ -485,7 +490,6 @@ function startUpload(folderPath, req, action, res, next) {
   }
 
 }
-
 
 /**
  * Validate unit test uploading

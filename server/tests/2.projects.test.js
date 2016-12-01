@@ -102,7 +102,7 @@ describe('## Projects APIs', () => {
       });
   });
 
-  it('should get tre project with template', (done) => {
+  it('should get tree project with template', (done) => {
     request(app)
       .get('/api/editor/' + project.templateInfo._id + '')
       .set(User.generateHeaders())
