@@ -19,6 +19,10 @@ export default {
       key: "D62596D7F75C45FFCFA07B938478844F",
       clientSecret: "12377e383557cecdc463f202cdc89758",
       callbackURL: "http://localhost:3000/api/auth/steam/callback"
+    },
+    github:{
+      clientId: "2350afe57c144672285b",
+      clientSecret: "3b16cafe190ecdc3a659198dc32b396b95dff77a"
     }
   },
   urlshortenerkey: "AIzaSyCe5zVHHHhhv40N-WzeffxWva377dPQnH8",

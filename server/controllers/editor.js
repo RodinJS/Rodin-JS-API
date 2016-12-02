@@ -39,39 +39,10 @@ function getTreeJSON(req, res, next) {
           }
         };
 
-        const folderPath = req.query.folderPath ? '/' + req.query.folderPath : '';
         const rootPath = `projects/${req.user.username}/${project.root}`;
 
-        let isSetFolderPath = !!folderPath;
-
-        function dirTree(filename) {
-          let stats = fs.lstatSync(filename),
-            info = {
-              parent: path.relative(rootPath, path.dirname(filename)),
-              path: path.relative("./" + rootPath, "./" + filename),
-              name: path.basename(filename)
-            };
-          if (stats.isDirectory()) {
-            info.type = "directory";
-
-            if (rootPath == filename || isSetFolderPath) {
-              isSetFolderPath = false;
-
-              info.children = fs.readdirSync(filename).map(function (child) {
-                return dirTree(filename + '/' + child);
-              });
-            }
-
-          }
-          else {
-            info.type = "file";
-          }
-
-          return info;
-        }
-
-        //req.query.getAll = true;
         if (req.query.getAll) {
+
           dirToJson(rootPath)
             .then((dirTree) => {
               // console.log(dirTree);
@@ -82,10 +53,60 @@ function getTreeJSON(req, res, next) {
               const err = new APIError('Problem with generating tree', httpStatus.BAD_REQUEST, true);
               return next(err);
             });
+
         }
         else {
-          response.data.tree = dirTree((isSetFolderPath ? rootPath + folderPath : rootPath));
+
+
+          if (_.isArray(req.query.folderPath)) {
+
+            response.data.tree = [];
+
+            _.each(req.query.folderPath, (folderPath, key) => {
+
+              response.data.tree.push(dirTree(`${rootPath}/${folderPath}`, true));
+
+            });
+
+          }
+          else {
+
+            const folderPath = req.query.folderPath ? `/${req.query.folderPath}` : '';
+            let isSetFolderPath = !!folderPath;
+
+            response.data.tree = dirTree((isSetFolderPath ? `${rootPath}${folderPath}` : rootPath), isSetFolderPath);
+
+          }
+
           return res.status(200).json(response);
+        }
+
+        function dirTree(filename, isSetFolderPath) {
+          let stats = fs.lstatSync(filename);
+
+
+          let info = {
+            parent: path.relative(rootPath, path.dirname(filename)),
+            path: path.relative("./" + rootPath, "./" + filename),
+            name: path.basename(filename),
+            type: "file"
+          };
+
+          if (stats.isDirectory()) {
+
+            info.type = "directory";
+
+            if (rootPath == filename || isSetFolderPath) {
+
+              info.children = fs.readdirSync(filename).map(function (child) {
+                return dirTree(filename + '/' + child, false);
+              });
+
+            }
+
+          }
+
+          return info;
         }
 
       }

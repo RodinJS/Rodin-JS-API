@@ -108,6 +108,7 @@ function create(req, res, next) {
           description: req.body.description,
           isNew: true
         });
+
         project.saveAsync()
           .catch((e) => {
             const message = e.code === 11000 ? 'Project exist' : httpStatus[400];

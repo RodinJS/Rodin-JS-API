@@ -129,6 +129,7 @@ function ifTokenValid(req, res, next) {
 							creationDate:user.createdAt
 						};
 
+
 						return next();
 					} else {
 						const err = new APIError('Invalid token!', httpStatus.BAD_REQUEST, true);
