@@ -1,5 +1,6 @@
 import express from 'express';
 import gitCtrl from '../controllers/git';
+import check from '../controllers/check';
 
 const router = express.Router();
 
@@ -70,6 +71,6 @@ router.route('/')
 	*      }
 	*
 	*/
-	.post(gitCtrl.create);
+	.post(check.ifTokenValid, gitCtrl.create);
 
 export default router;
