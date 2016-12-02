@@ -6,13 +6,14 @@ import help from '../helpers/editor';
 
 function create(req, res, next) {
 	if(req.body.root) {
+		console.log("--------", req.user);
 		const projectRoot = 'projects/' + req.user.username + '/' + help.cleanUrl(req.body.root);
 		// const projectRoot = 'C:\\Users\\Grig\\Documents\\GitHub\\Rodin-JS-API\\gago';
 		const gitResult = git.createRepo(req.user.username, help.cleanUrl(req.body.name));
 		const execResult = execSync(`cd ${projectRoot} && git remote add origin ${gitResult.clone_url} && git push -u origin master`);
 
 		res.json(execResult);
-		
+
 		// res.status(200).json({
 		// 	success: true,
 		// 	data: {
