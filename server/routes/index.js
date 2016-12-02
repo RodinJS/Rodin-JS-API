@@ -7,6 +7,7 @@ import iosRoutes from './ios';
 import paymentsRoutes from './payments';
 import hooksRoutes from './hooks';
 import notificationsRoute from './notifications';
+import gitRoute from './git';
 
 const router = express.Router();	// eslint-disable-line new-cap
 
@@ -39,6 +40,9 @@ router.use('/hooks', hooksRoutes);
 
 //mount notifications  routes
 router.use('/notifications', notificationsRoute);
+
+//github integration routes
+router.use('/git', gitRoute);
 
 
 export default router;

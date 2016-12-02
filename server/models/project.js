@@ -90,6 +90,10 @@ const ProjectSchema = new mongoose.Schema({
     type: {
         type: String
     },
+    github: {
+        git: { type: String },
+        https: { type: String }
+    },
     createdAt: {
         type: Date,
         default: Date.now
@@ -226,7 +230,8 @@ ProjectSchema.pre("save", function (next) {
         if (i !== 0) {
             project.root += i;
         } else {
-            project.root = project.name.replace(/ /g, '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+            project.root = project.name.replace(/ /g, '').replace(/[^a-zA-Z0-9]/g, '');
+            project.name = project.root;
         }
 
         project.constructor.count({root: project.root}, (err, count) => {

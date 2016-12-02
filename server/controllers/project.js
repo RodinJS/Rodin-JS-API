@@ -14,32 +14,32 @@ import fsExtra from 'fs-extra';
 import utils from '../helpers/common';
 import userCapacity from '../helpers/directorySize';
 import transpiler from '../helpers/transpiler';
-import  _ from 'lodash';
-
+import _ from 'lodash';
+import git from '../helpers/github';
 
 const getStatus = (project, device, cb) => {
-  console.log(JSON.stringify(project, null, 3));
-  request.get(
-    {
-      url: `${config[device].urls.getStatus}/${project.build[device].buildId}`,
-      headers: {
-        'app-id': config[device].appId,
-        'app-secret': config[device].appSecret
-      }
-    },
-    (err, httpResponse, body) => {
-      // console.log("1", err);
-      // console.log("2", httpResponse);
-      console.log("3", body);
-      if (err || httpResponse.statusCode !== 200) {
-        project.build[device].built = false;
-        return project.save(err => cb(err, project));
-      }
+	console.log(JSON.stringify(project, null, 3));
+	request.get(
+		{
+			url: `${config[device].urls.getStatus}/${project.build[device].buildId}`,
+			headers: {
+				'app-id': config[device].appId,
+				'app-secret': config[device].appSecret
+			}
+		},
+		(err, httpResponse, body) => {
+			// console.log("1", err);
+			// console.log("2", httpResponse);
+			console.log("3", body);
+			if (err || httpResponse.statusCode !== 200) {
+				project.build[device].built = false;
+				return project.save(err => cb(err, project));
+			}
 
-      project.build[device].built = JSON.parse(body).data.buildStatus;
-      return project.save(err => cb(err, project));
-    }
-  )
+			project.build[device].built = JSON.parse(body).data.buildStatus;
+			return project.save(err => cb(err, project));
+		}
+	)
 };
 
 /**
@@ -47,40 +47,40 @@ const getStatus = (project, device, cb) => {
  * @returns {Project}
  */
 function get(req, res, next) {
-  Project.getOne(req.params.id, req.user.username)
-    .then((project) => {
-      if (project) {
-        if (req.query.device) {
-          return getStatus(project, req.query.device, (err, project) => {
-            res.status(200).json({
-              success: true,
-              data: project
-            });
-          })
-        }
-        //TODO normalize root folder path
-        let response = {
-          "success": true,
-          "data": project
-        };
-        if (req.query.projectSize) {
-          req.project = project.toObject();
-          return next();
-        }
-        else {
-          return res.status(200).json(response);
-        }
-      }
-      else {
-        const err = new APIError('Project is empty', httpStatus.NOT_FOUND, true);
-        return next(err);
-      }
-    })
-    .catch((e) => {
-      const err = new APIError('Project not found', httpStatus.NOT_FOUND, true);
-      return next(e);
+	Project.getOne(req.params.id, req.user.username)
+		.then((project) => {
+			if (project) {
+				if (req.query.device) {
+					return getStatus(project, req.query.device, (err, project) => {
+						res.status(200).json({
+							success: true,
+							data: project
+						});
+					})
+				}
+				//TODO normalize root folder path
+				let response = {
+					"success": true,
+					"data": project
+				};
+				if (req.query.projectSize) {
+					req.project = project.toObject();
+					return next();
+				}
+				else {
+					return res.status(200).json(response);
+				}
+			}
+			else {
+				const err = new APIError('Project is empty', httpStatus.NOT_FOUND, true);
+				return next(err);
+			}
+		})
+		.catch((e) => {
+			const err = new APIError('Project not found', httpStatus.NOT_FOUND, true);
+			return next(e);
 
-    });
+		});
 }
 
 /**
@@ -91,129 +91,130 @@ function get(req, res, next) {
  * @returns {Project}
  */
 function create(req, res, next) {
-  Project.getByName(req.body.name, req.user.username)
-    .then(projectExist => {
-        if (projectExist) {
-          const message = 'Project exist';
-          const errorCode = httpStatus.PROJECT_EXIST;
-          const err = new APIError(message, errorCode, true);
-          return next(err);
-        }
+	Project.getByName(req.body.name, req.user.username)
+		.then(projectExist => {
+				if (projectExist) {
+					const message = 'Project exist';
+					const errorCode = httpStatus.PROJECT_EXIST;
+					const err = new APIError(message, errorCode, true);
+					return next(err);
+				}
 
-        let project = new Project({
-          name: req.body.name,
-          tags: req.body.tags,
-          root: req.body.name,
-          owner: req.user.username,
-          description: req.body.description,
-          isNew: true
-        });
-        project.saveAsync()
-          .catch((e) => {
-            const message = e.code === 11000 ? 'Project exist' : httpStatus[400];
-            const errorCode = e.code === 11000 ? httpStatus.PROJECT_EXIST : httpStatus.BAD_REQUEST;
-            const err = new APIError(message, errorCode, true);
-            return next(err);
-          })
-          .then((savedProject) => {
-            if (!savedProject) return;
+				let project = new Project({
+					name: req.body.name,
+					tags: req.body.tags,
+					root: req.body.name,
+					owner: req.user.username,
+					description: req.body.description,
+					isNew: true
+				});
+				project.saveAsync()
+					.catch((e) => {
+						const message = e.code === 11000 ? 'Project exist' : httpStatus[400];
+						const errorCode = e.code === 11000 ? httpStatus.PROJECT_EXIST : httpStatus.BAD_REQUEST;
+						const err = new APIError(message, errorCode, true);
+						return next(err);
+					})
+					.then((savedProject) => {
+						if (!savedProject) return;
 
-            let project = savedProject.toObject();
 
-            let rootDir = 'projects/' + req.user.username + '/' + project.root;
+						let project = savedProject.toObject();
 
-            if (!fs.existsSync(rootDir)) {
+						let rootDir = 'projects/' + req.user.username + '/' + project.root;
 
-              fs.mkdirSync(rootDir); //creating root dir for project
+						if (!fs.existsSync(rootDir)) {
 
-              if (req.body.templateId) {
+							fs.mkdirSync(rootDir); //creating root dir for project
 
-                ProjectTemplates.getOne(req.body.templateId).then((templateProject) => {
+							if (req.body.templateId) {
 
-                  if (templateProject) {
+								ProjectTemplates.getOne(req.body.templateId).then((templateProject) => {
 
-                    templateProject = templateProject.toObject();
+									if (templateProject) {
 
-                    let templateDir = 'resources/templates/' + templateProject.root;
+										templateProject = templateProject.toObject();
 
-                    // Check template exist
-                    if (fs.existsSync(templateDir)) {
+										let templateDir = 'resources/templates/' + templateProject.root;
 
-                      //copy tempate
-                      fsExtra.copy(templateDir, rootDir, function (err) {
-                        if (err)
-                          fs.appendFileSync(rootDir + '/error.log', err + '\n');
-                        else {
-                          Project.updateAsync(
-                            {
-                              _id: project._id,
-                              owner: req.user.username
-                            },
-                            {
-                              $set: {
-                                updatedAt: new Date(),
-                                templateOf: templateProject.name
+										// Check template exist
+										if (fs.existsSync(templateDir)) {
 
-                              }
-                            }
-                          ).then(result => {
-                          })
-                            .catch((e) => {
-                              fs.appendFileSync(rootDir + '/error.log', e + '\n');
-                            });
-                        }
+											//copy tempate
+											fsExtra.copy(templateDir, rootDir, function (err) {
+												if (err)
+													fs.appendFileSync(rootDir + '/error.log', err + '\n');
+												else {
+													Project.updateAsync(
+														{
+															_id: project._id,
+															owner: req.user.username
+														},
+														{
+															$set: {
+																updatedAt: new Date(),
+																templateOf: templateProject.name
 
-                      });
+															}
+														}
+													).then(result => {
+													})
+														.catch((e) => {
+															fs.appendFileSync(rootDir + '/error.log', e + '\n');
+														});
+												}
 
-                    }
-                    else {
-                      fs.appendFileSync(rootDir + '/error.log', 'Template not exist' + '\n');
-                    }
-                  }
-                  else {
-                    fs.appendFileSync(rootDir + '/error.log', 'Template not exist' + '\n');
-                  }
+											});
 
-                });
-              }
+										}
+										else {
+											fs.appendFileSync(rootDir + '/error.log', 'Template not exist' + '\n');
+										}
+									}
+									else {
+										fs.appendFileSync(rootDir + '/error.log', 'Template not exist' + '\n');
+									}
 
-            }
+								});
+							}
 
-            User.get(req.user.username)
-              .then(user => {
-                if (user) {
-                  User.updateAsync({username: req.user.username}, {
-                    $push: {
-                      "projects": savedProject._id
-                    }
-                  })
-                    .then(updatedUser => {
-                      return res.status(201).json({
-                        "success": true,
-                        "data": savedProject.outcome()
-                      });
-                    })
-                    .catch((e) => {
-                      const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
-                      return next(err);
-                    });
-                } else {
-                  const err = new APIError('User not found!', 310);
-                  return next(err);
-                }
+						}
 
-              });
-          })
-          .error((e) => {
-            const err = new APIError("Something went wrong!", 312, true);
-            return next(err);
-          });
-      },
-      e => {
-        const err = new APIError("Bad request", 400, true);
-        return next(err);
-      }
-    );
+						User.get(req.user.username)
+							.then(user => {
+								if (user) {
+									User.updateAsync({username: req.user.username}, {
+										$push: {
+											"projects": savedProject._id
+										}
+									})
+										.then(updatedUser => {
+											return res.status(201).json({
+												"success": true,
+												"data": savedProject.outcome()
+											});
+										})
+										.catch((e) => {
+											const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+											return next(err);
+										});
+								} else {
+									const err = new APIError('User not found!', 310);
+									return next(err);
+								}
+
+							});
+					})
+					.error((e) => {
+						const err = new APIError("Something went wrong!", 312, true);
+						return next(err);
+					});
+			},
+			e => {
+				const err = new APIError("Bad request", 400, true);
+				return next(err);
+			}
+		);
 }
 
 /**
@@ -223,41 +224,41 @@ function create(req, res, next) {
  * @returns {Project}
  */
 function update(req, res, next) {
-  req.body.updatedAt = new Date();
+	req.body.updatedAt = new Date();
 
-  Project.findOneAndUpdate(
-    {
-      _id: req.params.id,
-      owner: req.user.username
-    },
-    {
-      $set: req.body
-    }, {new: true}, (err, project) => {
-      if (err) {
-        const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
-        return next(err);
-      }
-      return res.status(200).json({
-        "success": true,
-        "data": project
-      });
-    })
-  /*.then(result => {
-   console.log(result);
-   if (result.nModified === 1) {
-   return res.status(200).json({
-   "success": true,
-   "data": {}
-   });
-   } else {
-   const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
-   return next(err);
-   }
-   })
-   .catch((e) => {
-   const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
-   return next(err);
-   });*/
+	Project.findOneAndUpdate(
+		{
+			_id: req.params.id,
+			owner: req.user.username
+		},
+		{
+			$set: req.body
+		}, {new: true}, (err, project) => {
+			if (err) {
+				const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+				return next(err);
+			}
+			return res.status(200).json({
+				"success": true,
+				"data": project
+			});
+		})
+	/*.then(result => {
+	 console.log(result);
+	 if (result.nModified === 1) {
+	 return res.status(200).json({
+	 "success": true,
+	 "data": {}
+	 });
+	 } else {
+	 const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+	 return next(err);
+	 }
+	 })
+	 .catch((e) => {
+	 const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+	 return next(err);
+	 });*/
 }
 
 /**
@@ -267,14 +268,14 @@ function update(req, res, next) {
  * @returns {Project[]}
  */
 function list(req, res, next) {
-  const {limit = 50, skip = 0} = req.query;
-  Project.list({limit, skip}, req.user.username, req.query._queryString).then((projects) => {
-    res.status(200).json({
-      success: true,
-      data: projects
-    })
-  })
-    .error((e) => next(e));
+	const {limit = 50, skip = 0} = req.query;
+	Project.list({limit, skip}, req.user.username, req.query._queryString).then((projects) => {
+		res.status(200).json({
+			success: true,
+			data: projects
+		})
+	})
+		.error((e) => next(e));
 }
 
 /**
@@ -282,41 +283,41 @@ function list(req, res, next) {
  * @returns {Project}
  */
 function remove(req, res, next) {
-  const id = req.params.id;
-  const username = req.user.username;
-  User.getPermission(username, id)
-    .then(user => {
-      if (user) {
-        Project.removeAsync({_id: id})
-          .then((deletedProject) => {
-            if (deletedProject.result.ok === 1) {
-              User.updateAsync(
-                {
-                  username: username
-                },
-                {
-                  $pull: {
-                    projects: id
-                  }
-                }
-              )
-                .then(updatedUser => {
-                  return res.status(200).json({
-                    "success": true,
-                    "data": "Project Successfuly deleted!"
-                  });
-                });
-            } else {
-              const err = new APIError("Something went wrong!", 312, true);
-              return next(err);
-            }
-          }).error((e) => next(e));
-      } else {
-        const err = new APIError('User has no permission to modify this project!', 310, true);
-        return next(err);
-      }
+	const id = req.params.id;
+	const username = req.user.username;
+	User.getPermission(username, id)
+		.then(user => {
+			if (user) {
+				Project.removeAsync({_id: id})
+					.then((deletedProject) => {
+						if (deletedProject.result.ok === 1) {
+							User.updateAsync(
+								{
+									username: username
+								},
+								{
+									$pull: {
+										projects: id
+									}
+								}
+							)
+								.then(updatedUser => {
+									return res.status(200).json({
+										"success": true,
+										"data": "Project Successfuly deleted!"
+									});
+								});
+						} else {
+							const err = new APIError("Something went wrong!", 312, true);
+							return next(err);
+						}
+					}).error((e) => next(e));
+			} else {
+				const err = new APIError('User has no permission to modify this project!', 310, true);
+				return next(err);
+			}
 
-    });
+		});
 }
 
 /**
@@ -327,77 +328,75 @@ function remove(req, res, next) {
  * @returns {*}
  */
 function makePublic(req, res, next) {
-  if (!req.params.id) {
-    const err = new APIError('Provide project ID!', httpStatus.FILE_OR_PATH_DOES_NOT_EXIST, true);
-    return next(err);
-  }
+	if (!req.params.id) {
+		const err = new APIError('Provide project ID!', httpStatus.FILE_OR_PATH_DOES_NOT_EXIST, true);
+		return next(err);
+	}
 
-  if (!req.body.status) {
-    const err = new APIError('Provide project status!', httpStatus.FILE_OR_PATH_DOES_NOT_EXIST, true);
-    return next(err);
-  }
+	if (!req.body.status) {
+		const err = new APIError('Provide project status!', httpStatus.FILE_OR_PATH_DOES_NOT_EXIST, true);
+		return next(err);
+	}
 
 
-  const id = req.params.id;
-  const username = req.user.username;
-  const status = req.body.status;
-  Project.getOne(id, username)
-    .then(project => {
+	const id = req.params.id;
+	const username = req.user.username;
+	const status = req.body.status;
+	Project.getOne(id, username)
+		.then(project => {
 
-      if (project) {
-        Project.updateAsync(
-          {
-            _id: req.params.id
-          },
-          {
-            $set: {
-              "public": status
-            }
-          }
-        )
-          .then(updatedProject => {
-            if (updatedProject.nModified === 1) {
-              if (status === 'true') {
-                const srcDir = path.join(__dirname, '..', '..', '..', 'projects', username, help.cleanUrl(project.root));
-                // const srcDir = `/var/www/${req.hostname}/projects/${username}/${help.cleanUrl(project.root)}`;
-                const publicDir = path.join(__dirname, '..', '..', '..', 'public', username, help.cleanUrl(project.root));
-                // const publicDir = '/var/www/api.rodinapp.com/public/' + username + '/' + help.cleanUrl(project.root);
-                const ter = 'ln -s ' + srcDir + ' ' + publicDir;
-                const code = execSync(ter);
-                return res.status(200).json({
-                  "success": true,
-                  "data": {publicDir}
-                });
+			if (project) {
+				Project.updateAsync(
+					{
+						_id: req.params.id
+					},
+					{
+						$set: {
+							"public": status
+						}
+					}
+				)
+					.then(updatedProject => {
+						if (updatedProject.nModified === 1) {
+							if (status === 'true') {
+								const srcDir = path.join(__dirname, '..', '..', '..', 'projects', username, help.cleanUrl(project.root));
+								const publicDir = path.join(__dirname, '..', '..', '..', 'public', username, help.cleanUrl(project.root));
+								const ter = 'ln -s ' + srcDir + ' ' + publicDir;
+								const code = execSync(ter);
+								return res.status(200).json({
+									"success": true,
+									"data": {publicDir}
+								});
 
-              } else {
-                const publicDir = path.join(__dirname, '..', '..', '..', 'public', username, help.cleanUrl(project.root));
-                // const publicDir = '/var/www/api.rodinapp.com/public/' + username + '/' + help.cleanUrl(project.root);
-                if (fs.existsSync(publicDir)) {
-                  fs.unlinkSync(publicDir);
-                  return res.status(200).json({
-                    "success": true,
-                    "data": {publicDir}
-                  });
-                } else {
-                  const err = new APIError('link exist!', httpStatus.BAD_REQUEST, true);
-                  return next(err);
-                }
+							} else {
+								const publicDir = path.join(__dirname, '..', '..', '..', 'public', username, help.cleanUrl(project.root));
+								// const publicDir = '/var/www/api.rodinapp.com/public/' + username + '/' + help.cleanUrl(project.root);
+								if (fs.existsSync(publicDir)) {
+									fs.unlinkSync(publicDir);
+									return res.status(200).json({
+										"success": true,
+										"data": {publicDir}
+									});
+								} else {
+									const err = new APIError('link exist!', httpStatus.BAD_REQUEST, true);
+									return next(err);
+								}
 
-              }
-            } else {
-              const err = new APIError('Can\'t update info--', httpStatus.BAD_REQUEST, true);
-              return next(err);
-            }
-          }).catch(e => {
-          console.log(e)
-          const err = new APIError('Can\'t update info++', httpStatus.BAD_REQUEST, true);
-          return next(e);
-        });
-      } else {
-        const err = new APIError('Project not found!', 310, true);
-        return next(err);
-      }
-    });
+							}
+						} else {
+							const err = new APIError('Can\'t update info--', httpStatus.BAD_REQUEST, true);
+							return next(err);
+						}
+					}).catch(e => {
+					console.log(e)
+					const err = new APIError('Can\'t update info++', httpStatus.BAD_REQUEST, true);
+					return next(e);
+				});
+			} else {
+				const err = new APIError('Project not found!', 310, true);
+				return next(err);
+			}
+		});
 }
 
 /**
@@ -411,50 +410,50 @@ function makePublic(req, res, next) {
  */
 function publishProject(req, res, next) {
 
-  let projectFolder = help.generateFilePath(req, '');
-  let publishFolder = help.generateFilePath(req, '', 'publish');
+	let projectFolder = help.generateFilePath(req, '');
+	let publishFolder = help.generateFilePath(req, '', 'publish');
 
-  if (fs.existsSync(projectFolder)) {
+	if (fs.existsSync(projectFolder)) {
 
-    if (fs.existsSync(publishFolder)) {
-      fsExtra.removeSync(publishFolder)
-    }
+		if (fs.existsSync(publishFolder)) {
+			fsExtra.removeSync(publishFolder)
+		}
 
-    fsExtra.copy(projectFolder, publishFolder, function (err) {
-      if (err) {
-        const err = new APIError('Publishing error', httpStatus.BAD_REQUEST, true);
-        return next(err);
-      }
+		fsExtra.copy(projectFolder, publishFolder, function (err) {
+			if (err) {
+				const err = new APIError('Publishing error', httpStatus.BAD_REQUEST, true);
+				return next(err);
+			}
 
-      //Todo implement published public mechanizm
-      let publishedPublic = req.body.publishedPublic || true;
+			//Todo implement published public mechanizm
+			let publishedPublic = req.body.publishedPublic || true;
 
-      Project.updateAsync({_id: req.params.id, owner: req.user.username}, {
-        $set: {
-          publishDate: new Date(),
-          publishedPublic: publishedPublic
-        }
-      })
-        .then(result => {
-          if (result.nModified === 1) {
-            return res.status(200).json({success: true, data: 'Project published'})
-          }
-          else {
-            const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
-            return next(err);
-          }
-        })
-        .catch((e) => {
-          const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
-          return next(err);
-        });
-    });
+			Project.updateAsync({_id: req.params.id, owner: req.user.username}, {
+				$set: {
+					publishDate: new Date(),
+					publishedPublic: publishedPublic
+				}
+			})
+				.then(result => {
+					if (result.nModified === 1) {
+						return res.status(200).json({success: true, data: 'Project published'})
+					}
+					else {
+						const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+						return next(err);
+					}
+				})
+				.catch((e) => {
+					const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+					return next(err);
+				});
+		});
 
-  }
-  else {
-    const err = new APIError('Project not found', httpStatus.NOT_FOUND, true);
-    return next(err);
-  }
+	}
+	else {
+		const err = new APIError('Project not found', httpStatus.NOT_FOUND, true);
+		return next(err);
+	}
 
 }
 
@@ -467,34 +466,34 @@ function publishProject(req, res, next) {
  */
 function unPublishProject(req, res, next) {
 
-  let publishFolder = help.generateFilePath(req, '', 'publish');
+	let publishFolder = help.generateFilePath(req, '', 'publish');
 
-  if (fs.existsSync(publishFolder)) {
-    fsExtra.removeSync(publishFolder);
-    Project.updateAsync({_id: req.params.id, owner: req.user.username}, {
-      $unset: {
-        publishDate: 1,
-        publishedPublic: 1
-      }
-    })
-      .then(result => {
-        if (result.nModified === 1) {
-          return res.status(200).json({success: true, data: 'Project unpublished'})
-        }
-        else {
-          const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
-          return next(err);
-        }
-      })
-      .catch((e) => {
-        const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
-        return next(err);
-      });
-  }
-  else {
-    const err = new APIError('Published project does not exist', httpStatus.BAD_REQUEST, true);
-    return next(err);
-  }
+	if (fs.existsSync(publishFolder)) {
+		fsExtra.removeSync(publishFolder);
+		Project.updateAsync({_id: req.params.id, owner: req.user.username}, {
+			$unset: {
+				publishDate: 1,
+				publishedPublic: 1
+			}
+		})
+			.then(result => {
+				if (result.nModified === 1) {
+					return res.status(200).json({success: true, data: 'Project unpublished'})
+				}
+				else {
+					const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+					return next(err);
+				}
+			})
+			.catch((e) => {
+				const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+				return next(err);
+			});
+	}
+	else {
+		const err = new APIError('Published project does not exist', httpStatus.BAD_REQUEST, true);
+		return next(err);
+	}
 
 
 }
@@ -507,23 +506,23 @@ function unPublishProject(req, res, next) {
  */
 function getPublishedProjects(req, res, next) {
 
-  const skip = parseInt(req.query.skip) || 0;
-  const limit = parseInt(req.query.limit) || 10;
+	const skip = parseInt(req.query.skip) || 0;
+	const limit = parseInt(req.query.limit) || 10;
 
 
-  Project.list({skip: skip, limit: limit}, false, false, true)
-    .then(publishedProject => {
-      return res.status(200).json({
-        success: true, data: _.map(publishedProject, (project) => {
-          return _.pick(project, ['name', 'owner', 'id', 'thumbnail', 'description', 'root'])
-        })
-      });
-    })
-    .catch((error) => {
-      console.log(error);
-      const err = new APIError('Can\'t get published projects', httpStatus.BAD_REQUEST, true);
-      return next(err);
-    });
+	Project.list({skip: skip, limit: limit}, false, false, true)
+		.then(publishedProject => {
+			return res.status(200).json({
+				success: true, data: _.map(publishedProject, (project) => {
+					return _.pick(project, ['name', 'owner', 'id', 'thumbnail', 'description', 'root'])
+				})
+			});
+		})
+		.catch((error) => {
+			console.log(error);
+			const err = new APIError('Can\'t get published projects', httpStatus.BAD_REQUEST, true);
+			return next(err);
+		});
 }
 
 
@@ -535,23 +534,23 @@ function getPublishedProjects(req, res, next) {
  */
 function getPublishedProject(req, res, next) {
 
-  if (!req.params.id) {
-    const err = new APIError('Provide project id', httpStatus.BAD_REQUEST, true);
-    return next(err);
-  }
+	if (!req.params.id) {
+		const err = new APIError('Provide project id', httpStatus.BAD_REQUEST, true);
+		return next(err);
+	}
 
 
-  Project.get(req.params.id)
-    .then(publishedProject => {
-      return res.status(200).json({
-        success: true,
-        data: _.pick(publishedProject, ['name', 'owner', 'id', 'thumbnail', 'description', 'root'])
-      });
-    })
-    .catch((error) => {
-      const err = new APIError('Can\'t get published project', httpStatus.BAD_REQUEST, true);
-      return next(err);
-    });
+	Project.get(req.params.id)
+		.then(publishedProject => {
+			return res.status(200).json({
+				success: true,
+				data: _.pick(publishedProject, ['name', 'owner', 'id', 'thumbnail', 'description', 'root'])
+			});
+		})
+		.catch((error) => {
+			const err = new APIError('Can\'t get published project', httpStatus.BAD_REQUEST, true);
+			return next(err);
+		});
 }
 
 /**
@@ -562,33 +561,33 @@ function getPublishedProject(req, res, next) {
  * @returns {*}
  */
 function getProjectsCount(req, res, next) {
-  if (!req.query.projectsCount) return next();
-  let query = {
-    $match: {
-      owner: req.user.username
-    }
-  };
-  let option = {
-    $group: {
-      _id: {$gt: ["$publishDate", null]},
-      count: {$sum: 1}
-    }
-  };
-  Project.aggregate(query, option)
-    .then(projects => {
-      req.projectsCount = {};
-      _.each(projects, (project) => {
+	if (!req.query.projectsCount) return next();
+	let query = {
+		$match: {
+			owner: req.user.username
+		}
+	};
+	let option = {
+		$group: {
+			_id: {$gt: ["$publishDate", null]},
+			count: {$sum: 1}
+		}
+	};
+	Project.aggregate(query, option)
+		.then(projects => {
+			req.projectsCount = {};
+			_.each(projects, (project) => {
 
-        if (!project._id)
-          req.projectsCount.unpublished = project.count;
-        else
-          req.projectsCount.published = project.count;
-      });
-      next();
-    })
-    .catch((e) => {
-      console.log(e);
-    })
+				if (!project._id)
+					req.projectsCount.unpublished = project.count;
+				else
+					req.projectsCount.published = project.count;
+			});
+			next();
+		})
+		.catch((e) => {
+			console.log(e);
+		})
 }
 /**
  *
@@ -599,15 +598,15 @@ function getProjectsCount(req, res, next) {
  */
 function importOnce(req, res, next) {
 
-  const projects = utils.getDefTemplatesObject();
+	const projects = utils.getDefTemplatesObject();
 
-  ProjectTemplates.insert(projects, (response) => {
-    if (!response.success) {
-      const err = new APIError('Inserting error', httpStatus.BAD_REQUEST, true);
-      return next(err);
-    }
-    res.status(200).send({success: true});
-  });
+	ProjectTemplates.insert(projects, (response) => {
+		if (!response.success) {
+			const err = new APIError('Inserting error', httpStatus.BAD_REQUEST, true);
+			return next(err);
+		}
+		res.status(200).send({success: true});
+	});
 }
 
 /**
@@ -617,67 +616,67 @@ function importOnce(req, res, next) {
  * @returns {ProjectTemplate[]}
  */
 function getTemplatesList(req, res, next) {
-  const {limit = 50, skip = 0} = req.query;
-  ProjectTemplates.list({limit, skip}).then((projects) => {
-    res.status(200).json({
-      success: true,
-      data: projects
-    })
-  }).error((e) => {
-    const err = new APIError('Bad request', httpStatus.BAD_REQUEST, true);
-    return next(err);
-  });
+	const {limit = 50, skip = 0} = req.query;
+	ProjectTemplates.list({limit, skip}).then((projects) => {
+		res.status(200).json({
+			success: true,
+			data: projects
+		})
+	}).error((e) => {
+		const err = new APIError('Bad request', httpStatus.BAD_REQUEST, true);
+		return next(err);
+	});
 }
 
 function getProjectSize(req, res, next) {
-  if (!req.query.projectSize) return next();
-  let rootDir = 'projects/' + req.user.username + '/' + req.project.root;
+	if (!req.query.projectSize) return next();
+	let rootDir = 'projects/' + req.user.username + '/' + req.project.root;
 
-  userCapacity.readSizeRecursive(rootDir, (err, size) => {
-    size = err ? 0 : size;
+	userCapacity.readSizeRecursive(rootDir, (err, size) => {
+		size = err ? 0 : size;
 
-    req.project.projectSize = utils.byteToMb(size);
+		req.project.projectSize = utils.byteToMb(size);
 
-    let response = {
-      "success": true,
-      "data": req.project
-    };
-    return res.status(200).json(response);
-  });
+		let response = {
+			"success": true,
+			"data": req.project
+		};
+		return res.status(200).json(response);
+	});
 }
 
 
 function transpile(req, res, next) {
-  Project.getOne(req.params.id, req.user.username)
-    .then(project => {
-      if (!project) {
-        const err = new APIError('Project is empty', httpStatus.NOT_FOUND, true);
-        return next(err);
-      }
-      req.project = project;
-      transpiler.projectTranspile(req);
-      res.status(200).json({success: true, data: project.name + ' build start'});
-    })
-    .catch((e) => {
-      const err = new APIError("Bad request", 400, true);
-      return next(err);
-    });
+	Project.getOne(req.params.id, req.user.username)
+		.then(project => {
+			if (!project) {
+				const err = new APIError('Project is empty', httpStatus.NOT_FOUND, true);
+				return next(err);
+			}
+			req.project = project;
+			transpiler.projectTranspile(req);
+			res.status(200).json({success: true, data: project.name + ' build start'});
+		})
+		.catch((e) => {
+			const err = new APIError("Bad request", 400, true);
+			return next(err);
+		});
 }
 
 export default {
-  get,
-  create,
-  update,
-  list,
-  remove,
-  makePublic,
-  publishProject,
-  unPublishProject,
-  getPublishedProject,
-  getPublishedProjects,
-  importOnce,
-  getTemplatesList,
-  getProjectsCount,
-  getProjectSize,
-  transpile
+	get,
+	create,
+	update,
+	list,
+	remove,
+	makePublic,
+	publishProject,
+	unPublishProject,
+	getPublishedProject,
+	getPublishedProjects,
+	importOnce,
+	getTemplatesList,
+	getProjectsCount,
+	getProjectSize,
+	transpile
 };
