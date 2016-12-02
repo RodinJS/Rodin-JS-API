@@ -13,7 +13,6 @@ import helmet from 'helmet';
 import winstonInstance from './winston';
 import apiRoutes from '../server/routes';
 import socketRoutes from '../server/routes/socket';
-import previewRoutes from '../server/routes/preview';
 import config from './env';
 import APIError from '../server/helpers/APIError';
 import passport from 'passport';
@@ -56,9 +55,6 @@ app.use('/api', apiRoutes);
 
 // mount all socketRoutes on /socket path
 app.use('/socket', socketRoutes);
-
-// mount all previewRoutes on /preview path
-// app.use('/preview', previewRoutes);
 
 // if error is not an instanceOf APIError, convert it.
 app.use((err, req, res, next) => {
