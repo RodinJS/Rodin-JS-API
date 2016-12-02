@@ -7,7 +7,7 @@ function cleanUrl(url) {
 // don't let users crawl up the file name by using bar/foo/bar.js
 function cleanFileName(name) {
     name = cleanUrl(name);
-    let newName = name.split(/[\\\/]+/g);
+    let newName = name.split(/[\\\/ / /]+/g);
     return newName[newName.length-1];
 }
 

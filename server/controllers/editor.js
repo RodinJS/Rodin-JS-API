@@ -240,7 +240,9 @@ function postFile(req, res, next) {
   }
 
   let mainPath = help.generateFilePath(req, req.body.path);
+
   const type = req.body.type;
+
   let filePath = mainPath + "/" + help.cleanFileName(req.body.name);
 
   if (action === 'create') {
@@ -264,8 +266,11 @@ function postFile(req, res, next) {
     }
 
     else if (type === 'directory') {
+
       if (!fs.existsSync(filePath)) {
+
         fsExtra.ensureDir(filePath, (err) => {
+
           if (err) {
             err = new APIError('Can not create folder!', httpStatus.COULD_NOT_CREATE_FILE, true);
             return next(err);
@@ -273,17 +278,20 @@ function postFile(req, res, next) {
           updateProjectDate(req);
           res.status(200).send({"success": true, "data": 'The folder was created!'});
         });
+
       }
       else {
         const err = new APIError('folder already exist!', httpStatus.FILE_DOES_NOT_EXIST, true);
         return next(err);
       }
+
     }
 
     else {
       const err = new APIError('Provide type name!', httpStatus.BAD_REQUEST, true);
       return next(err);
     }
+
   }
 
   else if (action === 'copy') {
@@ -295,6 +303,7 @@ function postFile(req, res, next) {
     let srcPath = help.generateFilePath(req, req.body.srcPath);
 
     if (type === 'file') {
+
       readFile(srcPath, (err, content) => {
         if (err) {
           const err = new APIError('File does not exist!', httpStatus.FILE_DOES_NOT_EXIST, true);
@@ -328,7 +337,7 @@ function postFile(req, res, next) {
 
     else if (type === 'directory') {
 
-      if (!req.body.srcPath && req.body.name == req.project.root) {
+      if (!req.body.srcPath) {
         const err = new APIError('Cant copy project in self!', httpStatus.BAD_REQUEST, true);
         return next(err);
       }
@@ -337,6 +346,7 @@ function postFile(req, res, next) {
 
 
         if (!fs.existsSync(filePath)) {
+
           fsExtra.copy(srcPath, filePath, function (err) {
             if (err) {
               const err = new APIError('Folder copy error!', httpStatus.BAD_REQUEST, true);
@@ -347,6 +357,7 @@ function postFile(req, res, next) {
               res.status(200).send({"success": true, "data": 'The folder was copeid!'});
             }
           });
+
         }
         else {
           const err = new APIError('Folder already exist!', httpStatus.FILE_ALREDY_EXIST, true);
