@@ -1,3 +1,5 @@
+import fs from 'fs';
+
 const defTemplates = [
     {
         "name": "Empty Project",
@@ -61,4 +63,18 @@ function convertDate(){
     return (monthIndex+1) +' / '+day+' / '+year;
 }
 
-export default {generateCode, getDefTemplatesObject, byteToMb, getUserNameFromEmail, convertDate};
+function deleteFolderRecursive(path) {
+  fs.readdirSync(path).forEach((file) => {
+    let curPath = path + "/" + file;
+    if (fs.lstatSync(curPath).isDirectory()) { // recurse
+      deleteFolderRecursive(curPath);
+    }
+    else { // delete file
+      fs.unlinkSync(curPath);
+    }
+  });
+  fs.rmdirSync(path);
+}
+
+
+export default {generateCode, getDefTemplatesObject, byteToMb, getUserNameFromEmail, convertDate, deleteFolderRecursive};

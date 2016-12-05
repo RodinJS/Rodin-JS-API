@@ -1,5 +1,4 @@
 import express from 'express';
-import path from 'path';
 import logger from 'morgan';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
@@ -13,7 +12,6 @@ import helmet from 'helmet';
 import winstonInstance from './winston';
 import apiRoutes from '../server/routes';
 import socketRoutes from '../server/routes/socket';
-import previewRoutes from '../server/routes/preview';
 import config from './env';
 import APIError from '../server/helpers/APIError';
 import passport from 'passport';
@@ -100,7 +98,7 @@ app.use((err, req, res, next) => {
 	});
 });
 
-// disable cache 
+// disable cache
 app.use((req, res, next) => {
     res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
     res.header('Expires', '-1');

@@ -14,7 +14,7 @@ describe('## Projects APIs', () => {
     blank: {
       name: 'testProject',
       tags: ['test'],
-      description: 'test project description'
+      description: 'test project description',
     },
     template: {
       name: 'testProjectTemplate',
@@ -124,6 +124,30 @@ describe('## Projects APIs', () => {
   it('should remove project with template data', (done) => {
     request(app)
       .delete('/api/project/' + project.templateInfo._id + '')
+      .set(User.generateHeaders())
+      .expect(httpStatus.OK)
+      .then(res => {
+        expect(res.body.success).to.equal(true);
+        done();
+      });
+  });
+
+  it('should project set public', (done) => {
+    request(app)
+      .post(`/api/project/pp/${project.info._id}`)
+      .send({status:"true"})
+      .set(User.generateHeaders())
+      .expect(httpStatus.OK)
+      .then(res => {
+        expect(res.body.success).to.equal(true);
+        done();
+      });
+  });
+
+  it('should project unset public', (done) => {
+    request(app)
+      .post(`/api/project/pp/${project.info._id}`)
+      .send({status:"false"})
       .set(User.generateHeaders())
       .expect(httpStatus.OK)
       .then(res => {

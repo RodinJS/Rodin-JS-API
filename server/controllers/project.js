@@ -50,6 +50,7 @@ function get(req, res, next) {
   Project.getOne(req.params.id, req.user.username)
     .then((project) => {
       if (project) {
+
         if (req.query.device) {
           return getStatus(project, req.query.device, (err, project) => {
             res.status(200).json({
@@ -58,18 +59,10 @@ function get(req, res, next) {
             });
           })
         }
-        //TODO normalize root folder path
-        let response = {
-          "success": true,
-          "data": project
-        };
-        if (req.query.projectSize) {
-          req.project = project.toObject();
-          return next();
-        }
-        else {
-          return res.status(200).json(response);
-        }
+
+        req.project = project.toObject();
+        return next();
+
       }
       else {
         const err = new APIError('Project is empty', httpStatus.NOT_FOUND, true);
@@ -242,23 +235,7 @@ function update(req, res, next) {
         "success": true,
         "data": project
       });
-    })
-  /*.then(result => {
-   console.log(result);
-   if (result.nModified === 1) {
-   return res.status(200).json({
-   "success": true,
-   "data": {}
-   });
-   } else {
-   const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
-   return next(err);
-   }
-   })
-   .catch((e) => {
-   const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
-   return next(err);
-   });*/
+    });
 }
 
 /**
@@ -288,19 +265,32 @@ function remove(req, res, next) {
   User.getPermission(username, id)
     .then(user => {
       if (user) {
+
         Project.removeAsync({_id: id})
+
           .then((deletedProject) => {
             if (deletedProject.result.ok === 1) {
-              User.updateAsync(
-                {
-                  username: username
-                },
-                {
-                  $pull: {
-                    projects: id
-                  }
-                }
-              )
+
+              const rootDir = 'projects/' + req.user.username + '/' + req.project.root;
+
+              const publishDir = 'public/' + req.user.username + '/' + req.project.root;
+
+              const publicDir = 'publish/' + req.user.username + '/' + req.project.root;
+
+              if (fs.existsSync(rootDir)) {
+                utils.deleteFolderRecursive(rootDir);
+              }
+
+              if (fs.existsSync(publishDir)) {
+                utils.deleteFolderRecursive(publishDir);
+              }
+
+              if (fs.existsSync(publicDir)) {
+                utils.deleteFolderRecursive(publicDir);
+              }
+
+
+              User.updateAsync({username: username}, {$pull: {projects: id}})
                 .then(updatedUser => {
                   return res.status(200).json({
                     "success": true,
@@ -311,8 +301,12 @@ function remove(req, res, next) {
               const err = new APIError("Something went wrong!", 312, true);
               return next(err);
             }
+
           }).error((e) => next(e));
-      } else {
+
+
+      }
+      else {
         const err = new APIError('User has no permission to modify this project!', 310, true);
         return next(err);
       }
@@ -342,63 +336,46 @@ function makePublic(req, res, next) {
   const id = req.params.id;
   const username = req.user.username;
   const status = req.body.status;
-  Project.getOne(id, username)
-    .then(project => {
+  Project.updateAsync({_id: id}, {$set: {"public": status}})
+    .then(updatedProject => {
+      if (updatedProject.nModified === 1) {
+        if (status === 'true') {
+          const srcDir = `projects/${username}/${help.cleanUrl(req.project.root)}`;
+          const publicDir = `public/${username}/${help.cleanUrl(req.project.root)}`;
 
-      if (project) {
-        Project.updateAsync(
-          {
-            _id: req.params.id
-          },
-          {
-            $set: {
-              "public": status
-            }
+          fsExtra.ensureSymlinkSync(srcDir, publicDir);
+
+          return res.status(200).json({
+            "success": true,
+            "data": {publicDir}
+          });
+
+        }
+        else {
+          const publicDir = `public/${username}/${help.cleanUrl(req.project.root)}`;
+
+          if (fs.existsSync(publicDir)) {
+            fs.unlinkSync(publicDir);
+            return res.status(200).json({
+              "success": true,
+              "data": {publicDir}
+            });
           }
-        )
-          .then(updatedProject => {
-            if (updatedProject.nModified === 1) {
-              if (status === 'true') {
-                const srcDir = path.join(__dirname, '..', '..', '..', 'projects', username, help.cleanUrl(project.root));
-                // const srcDir = `/var/www/${req.hostname}/projects/${username}/${help.cleanUrl(project.root)}`;
-                const publicDir = path.join(__dirname, '..', '..', '..', 'public', username, help.cleanUrl(project.root));
-                // const publicDir = '/var/www/api.rodinapp.com/public/' + username + '/' + help.cleanUrl(project.root);
-                const ter = 'ln -s ' + srcDir + ' ' + publicDir;
-                const code = execSync(ter);
-                return res.status(200).json({
-                  "success": true,
-                  "data": {publicDir}
-                });
+          else {
+            const err = new APIError('link exist!', httpStatus.BAD_REQUEST, true);
+            return next(err);
+          }
 
-              } else {
-                const publicDir = path.join(__dirname, '..', '..', '..', 'public', username, help.cleanUrl(project.root));
-                // const publicDir = '/var/www/api.rodinapp.com/public/' + username + '/' + help.cleanUrl(project.root);
-                if (fs.existsSync(publicDir)) {
-                  fs.unlinkSync(publicDir);
-                  return res.status(200).json({
-                    "success": true,
-                    "data": {publicDir}
-                  });
-                } else {
-                  const err = new APIError('link exist!', httpStatus.BAD_REQUEST, true);
-                  return next(err);
-                }
-
-              }
-            } else {
-              const err = new APIError('Can\'t update info--', httpStatus.BAD_REQUEST, true);
-              return next(err);
-            }
-          }).catch(e => {
-          console.log(e)
-          const err = new APIError('Can\'t update info++', httpStatus.BAD_REQUEST, true);
-          return next(e);
-        });
-      } else {
-        const err = new APIError('Project not found!', 310, true);
+        }
+      }
+      else {
+        const err = new APIError('Can\'t update info--', httpStatus.BAD_REQUEST, true);
         return next(err);
       }
-    });
+    }).catch(e => {
+    const err = new APIError('Can\'t update info++', httpStatus.BAD_REQUEST, true);
+    return next(e);
+  });
 }
 
 /**
@@ -440,20 +417,20 @@ function publishProject(req, res, next) {
           if (result.nModified === 1) {
             //Send Mail
             req.mailSettings = {
-              to:req.user.email,
-              from:'team@rodin.space',
-              fromName:'Rodin team',
-              templateName:'rodin_publish',
-              subject:`${req.project.name} published`,
-              handleBars:[{
-                name:'userName',
+              to: req.user.email,
+              from: 'team@rodin.space',
+              fromName: 'Rodin team',
+              templateName: 'rodin_publish',
+              subject: `${req.project.name} published`,
+              handleBars: [{
+                name: 'userName',
                 content: req.user.username
-              },{
-                name:'publishUrl',
-                content:`${config.clientURL}/publish/${req.user.username}/${req.project.name}`
+              }, {
+                name: 'publishUrl',
+                content: `${config.clientURL}/publish/${req.user.username}/${req.project.name}`
               }]
             };
-            mandrill.sendMail(req, res, (response)=>{
+            mandrill.sendMail(req, res, (response) => {
               //console.log(response);
             });
             return res.status(200).json({success: true, data: 'Project published'})
@@ -519,6 +496,7 @@ function unPublishProject(req, res, next) {
 
 }
 
+
 /**
  * Get published public projects
  * @param req
@@ -545,7 +523,6 @@ function getPublishedProjects(req, res, next) {
       return next(err);
     });
 }
-
 
 /**
  * Get published public project
@@ -657,12 +634,7 @@ function getProjectSize(req, res, next) {
     size = err ? 0 : size;
 
     req.project.projectSize = utils.byteToMb(size);
-
-    let response = {
-      "success": true,
-      "data": req.project
-    };
-    return res.status(200).json(response);
+    return next();
   });
 }
 
@@ -683,6 +655,11 @@ function transpile(req, res, next) {
     });
 }
 
+
+function finalize(req, res, next) {
+  return res.status(200).json({success: true, data: req.project});
+}
+
 export default {
   get,
   create,
@@ -698,5 +675,6 @@ export default {
   getTemplatesList,
   getProjectsCount,
   getProjectSize,
-  transpile
+  transpile,
+  finalize
 };

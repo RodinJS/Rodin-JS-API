@@ -28,15 +28,15 @@ process.on('message', (message) => {
   gulp.start('transpiler', completeTranspile);
 
 
-  function onError(error){
+  function onError(error) {
     fsExtra.removeSync(project + '/pre_build');
     process.send({success: false, error: error});
     process.exit(1);
   }
 
-  function completeTranspile(){
+  function completeTranspile() {
     fs.rename(project + '/pre_build', project + '/build', function (err) {
-      if(err && err.code === 'ENOTEMPTY'){
+      if (err && err.code === 'ENOTEMPTY') {
         fsExtra.removeSync(project + '/build');
         return completeTranspile();
       }

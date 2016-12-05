@@ -2,7 +2,6 @@ import Promise from 'bluebird';
 import mongoose from 'mongoose';
 import config from './config/env';
 import app from './config/express';
-import http from 'http';
 import apiSocket from './server/controllers/apiSocket';
 
 // promisify mongoose

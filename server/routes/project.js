@@ -214,7 +214,7 @@ router.route('/:id')
 	 *          }
 	 *      }
  */
-  .get(check.ifTokenValid, projectCtrl.get, projectCtrl.getProjectSize)
+  .get(check.ifTokenValid, projectCtrl.get, projectCtrl.getProjectSize, projectCtrl.finalize)
 
   /** PUT /api/project/:projectId - Update project */
   .put(check.ifTokenValid, validate(paramValidation.updateProject), projectCtrl.update)
@@ -283,7 +283,7 @@ router.route('/:id')
 	 *          }
 	 *      }
    */
-  .delete(check.ifTokenValid, projectCtrl.remove);
+  .delete(check.ifTokenValid, projectCtrl.get, projectCtrl.remove);
 
 /**
  *
@@ -319,6 +319,6 @@ router.use('/:id/build', check.ifTokenValid, check.isProjectOwn, buildRouter);
 router.use('/:id/download', check.ifTokenValid, check.isProjectOwn, downloadRouter);
 
 router.route('/pp/:id')
-	.post(check.ifTokenValid, projectCtrl.makePublic, downloadRouter);
+	.post(check.ifTokenValid, projectCtrl.get, projectCtrl.makePublic, downloadRouter);
 
 export default router;

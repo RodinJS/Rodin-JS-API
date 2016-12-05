@@ -1,18 +1,14 @@
-import http from 'http';
 import path from 'path';
-import url from 'url';
 import fs from 'fs';
 import _ from 'lodash';
 
 import dirToJson from 'dir-to-json';
 
 import Project from '../models/project';
-import User from '../models/user';
 import APIError from '../helpers/APIError';
 import httpStatus from '../helpers/httpStatus';
 import help from '../helpers/editor';
-
-import config from '../../config/env';
+import utils from '../helpers/common';
 
 
 import fsExtra from 'fs-extra';
@@ -594,20 +590,11 @@ function deleteFile(req, res, next) {
       const err = new APIError('File does not exist!', httpStatus.FILE_DOES_NOT_EXIST, true);
       return next(err);
     }
-  } else { // when folder
-    function deleteFolderRecursive(path) {
-      fs.readdirSync(path).forEach((file, index) => {
-        var curPath = path + "/" + file;
-        if (fs.lstatSync(curPath).isDirectory()) { // recurse
-          deleteFolderRecursive(curPath);
-        } else { // delete file
-          fs.unlinkSync(curPath);
-        }
-      });
-      fs.rmdirSync(path);
-    };
+  }
+  else { // when folder
+
     if (fs.existsSync(filePath)) {
-      deleteFolderRecursive(filePath);
+      utils.deleteFolderRecursive(filePath);
       updateProjectDate(req);
       res.status(200).send({"success": true, "data": filePath});
     } else {
@@ -636,6 +623,5 @@ function updateProjectDate(req, cb) {
       $set: {updatedAt: new Date()}
     })
 }
-
 
 export default {getTreeJSON, getFile, putFile, postFile, deleteFile, uploadFiles, searchInsideFiles, isUnitTest};

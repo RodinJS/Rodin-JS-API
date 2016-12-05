@@ -17,24 +17,17 @@ const userBuffer = {};
 function projectTranspile(req) {
 
   if (userBuffer[req.user.username]) {
-    /*const error = {
-     status: httpStatus.SOCKET_ACTION_IN_PROGRESS,
-     message: 'Please wait until build complete',
-     type: httpStatus[httpStatus.SOCKET_ACTION_IN_PROGRESS]
-     };
-     req.notification = {success: false, error: error};
-     return pushSocket(req);*/
     userBuffer[req.user.username].kill();
     delete  userBuffer[req.user.username];
   }
   let folderPath = help.generateFilePath(req, '');
   let excecutorParams = {};
-  /*if(process.env.DEBUG){
-   excecutorParams =  {execArgv: ['--debug-brk=6676']}
-   }*/
+
   const executor = cp.fork(`${__dirname}/projectTranspiler.js`, excecutorParams);
   userBuffer[req.user.username] = executor;
+
   executor.send({project: folderPath});
+
   executor.on('message', (message) => {
     req.notification = message;
     if (message.error) {
@@ -53,6 +46,7 @@ function projectTranspile(req) {
     delete userBuffer[req.user.username];
     return pushSocket(req)
   });
+
 
 }
 
