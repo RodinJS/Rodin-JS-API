@@ -29,44 +29,42 @@ router.route('/')
 	* @apiSuccess (200) {String} user.profile.lastName     User last name.
 	*
 	* @apiSuccessExample {json} Success-Response:
-	*     HTTP/1.1 200 OK
-	*     {
-	*          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImdhZm95dHQiLCJyb2",
-	*          "user": {
-	*              "email": "user@example.com",
-	*              "role": "Free"
-	*              "profile": {
-	*                  "firstName": "Gago"
-	*                  "lastName": "Aperikyan"
-	*              }
-	*           }
-	*     }
+	*	HTTP/1.1 200 OK
+	*	{
+	*		"success": true,
+	*		"data": {
+	*			"name": "vavandr",
+	*			"private": false,
+	*			"git_url": "git://github.com/grigorkh/vavandr.git",
+	*			"clone_url": "https://github.com/grigorkh/vavandr.git",
+	*			"location": "https://api.github.com/repos/grigorkh/vavandr",
+	*			"status": "201 Created"
+	*		}
+	*	}
 	*
-	* @apiError BadRequest <code>email</code> and/or <code>password</code> of the User is required.
+	* @apiError NoGithub GitHub account not linked to this user!
 	*
 	* @apiErrorExample {json} Bad Request:
-	*      HTTP/1.1 400 Bad Request
+	*      HTTP/1.1 350
 	*      {
 	*          "success": false
 	*          "error": {
-	*              "message": "\"email\" is required and \"password\" is required",
-	*              "status": 400,
-	*              "type": "Bad Request",
+	*              "message": "GitHub account not linked to this user!",
+	*              "status": 350,
 	*              "timestamp": 1473863313415
 	*          }
 	*      }
 	*
-	* @apiError UserExists User exists.
+	* @apiError NoToken Token does not provided!
 	*
 	* @apiErrorExample {json} Bad Request:
-	*      HTTP/1.1 400 Bad Request
+	*      HTTP/1.1 315
 	*      {
 	*          "success": false
 	*          "error": {
-	*              "message": "User exists",
-	*              "status": 400,
-	*              "type": "Bad Request",
-	*              "timestamp": 1474029303546
+	*              "message": "Token does not provided!",
+	*              "status": 315,
+	*              "timestamp": 1480923413253
 	*          }
 	*      }
 	*

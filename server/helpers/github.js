@@ -40,10 +40,8 @@ function createRepo(username, repoName) {
 						auto_init: true 
 					}, (err, result) => {
 						if(err) {
-							resolve({
-								success: false,
-								error: err
-							});
+							const e = new APIError(`Repo with name ${repoName} alredy exist!`, httpStatus.REPO_NAME_EXIST, true);
+							reject(e);
 						}
 						resolve({
 							success: true,

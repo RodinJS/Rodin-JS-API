@@ -132,7 +132,7 @@ const httpStatus = {
 // working with github [350-370]
   GITHUB_NOT_LINKED: 350,
   NO_PROJECT_ROOT: 351,
-
+  REPO_NAME_EXIST: 352,
 
 // working with sockets [600~]
   BAD_SOCKET_REQUEST: 600,
