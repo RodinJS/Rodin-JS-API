@@ -9,9 +9,10 @@ import APIError from '../helpers/APIError';
 import User from '../models/user';
 import mandrill from '../helpers/mandrill';
 import Utils from '../helpers/common';
-import apiSockets from '../controllers/apiSocket';
 import notifications from '../controllers/notifications';
+import request from 'request-promise';
 import _ from 'lodash';
+import config from '../../config/env';
 const HookSecretKey = 'K7rd6FzEZwzcc6dQr3cv9kz4tTTZzAc9hdXYJpukvEnxmbdB42V4b6HePs5ZDTYLW_4000dram';
 
 
@@ -95,17 +96,27 @@ function build(req, res, next) {
 
       mandrill.sendMail(req, res, () => {
 
-        const activeUser = apiSockets.Service.io.findUser(req.user.username);
 
-        if (activeUser) {
-          let socketPushData = {
+        const options = {
+          method: 'POST',
+          uri: `${config.socketURL}/ss/hooks`,
+          body: {
             username: req.user.username,
             label: req.notification.error ? req.notification.error.message : req.notification.data,
             project:_.pick(req.project, ['_id', 'name']),
-            error: req.notification.error || false
-          };
-          apiSockets.Service.io.broadcastToRoom(req.user.username, 'probjectBuild', socketPushData);
-        }
+            error: req.notification.error || false,
+            event:'projectBuild'
+          },
+          json: true // Automatically stringifies the body to JSON
+        };
+
+        request(options)
+          .then((response) => {
+            console.log(response);
+          })
+          .catch( (err)  =>{
+            console.log(err);
+          });
         notifications.create(req, false, false);
         return res.status(200).json(req.notification);
 

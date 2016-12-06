@@ -3,7 +3,7 @@
  */
 
 
-import config from '../../config/env';
+import config from '../config/env';
 import sio from 'socket.io';
 import _ from 'lodash';
 import jwt from 'jsonwebtoken';

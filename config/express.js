@@ -11,6 +11,7 @@ import expressValidation from 'express-validation';
 import helmet from 'helmet';
 import winstonInstance from './winston';
 import apiRoutes from '../server/routes';
+import rodinSocketRoutes from '../socketServer/routes';
 import socketRoutes from '../server/routes/socket';
 import config from './env';
 import APIError from '../server/helpers/APIError';
@@ -51,6 +52,8 @@ if (config.env === 'development') {
 
 // mount all apiRoutes on /api path
 app.use('/api', apiRoutes);
+
+app.use('/ss', rodinSocketRoutes);
 
 // mount all socketRoutes on /socket path
 app.use('/socket', socketRoutes);

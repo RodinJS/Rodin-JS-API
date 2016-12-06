@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import cp from 'child_process';
-import apiSockets from '../../controllers/apiSocket';
+import request from 'request-promise';
+import config from '../../../config/env';
 import APIError from '../APIError';
 import httpStatus from '../httpStatus';
 import help from '../../helpers/editor';
@@ -51,7 +52,23 @@ function projectTranspile(req) {
 }
 
 function pushSocket(req) {
-  apiSockets.Service.io.broadcastToRoom(req.user.username, 'projectTranspiled', req.notification);
+  req.notification.username = req.user.username;
+  req.notification.event = 'projectTranspiled';
+  const options = {
+    method: 'POST',
+    uri: `${config.socketURL}/ss/hooks`,
+    body: req.notification,
+    json: true // Automatically stringifies the body to JSON
+  };
+
+  request(options)
+    .then((response) => {
+      console.log(response);
+    })
+    .catch( (err)  =>{
+      console.log(err);
+    });
+  notifications.create(req, false, false);
 }
 
 export default {projectTranspile};
