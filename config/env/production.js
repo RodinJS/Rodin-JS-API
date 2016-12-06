@@ -5,7 +5,7 @@ export default {
   clientURL: 'https://rodin.io',
   port: 3000,
   socketPort:4000,
-  socketURL:'https://ss.rodin.space/',
+  socketURL:'https://ss.rodin.space',
   social: {
     facebook: {
       clientID: "214577345643265",

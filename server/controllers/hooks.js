@@ -43,15 +43,9 @@ function build(req, res, next) {
     return next(err);
   }
 
-  const update = {
-    build: {
-      [req.params.device]: {
-        built: req.body.built || false,
-        buildId: req.body.buildId
-
-      }
-    }
-  };
+  const update = {};
+  update[`build.${req.params.device}.built`] = req.body.built || false;
+  update[`build.${req.params.device}.buildId`] = req.body.buildId;
 
   Project.findOneAndUpdate({_id: req.params.id}, {$set: update}, {new: true}, (err, project) => {
     if (err) {
