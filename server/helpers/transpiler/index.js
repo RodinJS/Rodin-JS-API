@@ -68,7 +68,6 @@ function pushSocket(req) {
     .catch( (err)  =>{
       console.log(err);
     });
-  notifications.create(req, false, false);
 }
 
 export default {projectTranspile};

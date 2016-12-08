@@ -5,8 +5,6 @@
 import Notifications from '../models/notifications';
 import APIError from '../helpers/APIError';
 import _  from 'lodash';
-import httpStatus from '../helpers/httpStatus';
-import config from '../../config/env';
 
 /**
  * Get project for preview

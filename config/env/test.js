@@ -4,6 +4,7 @@ export default {
   db: 'mongodb://localhost/rodin-js-api-test',
   port: 5000,
   socketPort: 6000,
+  socketURL:'http://localhost:6000',
   clientURL: 'https://rodin.space',
   social: {
     facebook: {
