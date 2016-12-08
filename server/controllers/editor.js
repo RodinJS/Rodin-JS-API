@@ -458,8 +458,11 @@ function uploadFiles(req, res, next) {
         if (existedFiles.length > 0) {
           res.status(200).send({
             "success": true,
-            "data": 'Following files exists, please provide action (replace, rename)',
-            files: existedFiles
+            "data": {
+              files: existedFiles,
+              message:'Following files exists, please provide action (replace, rename)',
+            }
+
           });
         }
         else
