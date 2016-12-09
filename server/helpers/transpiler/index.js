@@ -2,7 +2,6 @@ import _ from 'lodash';
 import cp from 'child_process';
 import request from 'request-promise';
 import config from '../../../config/env';
-import APIError from '../APIError';
 import httpStatus from '../httpStatus';
 import help from '../../helpers/editor';
 import notifications from '../../controllers/notifications';

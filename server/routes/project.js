@@ -5,8 +5,6 @@ import projectCtrl from '../controllers/project';
 import check from '../controllers/check';
 import buildRouter from './build/index';
 import downloadRouter from './download';
-// import '../../config/passport';
-// import passport from 'passport';
 
 const router = express.Router();	// eslint-disable-line new-cap
 

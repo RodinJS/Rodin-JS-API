@@ -496,7 +496,6 @@ function unPublishProject(req, res, next) {
 
 }
 
-
 /**
  * Get published public projects
  * @param req

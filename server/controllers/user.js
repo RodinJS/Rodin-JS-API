@@ -201,7 +201,6 @@ function resetPassword(req, res, next) {
 
 }
 
-
 function changePassword(req, res, next) {
   if (req.body.password != req.body.confirmPassword) {
     const err = new APIError('Password not match', httpStatus.BAD_REQUEST, true);
@@ -367,7 +366,6 @@ function updatePassword(req, res, next) {
     })
     .error((e) => next(e));
 }
-
 
 /**
  * Get user list.

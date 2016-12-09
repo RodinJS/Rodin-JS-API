@@ -75,9 +75,8 @@ ProjectTemplatesSchema.statics = {
     insert(projects, cb) {
 
         let bulk = this.collection.initializeUnorderedBulkOp();
-
         for(let i = 0; i < projects.length; i ++) {
-            bulk.find({name: projects[i].name}).upsert().update({ $set: projects[i] });
+          bulk.find({name: projects[i].name}).upsert().update({ $set: projects[i] });
         }
 
         bulk.execute((err)=>{
@@ -86,8 +85,6 @@ ProjectTemplatesSchema.statics = {
             }
             return cb({success:true});
         });
-
-        //return this.update({name: project.name}, {$set: project}, {upsert: true});
     },
 
     list({skip = 0, limit = 50} = {}) {
