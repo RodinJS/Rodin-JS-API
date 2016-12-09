@@ -133,8 +133,9 @@ function getFile(req, res, next) {
       const err = new APIError('File does not exist!', httpStatus.FILE_DOES_NOT_EXIST, true);
       return next(err);
     }
-
-    return res.send({"success": true, "data": {content}});
+    const fileState = fs.statSync(filePath);
+    let fileSize = fileState ? utils.byteToMb(fileState['size']) : 0;
+    return res.send({"success": true, "data":{fileSize:fileSize, content:content}});
   });
 }
 
@@ -611,7 +612,8 @@ function deleteFile(req, res, next) {
 function readFile(path, callback) {
   try {
     fs.readFile(path, 'utf8', callback);
-  } catch (e) {
+  }
+  catch (e) {
     callback(e);
   }
 }

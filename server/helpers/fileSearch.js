@@ -70,15 +70,12 @@ class fileContentSearch {
         let lineReader = new LineByLineReader(file);
 
         lineReader
-            .on('error', function (err) {
+            .on('error',  (err)=> {
                 cb(false);
             })
-            .on('line', function (line) {
-                let searchWord = _this.searchWord.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
-                //_this.searchWord = "\\b" + _this.searchWord + "\\b";
-
-                //console.log(searchWord,  _this.regexParams);
-                let re = new RegExp(searchWord, _this.regexParams);
+            .on('line',  (line)=> {
+               let searchWord = _this.searchWord.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+               let re = new RegExp(searchWord, _this.regexParams);
 
 
                 let match = re.exec(line);
@@ -98,7 +95,7 @@ class fileContentSearch {
                 }
                 _this.readedLinesLength++;
             })
-            .on('end', function () {
+            .on('end',  () => {
                 cb(true);
             });
     }

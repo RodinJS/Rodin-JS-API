@@ -44,7 +44,7 @@ function getDefTemplatesObject(){
 }
 
 function byteToMb(num){
-    return (num / 1024 / 1024).toFixed(2)
+    return parseFloat((num / 1024 / 1024).toFixed(2))
 }
 
 function convertDate(){

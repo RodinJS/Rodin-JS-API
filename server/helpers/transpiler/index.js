@@ -32,13 +32,16 @@ function projectTranspile(req) {
   executor.on('message', (message) => {
     req.notification = message;
     if (message.error) {
-      let trimRootPath = req.notification.error.message.indexOf(req.project.root);
-      let parsedMessage = req.notification.error.message.substring(trimRootPath);
+      if(req.notification.error.message){
+        let trimRootPath = req.notification.error.message.indexOf(req.project.root);
+        let parsedMessage = req.notification.error.message.substring(trimRootPath);
+        req.notification.error.message = parsedMessage;
+      }
       req.notification.error = _.pick(req.notification.error, ['name', 'message']);
-      req.notification.error.message = parsedMessage;
       req.notification.error.status = httpStatus.SOCKET_ACTION_FAILED;
       req.notification.error.type = httpStatus[message.error.status];
       notifications.create(req, false, false);
+
     }
     else {
       req.notification.data = req.project.name + ' build complete';
