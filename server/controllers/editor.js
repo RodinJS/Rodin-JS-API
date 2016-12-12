@@ -135,7 +135,7 @@ function getFile(req, res, next) {
     }
     const fileState = fs.statSync(filePath);
     let fileSize = fileState ? utils.byteToMb(fileState['size']) : 0;
-    return res.send({"success": true, "data":{fileSize:fileSize, content:content}});
+    return res.send({"success": true, "data": {fileSize: fileSize, content: content}});
   });
 }
 
@@ -461,7 +461,7 @@ function uploadFiles(req, res, next) {
             "success": true,
             "data": {
               files: existedFiles,
-              message:'Following files exists, please provide action (replace, rename)',
+              message: 'Following files exists, please provide action (replace, rename)',
             }
 
           });
@@ -520,44 +520,6 @@ function startUpload(folderPath, req, action, res, next) {
     });
 
   }
-
-}
-
-/**
- * Validate unit test uploading
- * @param req
- * @param res
- * @param next
- */
-function isUnitTest(req, res, next) {
-
-  // THIS WORKS ONLY FOR UNIT TEST
-  if (req.body.testUpload) {
-
-    if (req.body.type === 'directory') {
-      //UNIT TEST FOLDER UPLOAD
-      let path = help.generateFilePath(req, req.body.path);
-      let templatePath = 'resources/templates/blank';
-      Minizip.zip(templatePath, path + '/test.zip', (err) => {
-        if (err) {
-          const err = new APIError('Test failed', httpStatus.BAD_REQUEST, true);
-          return next(err);
-        }
-        else {
-          let file = fs.readFileSync(path + '/test.zip');
-          req.files = [{originalname: 'test.zip', buffer: new Buffer(file)}];
-          next();
-        }
-      });
-    }
-    //UNIT TEST FOLDER UPLOAD
-    else {
-      req.files = req.body.files;
-      next();
-    }
-  }
-  else next();
-  // THIS WORKS ONLY FOR UNIT TEST
 
 }
 
@@ -627,6 +589,44 @@ function updateProjectDate(req, cb) {
     {
       $set: {updatedAt: new Date()}
     })
+}
+
+/**
+ * Validate unit test uploading
+ * @param req
+ * @param res
+ * @param next
+ */
+function isUnitTest(req, res, next) {
+
+  // THIS WORKS ONLY FOR UNIT TEST
+  if (req.body.testUpload) {
+
+    if (req.body.type === 'directory') {
+      //UNIT TEST FOLDER UPLOAD
+      let path = help.generateFilePath(req, req.body.path);
+      let templatePath = 'resources/templates/blank';
+      Minizip.zip(templatePath, path + '/test.zip', (err) => {
+        if (err) {
+          const err = new APIError('Test failed', httpStatus.BAD_REQUEST, true);
+          return next(err);
+        }
+        else {
+          let file = fs.readFileSync(path + '/test.zip');
+          req.files = [{originalname: 'test.zip', buffer: new Buffer(file)}];
+          next();
+        }
+      });
+    }
+    //UNIT TEST FOLDER UPLOAD
+    else {
+      req.files = req.body.files;
+      next();
+    }
+  }
+  else next();
+  // THIS WORKS ONLY FOR UNIT TEST
+
 }
 
 export default {getTreeJSON, getFile, putFile, postFile, deleteFile, uploadFiles, searchInsideFiles, isUnitTest};

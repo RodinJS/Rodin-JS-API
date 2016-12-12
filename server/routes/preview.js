@@ -1,7 +1,5 @@
 import express from 'express';
-import projectCtrl from '../controllers/project';
 import previewCtrl from '../controllers/preview';
-import check from '../controllers/check';
 
 const router = express.Router();	// eslint-disable-line new-cap
 
@@ -70,7 +68,7 @@ const router = express.Router();	// eslint-disable-line new-cap
  *      }
  */
 router.route('/:user/:project')
-  .get(previewCtrl.get)
+  .get(previewCtrl.get);
 
 
 

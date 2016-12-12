@@ -219,7 +219,7 @@ function create(req, res, next) {
 function update(req, res, next) {
   req.body.updatedAt = new Date();
 
-  Project.findOneAndUpdate(
+ /* Project.findOneAndUpdate(
     {
       _id: req.params.id,
       owner: req.user.username
@@ -235,6 +235,17 @@ function update(req, res, next) {
         "success": true,
         "data": project
       });
+    });*/
+  Project.findOneAndUpdate({_id: req.params.id, owner: req.user.username}, {$set:req.body}, {new:true})
+    .then(project=>{
+      return res.status(200).json({
+        "success": true,
+        "data": project
+      });
+    })
+    .catch(e=>{
+      const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+      return next(err);
     });
 }
 

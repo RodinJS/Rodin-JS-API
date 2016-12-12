@@ -117,7 +117,34 @@ function confirmUsername(req, res, next) {
     return res.status(httpStatus.BAD_REQUEST).json(err);
   }
   req.body.usernameConfirmed = true;
-  User.findOneAndUpdate({username: req.user.username}, {$set: req.body}, {new: true}, (err, user) => {
+
+  User.findOneAndUpdate({username: req.user.username}, {$set: req.body}, {new: true})
+    .then(user=>{
+      let rootDir = 'projects/' + user.username;
+      let publicDir = 'public/' + user.username;
+      let publishDir = 'publish/' + user.username;
+
+      if (!fs.existsSync(rootDir)) {
+        fs.mkdirSync(rootDir); //creating root dir for project
+      }
+
+      if (!fs.existsSync(publicDir)) {
+        fs.mkdirSync(publicDir); //creating root dir for public
+      }
+
+      if (!fs.existsSync(publishDir)) {
+        fs.mkdirSync(publishDir); //creating root dir for publish
+      }
+
+      req.user = user;
+      return next();
+    })
+    .catch(e=>{
+      const err = new APIError('Something went wrong', httpStatus.BAD_REQUEST, true);
+      return res.status(httpStatus.BAD_REQUEST).json(err);
+    })
+
+ /* User.findOneAndUpdate({username: req.user.username}, {$set: req.body}, {new: true}, (err, user) => {
     if (err) {
       const err = new APIError('Something went wrong', httpStatus.BAD_REQUEST, true);
       return res.status(httpStatus.BAD_REQUEST).json(err);
@@ -140,7 +167,7 @@ function confirmUsername(req, res, next) {
 
     req.user = user;
     next();
-  });
+  });*/
 }
 
 function resetPassword(req, res, next) {

@@ -325,16 +325,24 @@ function updateUser(req, res, next) {
         delete updatingData.planId;
     }
 
-    User.findOneAndUpdate({username: req.user.username}, {$set: updatingData}, {new: true}, (err, user)=> {
-        if (err) {
-            const err = new APIError('Update error!', httpStatus.BAD_REQUEST, true);
-            return next(err);
-        }
-        res.json({
-            "success": true,
-            "data": user//req.message || {}
-        })
+  User.findOneAndUpdate({username: req.user.username}, {$set: updatingData}, {new: true})
+    .then(user=>{
+      return  res.json({
+        "success": true,
+        "data": user//req.message || {}
+      });
     })
+    .catch(e=>{
+      const err = new APIError('Update error!', httpStatus.BAD_REQUEST, true);
+      return next(err);
+    });
+
+   /* User.findOneAndUpdate({username: req.user.username}, {$set: updatingData}, {new: true}, (err, user)=> {
+        if (err) {
+
+        }
+
+    })*/
 
 }
 
