@@ -4,12 +4,15 @@ import httpStatus from '../helpers/httpStatus';
 import config from '../../config/env';
 import help from '../helpers/editor';
 import git from '../helpers/github';
+import Project from '../models/project';
 
 function create(req, res, next) {
 	if(req.body.root) {
 		const projectRoot = '/var/www/stuff/projects/' + req.user.username + '/' + help.cleanUrl(req.body.root);
 		git.createRepo(req.user.username, help.cleanUrl(req.body.name))
 		.then(result => {
+			req.body.updatedAt = new Date();
+			
 			let clone_url = result.data.clone_url;
 			let position = clone_url.indexOf("github");
 			let token = result.token;
@@ -31,17 +34,37 @@ function create(req, res, next) {
 					.commit("initial commit!")	
 					.addRemote('origin', result.data.clone_url)
 					.push(['-u', repo_url], () => {
-						res.status(200).json({
-							success: true,
-							data: {
-								name: result.data.name,
-								private: result.data.private,
-								git_url: result.data.git_url,
-								clone_url: result.data.clone_url,
-								location: result.data.meta.location,
-								status: result.data.meta.status
-							}
-						});
+						Project.findOneAndUpdateAsync(
+							{
+								_id: req.body.id,
+								owner: req.user.username
+							},
+							{
+								$set: {
+									github: {
+										git: result.data.git_url,
+										https: result.data.clone_url
+									}
+								}
+							}, 
+							{
+								new: true
+							}).then(projData => {
+								res.status(200).json({
+									success: true,
+									data: {
+										name: result.data.name,
+										private: result.data.private,
+										git_url: result.data.git_url,
+										clone_url: result.data.clone_url,
+										location: result.data.meta.location,
+										status: result.data.meta.status
+									}
+								});
+							}).catch(e => {
+								const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+								return next(e);
+							});
 					});
 			});
 			gago.kill();
@@ -55,8 +78,24 @@ function create(req, res, next) {
 	}
 }
 
-function branch() {
-	
+function branch(req, res, next) {
+	if(req.body.root) {
+		const projectRoot = '/var/www/stuff/projects/' + req.user.username + '/' + help.cleanUrl(req.body.root);
+		git.createBranch(req.user.username, help.cleanUrl(req.body.id), projectRoot, help.cleanUrl(req.body.branch))
+			.then(result => {
+				res.status(200).json({
+					success: true,
+					data: result
+				});
+			})
+			.catch(e => {
+				const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+				next(e);
+			});
+	} else {
+		const err = new APIError("Project root does not provided!", httpStatus.NO_PROJECT_ROOT, true);
+		return next(err);
+	}
 }
 
 export default { create, branch };

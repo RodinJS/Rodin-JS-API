@@ -13,11 +13,13 @@ router.route('/')
 	*
 	* @apiParam {String} root        Project root folder path.
 	* @apiParam {String} name        GitHub repo name.
+	* @apiParam {String} id        	 Project id.
 	*
 	* @apiParamExample {json} Request-Example:
 	*     {
 	*          "root": "projectForGit",
-	*          "name": "s0meRepoName"
+	*          "name": "s0meRepoName",
+	*		   "id": "f74f3h7hfuifdwjr389"
 	*     }
 	*
 	* @apiSuccess (200) {String} token        				Server side generated token.
@@ -70,5 +72,8 @@ router.route('/')
 	*
 	*/
 	.post(check.ifTokenValid, gitCtrl.create);
+	
+router.route('/branch')
+	.post(check.ifTokenValid, gitCtrl.branch);
 
 export default router;

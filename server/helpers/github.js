@@ -5,6 +5,7 @@ import APIError from './APIError';
 import httpStatus from './httpStatus';
 import config from '../../config/env';
 import User from '../models/user';
+import Project from '../models/project';
 
 function createRepo(username, repoName) {
 	return new Promise((resolve, reject) => {
@@ -58,7 +59,7 @@ function createRepo(username, repoName) {
 				reject(err);
 			}
 		}).error((e) => {
-			const err = new APIError("Fatal error!", httpStatus.FATAL, true);
+			const err = new APIError("Fatal error!(DB)", httpStatus.FATAL, true);
 			reject(err);
 		});
 
@@ -66,10 +67,62 @@ function createRepo(username, repoName) {
 }
 
 
-function createBranch() {
+function createBranch(username, id, projectRoot, branchName) {
+	return new Promise((resolve, reject) => {
+		let token = '';
+
+		User.get(username)
+			.then(user => {
+				if(user) {
+					if(user.github.token) {
+						token = user.github.token;
+						Project.getOne(id, username)
+							.then(project => {
+								let clone_url = project.github.https;
+								let position = clone_url.indexOf("github");
+								let repo_url = [clone_url.slice(0, position), token, '@', clone_url.slice(position)].join('');
+								
+								require('simple-git')(projectRoot)
+									.checkoutLocalBranch(branchName, gitErr => {
+										if(gitErr) {
+											const err = new APIError(`${branchName} branch alredy exist!`, httpStatus.BAD_REQUEST, true);
+											reject(err);
+										}
+									})
+									.push(['-u', repo_url], () => {
+										resolve({
+											message: `${branchName} branch successfuly created`,
+											repo_url: clone_url
+										});
+									});
+							}).catch(e => {
+								const err = new APIError(`Project with ${id} does not exist!`, httpStatus.BAD_REQUEST, true);
+								reject(err);
+							});
+					} else {
+						const err = new APIError("GitHub account not linked to this user!", httpStatus.GITHUB_NOT_LINKED, true);
+						reject(err);
+					}
+				} else {
+					const err = new APIError(`User with username ${username} not found!`, httpStatus.USER_WITH_USERNAME_NOT_FOUND, true);
+					reject(err);
+				}
+			}).error((e) => {
+				const err = new APIError("Fatal error!(DB)", httpStatus.FATAL, true);
+				reject(err);
+			});
+	});
 
 }
 
 
+
+function pull() {
+
+}
+
+function push() {
+
+}
 
 export default { createRepo, createBranch };
