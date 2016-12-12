@@ -36,8 +36,7 @@ function createRepo(username, repoName) {
 					});
 
 					github.repos.create({ 
-						name: repoName,
-						auto_init: true 
+						name: repoName
 					}, (err, result) => {
 						if(err) {
 							const e = new APIError(`Repo with name ${repoName} alredy exist!`, httpStatus.REPO_NAME_EXIST, true);
@@ -45,7 +44,8 @@ function createRepo(username, repoName) {
 						}
 						resolve({
 							success: true,
-							data: result
+							data: result,
+							token: token
 						});
 					});
 
@@ -65,4 +65,11 @@ function createRepo(username, repoName) {
 	});
 }
 
-export default { createRepo };
+
+function createBranch() {
+
+}
+
+
+
+export default { createRepo, createBranch };

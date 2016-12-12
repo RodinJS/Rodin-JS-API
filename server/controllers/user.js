@@ -122,9 +122,9 @@ function confirmUsername(req, res, next) {
             const err = new APIError('Something went wrong', httpStatus.BAD_REQUEST, true);
             return res.status(httpStatus.BAD_REQUEST).json(err);
         }
-        let rootDir = 'projects/' + user.username;
-        let publicDir = 'public/' + user.username;
-        let publishDir = 'publish/' + user.username;
+        let rootDir = '/var/www/stuff/projects/' + user.username;
+        let publicDir = '/var/www/stuff/public/' + user.username;
+        let publishDir = '/var/www/stuff/publish/' + user.username;
 
         if (!fs.existsSync(rootDir)) {
             fs.mkdirSync(rootDir); //creating root dir for project
@@ -181,9 +181,9 @@ function create(req, res, next) {
 
             user.saveAsync()
                 .then((savedUser) => {
-                    let rootDir = 'projects/' + savedUser.username;
-                    let publicDir = 'public/' + savedUser.username;
-                    let publishDir = 'publish/' + savedUser.username;
+                    let rootDir = '/var/www/stuff/projects/' + savedUser.username;
+                    let publicDir = '/var/www/stuff/public/' + savedUser.username;
+                    let publishDir = '/var/www/stuff/publish/' + savedUser.username;
 
                     if (!fs.existsSync(rootDir)) {
                         fs.mkdirSync(rootDir); //creating root dir for project
@@ -309,9 +309,9 @@ function remove(req, res, next) {
     User.get(username)
         .then(user => {
             if (user) {
-                let rootDir = 'projects/' + username;
-                let publicDir = 'public/' + username;
-                let publishDir = 'publish/' + username;
+                let rootDir = '/var/www/stuff/projects/' + username;
+                let publicDir = '/var/www/stuff/public/' + username;
+                let publishDir = '/var/www/stuff/publish/' + username;
 
                 fsExtra.removeSync(rootDir);
                 fsExtra.removeSync(publicDir);
