@@ -191,7 +191,8 @@ function create(req, res, next) {
                       const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
                       return next(err);
                     });
-                } else {
+                }
+                else {
                   const err = new APIError('User not found!', 310);
                   return next(err);
                 }
@@ -218,24 +219,6 @@ function create(req, res, next) {
  */
 function update(req, res, next) {
   req.body.updatedAt = new Date();
-
- /* Project.findOneAndUpdate(
-    {
-      _id: req.params.id,
-      owner: req.user.username
-    },
-    {
-      $set: req.body
-    }, {new: true}, (err, project) => {
-      if (err) {
-        const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
-        return next(err);
-      }
-      return res.status(200).json({
-        "success": true,
-        "data": project
-      });
-    });*/
   Project.findOneAndUpdate({_id: req.params.id, owner: req.user.username}, {$set:req.body}, {new:true})
     .then(project=>{
       return res.status(200).json({

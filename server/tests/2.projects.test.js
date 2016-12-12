@@ -47,6 +47,30 @@ describe('## Projects APIs', () => {
       });
 
   });
+  it('should throw error projectExist', (done) => {
+    request(app)
+      .post('/api/project')
+      .set(User.generateHeaders())
+      .send(project.blank)
+      .expect(httpStatus.PROJECT_EXIST)
+      .then(res => {
+        expect(res.body.success).to.equal(false);
+        done();
+      });
+
+  });
+
+  it('should get projects list', (done) => {
+    request(app)
+      .get('/api/project')
+      .set(User.generateHeaders())
+      .expect(httpStatus.OK)
+      .then(res => {
+        expect(res.body.success).to.equal(true);
+        expect(res.body.data).to.be.an('array');
+        done();
+      });
+  });
 
   it('should insert teamplates inside DB', (done) => {
     request(app)
@@ -94,6 +118,7 @@ describe('## Projects APIs', () => {
     request(app)
       .get('/api/project/' + project.templateInfo._id + '')
       .set(User.generateHeaders())
+      .send({projectSize:true})
       .expect(httpStatus.OK)
       .then(res => {
         expect(res.body.success).to.equal(true);

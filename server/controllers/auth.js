@@ -243,6 +243,7 @@ function socialAuth(req, res, next) {
       if (req.params.socialName === 'facebook' && !user.facebookId) {
         userUpdate = {$set: {facebookId: req.body.id}}
       }
+
       else if (req.params.socialName === 'google' && !user.googleId) {
         userUpdate = {$set: {googleId: req.body.id}}
       }

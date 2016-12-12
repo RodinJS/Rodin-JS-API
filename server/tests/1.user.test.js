@@ -15,6 +15,12 @@ describe('## User APIs', () => {
       password: '1234567890AAa',
       role: 'Free'
     },
+    admin: {
+      email: 'mega@admin.me',
+      username: 'admin',
+      password: '1234567890AAa',
+      role: 'Admin'
+    },
     signUpUserfacebook: {
       id: 1580547325,
       email: 'presignupuser@fb.me',
@@ -44,6 +50,7 @@ describe('## User APIs', () => {
   };
 
   describe('# POST /api/user', () => {
+
     it('should create a new user', (done) => {
       request(app)
         .post('/api/user')
@@ -52,6 +59,7 @@ describe('## User APIs', () => {
         .then(res => {
           expect(res.body.data.user.email).to.equal(info.user.email);
           expect(res.body.data.user.role).to.equal('Free');
+          info.user.token = res.body.data.token;
           done();
         });
     });
@@ -63,6 +71,65 @@ describe('## User APIs', () => {
         .then(res => {
           expect(res.body.success).to.equal(true);
           expect(res.body.data.username).to.equal(info.user.username);
+          done();
+        });
+    });
+
+    it('should update user info', (done) => {
+      request(app)
+        .put(`/api/user/${info.user.username}`)
+        .set({'x-access-token': info.user.token})
+        .send({profile:{firstName:'gago', lastName:'mago'}})
+        .expect(httpStatus.OK)
+        .then(res => {
+          expect(res.body.success).to.equal(true);
+          done();
+        });
+    });
+
+    it('should update user password', (done) => {
+      request(app)
+        .put(`/api/user/password`)
+        .set({'x-access-token': info.user.token})
+        .send({password:'1234567890AAa'})
+        .expect(httpStatus.OK)
+        .then(res => {
+          expect(res.body.success).to.equal(true);
+          done();
+        });
+    });
+
+    it('should get me', (done) => {
+      request(app)
+        .get('/api/user/me')
+        .set({'x-access-token': info.user.token})
+        .expect(httpStatus.OK)
+        .then(res => {
+          expect(res.body.success).to.equal(true);
+          expect(res.body.data.username).to.equal(info.user.username);
+          done();
+        });
+    });
+
+    it('should fail update user password', (done) => {
+      request(app)
+        .put(`/api/user/password`)
+        .set({'x-access-token': info.user.token})
+        .send({password:'password'})
+        .expect(httpStatus.BAD_REQUEST)
+        .then(res => {
+          expect(res.body.success).to.equal(false);
+          done();
+        });
+    });
+
+    it('should throw error user exist', (done) => {
+      request(app)
+        .post('/api/user')
+        .send(info.user)
+        .expect(httpStatus.EMAIL_EXISTS)
+        .then(res => {
+          expect(res.body.success).to.equal(false);
           done();
         });
     });
@@ -283,12 +350,11 @@ describe('## User APIs', () => {
         });
     });
 
-
     it('should should allow successfuly change password', (done) => {
       //console.log(info.resetPasswordToken);
       request(app)
         .put('/api/user/resetPassword')
-        .send({password: '1234567890AAa', confirmPassword: '1234567890AAa', token:info.resetPasswordToken})
+        .send({password: '1234567890AAa', confirmPassword: '1234567890AAa', token: info.resetPasswordToken})
         .expect(httpStatus.OK)
         .then(res => {
           expect(res.body.success).to.equal(true);
@@ -298,6 +364,44 @@ describe('## User APIs', () => {
     });
 
   });
+
+/*  describe('#ADMIN ROLE', () => {
+    it('should create a new user with admin role', (done) => {
+      request(app)
+        .post('/api/user')
+        .send(info.admin)
+        .expect(httpStatus.OK)
+        .then(res => {
+          expect(res.body.data.user.email).to.equal(info.admin.email);
+          expect(res.body.data.user.role).to.equal('Admin');
+          done();
+        });
+    });
+
+    it('should login admin', (done) => {
+      request(app)
+        .post('/api/auth/login')
+        .send({email: info.admin.email, password: info.admin.password})
+        .expect(httpStatus.OK)
+        .then(res => {
+          expect(res.body.data.user.email).to.equal(info.admin.email);
+          expect(res.body.data.user.role).to.equal('Admin');
+          info.admin.token = res.body.data.token;
+          done();
+        });
+    });
+
+    it('should get all users', (done) => {
+      request(app)
+        .get('/api/user')
+        .set({'x-access-token': info.admin.token})
+        .expect(httpStatus.OK)
+        .then(res => {
+          expect(res.body).to.be.an('array');
+          done();
+        });
+    });
+  });*/
 
 
   // describe('# GET /api/user/:userEmail', () => {
@@ -323,18 +427,6 @@ describe('## User APIs', () => {
   //       .then(res => {
   //         expect(res.body.email).to.equal('gago@test.de');
   //         expect(res.body.role).to.equal('Free');
-  //         done();
-  //       });
-  //   });
-  // });
-
-  // describe('# GET /api/user/', () => {
-  //   it('should get all users', (done) => {
-  //     request(app)
-  //       .get('/api/user')
-  //       .expect(httpStatus.OK)
-  //       .then(res => {
-  //         expect(res.body).to.be.an('array');
   //         done();
   //       });
   //   });
