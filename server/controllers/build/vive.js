@@ -16,6 +16,7 @@ const build = (req, res, next) => {
   const project = JSON.parse(req.body.project);
   project.appId = req.project._id;
   project.userId = req.user.username;
+  project.version = req.body.version;
   project.url = `https://${req.headers.host}/public/${req.user.username}/${req.project.name}/`;
 
   request.post({
@@ -36,20 +37,16 @@ const build = (req, res, next) => {
       req.project = {
         vive: {
           requested: false,
-          built: false
+          built: false,
+          version:req.body.version
         }
       }
     }
 
-    if (!req.project.ios) {
-      req.project.vive = {
-        requested: false,
-        built: false
-      }
-    }
 
     req.project.build.vive.requested = true;
     req.project.build.vive.built = false;
+    req.project.build.vive.version = req.body.version;
     req.project.build.vive.buildId = JSON.parse(body).data.buildId;
     req.project.saveAsync().then(
       project => {
