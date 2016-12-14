@@ -140,10 +140,7 @@ function theirs(username, id, projectRoot) {
 						// });
 						let gago = exec(`cd ${projectRoot} && pwd`, (error, stdout, stderr) => {
 							if (error) {
-								res.status(400).send({
-									success: false,
-									error: error
-								});
+								reject(error);
 							}
 							console.log('stdout: ' + stdout);
 			    			console.log('stderr: ' + stderr);
