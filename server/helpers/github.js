@@ -2,6 +2,7 @@ import Promise from 'bluebird';
 import GitHubApi from 'github';
 import request from 'request-promise';
 import {exec} from 'child_process';
+import {spawn} from 'child_process';
 import APIError from './APIError';
 import httpStatus from './httpStatus';
 import config from '../../config/env';
@@ -134,27 +135,17 @@ function theirs(username, id, projectRoot) {
 				if(user) {
 					if(user.github.token) {
 						token = user.github.token;
-						// shell.exec(`cd ${projectRoot}`, (err) => {
-						// 	console.log("mi vpralyote");							
-						// 	reject(err);							
-						// });
-						let gago = exec(`cd ${projectRoot} && pwd`, (error, stdout, stderr) => {
-							if (error) {
-								reject(error);
-							}
-							console.log('stdout: ' + stdout);
-			    			console.log('stderr: ' + stderr);
 							Project.getOne(id, username)
 								.then(project => {
 									let repo_url = gitPathGenerator(token, project.github.https);
-									shell.exec(`git pull ${repo_url}`, (err) => {
+									shell.exec(`git pull ${repo_url}`, projectRoot, (err) => {
 									    console.log('git pull error: ', err);
 										shell.series([
-											`git reset -- ./`,
-											`git checkout -- ./`,
+											'git reset -- ./',
+											'git checkout -- ./',
 											`git pull ${repo_url}`
-										], (err) => {
-									    	console.log('git push/merge error: ', err); 
+										], projectRoot, (err) => {
+									    	console.log('git pull/checkout error: ', err); 
 									    	reject(err);
 										});
 										resolve({
@@ -165,8 +156,7 @@ function theirs(username, id, projectRoot) {
 									const err = new APIError(`Project with ${id} does not exist!`, httpStatus.BAD_REQUEST, true);
 									reject(err);
 								});
-			    		});
-			    		gago.kill();
+
 					} else {
 						const err = new APIError("GitHub account not linked to this user!", httpStatus.GITHUB_NOT_LINKED, true);
 						reject(err);
@@ -191,16 +181,16 @@ function ours(username, id, projectRoot) {
 				if(user) {
 					if(user.github.token) {
 						token = user.github.token;
-						shell.exec(`cd ${projectRoot}`, (err) => {
-							console.log("mi vpralyote");							
-							reject(err);
-						});
 						Project.getOne(id, username)
 							.then(project => {
 								let repo_url = gitPathGenerator(token, project.github.https);
-								shell.exec('git push -u origin ${repo_url}', (err) => {
+								shell.series([
+										'git add -A',
+										'git commit -m "update"',
+										`git push -u origin ${repo_url}`
+									], projectRoot, (err) => {
 								    console.log('git push error: ', err);
-								    shell.exec('git pull ${repo_url}', (err) => {
+								    shell.exec(`git pull ${repo_url}`, projectRoot, (err) => {
 										shell.series([
 											`git checkout --ours -- ./`,
 											`git push -u ${repo_url}`
@@ -209,7 +199,7 @@ function ours(username, id, projectRoot) {
 									    	reject(err);
 										});
 								    });
-									shell.exec('git push -u origin ${repo_url}', (err) => {
+									shell.exec(`git push -u origin ${repo_url}`, projectRoot, (err) => {
 									    	console.log('git push error: ', err);
 									    	reject(err); 
 									});
