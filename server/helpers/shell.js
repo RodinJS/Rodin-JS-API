@@ -1,13 +1,13 @@
 // execute a single shell command where "cmd" is a string
-exports.exec = function(cmd, cb){
-    // this would be way easier on a shell/bash script :P
+exports.exec = (cmd, cb) => {
+    console.log("----cmd-----", cmd);
     var child_process = require('child_process');
     var parts = cmd.split(/\s+/g);
     var p = child_process.spawn(parts[0], parts.slice(1), {stdio: 'inherit'});
-    p.on('exit', function(code){
+    p.on('exit', (code) => {
         var err = null;
         if (code) {
-            err = new Error('command "'+ cmd +'" exited with wrong status code "'+ code +'"');
+            err = new Error(`command '${cmd}' exited with wrong status code '${code}'`);
             err.code = code;
             err.cmd = cmd;
         }
@@ -17,9 +17,10 @@ exports.exec = function(cmd, cb){
 
 
 // execute multiple commands in series
-exports.series = function(cmds, cb){
-    var execNext = function(){
-        exports.exec(cmds.shift(), function(err){
+exports.series = (cmds, cb) => {
+    console.log("----cmd-----", cmds);
+    var execNext = () => {
+        exports.exec(cmds.shift(), (err) => {
             if (err) {
                 cb(err);
             } else {
