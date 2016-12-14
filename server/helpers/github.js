@@ -186,15 +186,16 @@ function ours(username, id, projectRoot) {
 								let repo_url = gitPathGenerator(token, project.github.https);
 								shell.series([
 										'git add -A',
-										'git commit -m "update"',
+										'git commit -m \"update\"',
 										`git push -u origin ${repo_url}`
 									], projectRoot, (err) => {
 								    console.log('git push error: ', err);
 								    shell.exec(`git pull ${repo_url}`, projectRoot, (err) => {
 										shell.series([
 											`git checkout --ours -- ./`,
+											`git config --global push.default matching`,
 											`git push -u ${repo_url}`
-										], (err) => {
+										], projectRoot, (err) => {
 									    	console.log('git push/merge error: ', err); 
 									    	reject(err);
 										});

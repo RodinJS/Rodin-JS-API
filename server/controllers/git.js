@@ -50,17 +50,26 @@ function create(req, res, next) {
 							{
 								new: true
 							}).then(projData => {
-								res.status(200).json({
-									success: true,
-									data: {
-										name: result.data.name,
-										private: result.data.private,
-										git_url: result.data.git_url,
-										clone_url: result.data.clone_url,
-										location: result.data.meta.location,
-										status: result.data.meta.status
-									}
-								});
+								let repo_info = result;
+								git.createBranch(req.user.username, help.cleanUrl(req.body.id), projectRoot, "rodin_editor")
+									.then(result => {
+										res.status(200).json({
+											success: true,
+											data: {
+												name: repo_info.data.name,
+												private: repo_info.data.private,
+												git_url: repo_info.data.git_url,
+												clone_url: repo_info.data.clone_url,
+												location: repo_info.data.meta.location,
+												status: repo_info.data.meta.status,
+												branch: result
+											}
+										});
+									})
+									.catch(e => {
+										const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+										next(e);
+									});
 							}).catch(e => {
 								const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
 								return next(e);
