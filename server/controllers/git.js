@@ -7,8 +7,8 @@ import git from '../helpers/github';
 import Project from '../models/project';
 
 function create(req, res, next) {
-	if(req.body.root) {
-		const projectRoot = '/var/www/stuff/projects/' + req.user.username + '/' + help.cleanUrl(req.body.root);
+	if(req.body.root && req.body.id) {
+		const projectRoot = '/var/www/stuff/projects/' + req.user.username + '/' + help.cleanUrl(req.body.root) + '/';
 		git.createRepo(req.user.username, help.cleanUrl(req.body.name))
 		.then(result => {
 			req.body.updatedAt = new Date();
@@ -73,14 +73,14 @@ function create(req, res, next) {
 			next(e);
 		});
 	} else {
-		const err = new APIError("Project root does not provided!", httpStatus.NO_PROJECT_ROOT, true);
+		const err = new APIError("Project root or id does not provided!", httpStatus.NO_PROJECT_ROOT, true);
 		return next(err);
 	}
 }
 
 function branch(req, res, next) {
-	if(req.body.root) {
-		const projectRoot = '/var/www/stuff/projects/' + req.user.username + '/' + help.cleanUrl(req.body.root);
+	if(req.body.root && req.body.id) {
+		const projectRoot = '/var/www/stuff/projects/' + req.user.username + '/' + help.cleanUrl(req.body.root) + '/';
 		git.createBranch(req.user.username, help.cleanUrl(req.body.id), projectRoot, help.cleanUrl(req.body.branch))
 			.then(result => {
 				res.status(200).json({
@@ -93,9 +93,46 @@ function branch(req, res, next) {
 				next(e);
 			});
 	} else {
-		const err = new APIError("Project root does not provided!", httpStatus.NO_PROJECT_ROOT, true);
+		const err = new APIError("Project root or id does not provided!", httpStatus.NO_PROJECT_ROOT, true);
 		return next(err);
 	}
 }
 
-export default { create, branch };
+
+function theirs(req, res, next) {
+	if(req.body.root && req.body.id) {
+		const projectRoot = '/var/www/stuff/projects/' + req.user.username + '/' + help.cleanUrl(req.body.root) + '/';
+		git.theirs(req.user.username, help.cleanUrl(req.body.id), projectRoot)
+			.then(data => {
+				res.status(200).json({
+					success: true,
+					data: data
+				});
+			}).catch(e => {
+				next(e);
+			});
+	} else {
+		const err = new APIError("Project root or project id does not provided!", httpStatus.NO_PROJECT_ROOT, true);
+		return next(err);
+	}
+}
+
+function ours(req, res, next) {
+	if(req.body.root && req.body.id) {
+		const projectRoot = '/var/www/stuff/projects/' + req.user.username + '/' + help.cleanUrl(req.body.root) + '/';
+		git.ours(req.user.username, help.cleanUrl(req.body.id), projectRoot)
+			.then(data => {
+				res.status(200).json({
+					success: true,
+					data: data
+				});
+			}).catch(e => {
+				next(e);
+			});
+	} else {
+		const err = new APIError("Project root or project id does not provided!", httpStatus.NO_PROJECT_ROOT, true);
+		return next(err);
+	}
+}
+
+export default { create, branch, theirs, ours };

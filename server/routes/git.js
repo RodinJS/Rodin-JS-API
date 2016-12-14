@@ -137,4 +137,132 @@ router.route('/branch')
 	*/
 	.post(check.ifTokenValid, gitCtrl.branch);
 
+router.route('/theirs')
+	/**
+	* @api {post} /api/git/branch Create new GitHub branch
+	* @apiName CreateGitBranch
+	* @apiGroup Git
+	* @apiVersion 0.0.1
+	*
+	* @apiParam {String} root        Project root folder path.
+	* @apiParam {String} name        GitHub repo name.
+	* @apiParam {String} branch    	 GitHub repo branch name.
+	* @apiParam {String} id        	 Project id.
+	*
+	* @apiParamExample {json} Request-Example:
+	*     {
+	*          "root": "projectForGit",
+	*          "name": "s0meRepoName",
+	*		   "branch": "someBranch",
+	*		   "id": "f74f3h7hfuifdwjr389"
+	*     }
+	*
+	* @apiSuccess (200) {Boolean} success      				Success message <code>true</code>.
+	* @apiSuccess (200) {Object} data         				Data object.
+	* @apiSuccess (200) {String} data.message 				Data message.
+	* @apiSuccess (200) {String} data.repo_url 				GitHub repo url.
+	*
+	* @apiSuccessExample {json} Success-Response:
+	*	HTTP/1.1 200 OK
+	*	{
+	*	  "success": true,
+	*	  "data": {
+	*	    "message": "gagoz branch successfuly created",
+	*	    "repo_url": "https://github.com/grigorkh/vavandr.git"
+	*	  }
+	*	}
+	*
+	* @apiError NoGithub GitHub account not linked to this user!
+	*
+	* @apiErrorExample {json} Bad Request:
+	*      HTTP/1.1 350
+	*      {
+	*          "success": false
+	*          "error": {
+	*              "message": "GitHub account not linked to this user!",
+	*              "status": 350,
+	*              "timestamp": 1473863313415
+	*          }
+	*      }
+	*
+	* @apiError NoToken Token does not provided!
+	*
+	* @apiErrorExample {json} Bad Request:
+	*      HTTP/1.1 315
+	*      {
+	*          "success": false
+	*          "error": {
+	*              "message": "Token does not provided!",
+	*              "status": 315,
+	*              "timestamp": 1480923413253
+	*          }
+	*      }
+	*
+	*/
+	.post(check.ifTokenValid, gitCtrl.theirs);
+
+router.route('/ours')
+	/**
+	* @api {post} /api/git/branch Create new GitHub branch
+	* @apiName CreateGitBranch
+	* @apiGroup Git
+	* @apiVersion 0.0.1
+	*
+	* @apiParam {String} root        Project root folder path.
+	* @apiParam {String} name        GitHub repo name.
+	* @apiParam {String} branch    	 GitHub repo branch name.
+	* @apiParam {String} id        	 Project id.
+	*
+	* @apiParamExample {json} Request-Example:
+	*     {
+	*          "root": "projectForGit",
+	*          "name": "s0meRepoName",
+	*		   "branch": "someBranch",
+	*		   "id": "f74f3h7hfuifdwjr389"
+	*     }
+	*
+	* @apiSuccess (200) {Boolean} success      				Success message <code>true</code>.
+	* @apiSuccess (200) {Object} data         				Data object.
+	* @apiSuccess (200) {String} data.message 				Data message.
+	* @apiSuccess (200) {String} data.repo_url 				GitHub repo url.
+	*
+	* @apiSuccessExample {json} Success-Response:
+	*	HTTP/1.1 200 OK
+	*	{
+	*	  "success": true,
+	*	  "data": {
+	*	    "message": "gagoz branch successfuly created",
+	*	    "repo_url": "https://github.com/grigorkh/vavandr.git"
+	*	  }
+	*	}
+	*
+	* @apiError NoGithub GitHub account not linked to this user!
+	*
+	* @apiErrorExample {json} Bad Request:
+	*      HTTP/1.1 350
+	*      {
+	*          "success": false
+	*          "error": {
+	*              "message": "GitHub account not linked to this user!",
+	*              "status": 350,
+	*              "timestamp": 1473863313415
+	*          }
+	*      }
+	*
+	* @apiError NoToken Token does not provided!
+	*
+	* @apiErrorExample {json} Bad Request:
+	*      HTTP/1.1 315
+	*      {
+	*          "success": false
+	*          "error": {
+	*              "message": "Token does not provided!",
+	*              "status": 315,
+	*              "timestamp": 1480923413253
+	*          }
+	*      }
+	*
+	*/
+	.post(check.ifTokenValid, gitCtrl.ours);
+
 export default router;

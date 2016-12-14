@@ -6,6 +6,13 @@ import httpStatus from './httpStatus';
 import config from '../../config/env';
 import User from '../models/user';
 import Project from '../models/project';
+import shell from './shell';
+
+
+function gitPathGenerator(token, clone_url) {
+	let position = clone_url.indexOf("github");
+	return [clone_url.slice(0, position), token, '@', clone_url.slice(position)].join('');
+}
 
 function createRepo(username, repoName) {
 	return new Promise((resolve, reject) => {
@@ -117,12 +124,98 @@ function createBranch(username, id, projectRoot, branchName) {
 
 
 
-function pull() {
+function theirs(username, id, projectRoot) {
+	return new Promise((resolve, reject) => {
+		let token = '';
 
+		User.get(username)
+			.then(user => {
+				if(user) {
+					if(user.github.token) {
+						token = user.github.token;
+						Project.getOne(id, username)
+							.then(project => {
+								let repo_url = gitPathGenerator(token, project.github.https);
+								shell.exec(`git pull ${repo_url}`, (err) => {
+								    console.log('git pull error: ', err);
+									shell.series([
+										`git checkout -- ${projectRoot}`,
+										`git pull ${repo_url}`
+									], (err) => {
+								    	console.log('git push/merge error: ', err); 
+								    	reject(err);
+									});
+									resolve({
+										message: `GitHub repo successfuly synced`
+									});
+								});
+							}).catch(e => {
+								const err = new APIError(`Project with ${id} does not exist!`, httpStatus.BAD_REQUEST, true);
+								reject(err);
+							});
+					} else {
+						const err = new APIError("GitHub account not linked to this user!", httpStatus.GITHUB_NOT_LINKED, true);
+						reject(err);
+					}
+				} else {
+					const err = new APIError(`User with username ${username} not found!`, httpStatus.USER_WITH_USERNAME_NOT_FOUND, true);
+					reject(err);
+				}
+			}).error((e) => {
+				const err = new APIError("Fatal error!(DB)", httpStatus.FATAL, true);
+				reject(err);
+			});
+	});
 }
 
-function push() {
+function ours(username, id, projectRoot) {
+	return new Promise((resolve, reject) => {
+		let token = '';
 
+		User.get(username)
+			.then(user => {
+				if(user) {
+					if(user.github.token) {
+						token = user.github.token;
+						Project.getOne(id, username)
+							.then(project => {
+								let repo_url = gitPathGenerator(token, project.github.https);
+								shell.exec('git push -u origin ${repo_url}', (err) => {
+								    console.log('git push error: ', err);
+								    shell.exec('git pull ${repo_url}', (err) => {
+										shell.series([
+											`git checkout --ours -- ${projectRoot}`,
+											`git push -u ${repo_url}`
+										], (err) => {
+									    	console.log('git push/merge error: ', err); 
+									    	reject(err);
+										});
+								    });
+									shell.exec('git push -u origin ${repo_url}', (err) => {
+									    	console.log('git push error: ', err);
+									    	reject(err); 
+									});
+									resolve({
+										message: `GitHub repo successfuly synced`
+									});
+								});
+							}).catch(e => {
+								const err = new APIError(`Project with ${id} does not exist!`, httpStatus.BAD_REQUEST, true);
+								reject(err);
+							});
+					} else {
+						const err = new APIError("GitHub account not linked to this user!", httpStatus.GITHUB_NOT_LINKED, true);
+						reject(err);
+					}
+				} else {
+					const err = new APIError(`User with username ${username} not found!`, httpStatus.USER_WITH_USERNAME_NOT_FOUND, true);
+					reject(err);
+				}
+			}).error((e) => {
+				const err = new APIError("Fatal error!(DB)", httpStatus.FATAL, true);
+				reject(err);
+			});
+	});
 }
 
-export default { createRepo, createBranch };
+export default { createRepo, createBranch, theirs, ours };
