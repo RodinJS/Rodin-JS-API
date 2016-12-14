@@ -89,7 +89,6 @@ router.route('/branch')
 	* @apiVersion 0.0.1
 	*
 	* @apiParam {String} root        Project root folder path.
-	* @apiParam {String} name        GitHub repo name.
 	* @apiParam {String} branch    	 GitHub repo branch name.
 	* @apiParam {String} id        	 Project id.
 	*
@@ -153,7 +152,6 @@ router.route('/theirs')
 	* @apiVersion 0.0.1
 	*
 	* @apiParam {String} root        Project root folder path.
-	* @apiParam {String} name        GitHub repo name.
 	* @apiParam {String} id        	 Project id.
 	*
 	* @apiParamExample {json} Request-Example:
@@ -214,7 +212,6 @@ router.route('/ours')
 	* @apiVersion 0.0.1
 	*
 	* @apiParam {String} root        Project root folder path.
-	* @apiParam {String} name        GitHub repo name.
 	* @apiParam {String} id        	 Project id.
 	*
 	* @apiParamExample {json} Request-Example:
