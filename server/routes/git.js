@@ -11,5 +11,8 @@ const router = express.Router();
 router.route('/')
   .get(gitCtrl.getToken, gitCtrl.getUser, authCtrl.socialAuth, gitCtrl.successAuth);
 
+router.route('/sync')
+  .get(gitCtrl.getToken, gitCtrl.getUser, gitCtrl.successSync);
+
 
 export default router;

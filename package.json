@@ -10,6 +10,7 @@
   },
   "scripts": {
     "start": "gulp serve",
+    "start:server":"cd ./dist; node socketServer",
     "build": "gulp",
     "lint": "gulp lint",
     "test": "gulp mocha",

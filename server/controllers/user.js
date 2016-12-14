@@ -79,7 +79,12 @@ function me(req, res) {
       role: req.user.role,
       profile: req.user.profile,
       creationDate: req.user.creationDate,
-      usernameConfirmed: req.user.usernameConfirmed
+      usernameConfirmed: req.user.usernameConfirmed,
+      github:req.user.github,
+      facebook:req.user.facebook,
+      google:req.user.google,
+      steam:req.user.steam,
+      oculus:req.user.oculus,
     }
   };
 

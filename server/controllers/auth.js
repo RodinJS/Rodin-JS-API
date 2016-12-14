@@ -114,168 +114,181 @@ function socialAuth(req, res, next) {
     return next(err);
   }
 
-  User.findOne(queryMethod, (err, user) => {
-    if (err) {
-      const err = new APIError('Something wrong!', httpStatus.BAD_REQUEST, true);
-      return next(err);
-    }
+  User.findOne(queryMethod)
+    .then(user => {
+      if (!user) {
 
-    if (!user) {
-
-      if (_.isUndefined(req.body.id)) {
-        const err = new APIError('Please provide userId', httpStatus.BAD_REQUEST, true);
-        return next(err);
-      }
-
-      if (_.isUndefined(req.body.email)) {
-        const err = new APIError('Please provide email', httpStatus.BAD_REQUEST, true);
-        return next(err);
-      }
-
-
-      let userObject = {
-        email: req.body.email,
-        username: req.body.username || req.body.id,
-        password: Utils.generateCode(8),
-        profile: {
-          firstName: req.body.first_name || '',
-          lastName: req.body.last_name || ''
-        },
-        role: 'Free',
-        usernameConfirmed: req.body.username ? true : false
-      };
-
-      if (req.params.socialName == 'facebook') {
-        userObject.facebookId = req.body.id;
-      }
-
-      else if (req.params.socialName === 'google') {
-        userObject.googleId = req.body.id;
-      }
-
-      else if (req.params.socialName === 'steam') {
-        userObject.steamId = req.body.id;
-      }
-
-      else if (req.params.socialName === 'oculus') {
-        userObject.oculusId = req.body.id;
-      }
-
-      else if (req.params.socialName === 'github') {
-        userObject.github = {
-          id: req.body.id,
-          token: req.gitAccessToken
-        }
-      }
-
-      else {
-        const err = new APIError('Wrong login method', httpStatus.BAD_REQUEST, true);
-        return next(err);
-      }
-
-
-      user = new User(userObject);
-      user.saveAsync(userObject)
-        .then((savedUser) => {
-
-          //setup project folder for confirmed User
-          if (userObject.usernameConfirmed) {
-
-            let rootDir = 'projects/' + savedUser.username;
-            let publicDir = 'public/' + savedUser.username;
-            let publishDir = 'publish/' + savedUser.username;
-
-            if (!fs.existsSync(rootDir)) {
-              fs.mkdirSync(rootDir); //creating root dir for project
-            }
-
-            if (!fs.existsSync(publicDir)) {
-              fs.mkdirSync(publicDir); //creating root dir for public
-            }
-
-            if (!fs.existsSync(publishDir)) {
-              fs.mkdirSync(publishDir); //creating root dir for publish
-            }
-
-          }
-
-
-          req.mailSettings = {
-            to: savedUser.email,
-            from: 'team@rodin.space',
-            fromName: 'Rodin team',
-            templateName: 'rodin_signup',
-            subject: 'Welcome to Rodin platform',
-            handleBars: [{
-              name: 'dateTime',
-              content: Utils.convertDate()
-            }, {
-              name: 'userName',
-              content: savedUser.username
-            }]
-          };
-          req.user = savedUser;
-
-
-          req.token = jwt.sign({ //jwt.verify
-            username: savedUser.username,
-            role: savedUser.role,
-            random: savedUser.password.slice(-15)
-          }, config.jwtSecret, {
-            expiresIn: "7d"
-          });
-
-          mandrill.sendMail(req, res, () => {
-            return next();
-          });
-
-        })
-        .error((e) => {
-          const err = new APIError('Something wrong!', httpStatus.BAD_REQUEST, true);
+        if (_.isUndefined(req.body.id)) {
+          const err = new APIError('Please provide userId', httpStatus.BAD_REQUEST, true);
           return next(err);
-        });
+        }
+
+        if (_.isUndefined(req.body.email)) {
+          const err = new APIError('Please provide email', httpStatus.BAD_REQUEST, true);
+          return next(err);
+        }
 
 
-    }
-    else {
-      let userUpdate = false;
+        let userObject = {
+          email: req.body.email,
+          username: req.body.username || req.body.id,
+          password: Utils.generateCode(8),
+          profile: {
+            firstName: req.body.first_name || '',
+            lastName: req.body.last_name || ''
+          },
+          role: 'Free',
+          usernameConfirmed: req.body.username ? true : false
+        };
 
-      if (req.params.socialName === 'facebook' && !user.facebookId) {
-        userUpdate = {$set: {facebookId: req.body.id}}
-      }
+        if (req.params.socialName == 'facebook') {
+          userObject.facebookId = req.body.id;
+        }
 
-      else if (req.params.socialName === 'google' && !user.googleId) {
-        userUpdate = {$set: {googleId: req.body.id}}
-      }
+        else if (req.params.socialName === 'google') {
+          userObject.googleId = req.body.id;
+        }
 
-      else if (req.params.socialName === 'github') {
-        userUpdate = {$set: {'github.token': req.gitAccessToken}}
-      }
+        else if (req.params.socialName === 'steam') {
+          userObject.steamId = req.body.id;
+        }
 
-      if (userUpdate) {
-        return User.updateAsync({username: user.username}, userUpdate)
-          .then(() => {
-            req.user = user;
+        else if (req.params.socialName === 'oculus') {
+          userObject.oculusId = req.body.id;
+        }
+
+        else if (req.params.socialName === 'github') {
+          userObject.github = {
+            id: req.body.id,
+            token: req.gitAccessToken
+          }
+        }
+
+        else {
+          const err = new APIError('Wrong login method', httpStatus.BAD_REQUEST, true);
+          return next(err);
+        }
+
+
+        user = new User(userObject);
+        user.saveAsync(userObject)
+          .then((savedUser) => {
+
+            //setup project folder for confirmed User
+            if (userObject.usernameConfirmed) {
+
+              let rootDir = 'projects/' + savedUser.username;
+              let publicDir = 'public/' + savedUser.username;
+              let publishDir = 'publish/' + savedUser.username;
+
+              if (!fs.existsSync(rootDir)) {
+                fs.mkdirSync(rootDir); //creating root dir for project
+              }
+
+              if (!fs.existsSync(publicDir)) {
+                fs.mkdirSync(publicDir); //creating root dir for public
+              }
+
+              if (!fs.existsSync(publishDir)) {
+                fs.mkdirSync(publishDir); //creating root dir for publish
+              }
+
+            }
+
+
+            req.mailSettings = {
+              to: savedUser.email,
+              from: 'team@rodin.space',
+              fromName: 'Rodin team',
+              templateName: 'rodin_signup',
+              subject: 'Welcome to Rodin platform',
+              handleBars: [{
+                name: 'dateTime',
+                content: Utils.convertDate()
+              }, {
+                name: 'userName',
+                content: savedUser.username
+              }]
+            };
+            req.user = savedUser;
+
 
             req.token = jwt.sign({ //jwt.verify
-              username: user.username,
-              role: user.role,
-              random: user.password.slice(-15)
+              username: savedUser.username,
+              role: savedUser.role,
+              random: savedUser.password.slice(-15)
             }, config.jwtSecret, {
               expiresIn: "7d"
             });
 
-            return next();
+            mandrill.sendMail(req, res, () => {
+              return next();
+            });
+
           })
           .error((e) => {
             const err = new APIError('Something wrong!', httpStatus.BAD_REQUEST, true);
             return next(err);
           });
+
+
       }
-      req.user = user;
-      return next();
-    }
-  });
+      else {
+
+        let userUpdate = false;
+
+        if (req.params.socialName === 'facebook' && !user.facebookId) {
+          userUpdate = {$set: {facebookId: req.body.id}}
+        }
+
+        else if (req.params.socialName === 'google' && !user.googleId) {
+          userUpdate = {$set: {googleId: req.body.id}}
+        }
+
+        else if (req.params.socialName === 'github') {
+          if(req.body.sync){
+            userUpdate = {$set: {'github.token': req.body.token, 'github.id':req.body.id}}
+          }
+          else{
+            userUpdate = {$set: {'github.token': req.gitAccessToken}}
+          }
+        }
+
+        if (userUpdate) {
+
+          return User.updateAsync({username: user.username}, userUpdate)
+            .then(() => {
+
+              if(req.body.sync){
+                return res.status(200).json({success:true, data:user});
+              }
+
+              req.user = user;
+
+              req.token = jwt.sign({ //jwt.verify
+                username: user.username,
+                role: user.role,
+                random: user.password.slice(-15)
+              }, config.jwtSecret, {
+                expiresIn: "7d"
+              });
+
+              return next();
+
+            })
+            .error((e) => {
+              const err = new APIError('Something wrong!', httpStatus.BAD_REQUEST, true);
+              return next(err);
+            });
+        }
+        req.user = user;
+        return next();
+      }
+    })
+    .catch(e => {
+      const err = new APIError('Something wrong!', httpStatus.BAD_REQUEST, true);
+      return next(err);
+    });
 }
 
 /**

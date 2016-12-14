@@ -47,79 +47,82 @@ function build(req, res, next) {
   update[`build.${req.params.device}.built`] = req.body.built || false;
   update[`build.${req.params.device}.buildId`] = req.body.buildId;
 
-  Project.findOneAndUpdate({_id: req.params.id}, {$set: update}, {new: true}, (err, project) => {
-    if (err) {
-      const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
-      return next(err);
-    }
-
-
-    User.get(project.owner).then((user) => {
-      if (!user) {
-        const err = new APIError('User Not Found', httpStatus.NOT_FOUND, true);
+  Project.findByIdAndUpdate(req.params.id, {$set: update}, {new: true})
+    .then(project=>{
+      if(!project){
+        const err = new APIError('Project not exist', httpStatus.NOT_FOUND, true);
         return next(err);
       }
-      req.mailSettings = {
-        to: user.email,
-        from: 'team@rodin.space',
-        fromName: 'Rodin team',
-        templateName: 'rodin_build',
-        subject: `${project.name} ${req.params.device} build complete`,
-        handleBars: [{
-          name: 'dateTime',
-          content: Utils.convertDate()
-        }, {
-          name: 'userName',
-          content: user.username
-        },
-          {
-            name: 'projectName',
-            content: project.name,
+      User.get(project.owner).then((user) => {
+        if (!user) {
+          const err = new APIError('User Not Found', httpStatus.NOT_FOUND, true);
+          return next(err);
+        }
+        req.mailSettings = {
+          to: user.email,
+          from: 'team@rodin.space',
+          fromName: 'Rodin team',
+          templateName: 'rodin_build',
+          subject: `${project.name} ${req.params.device} build complete`,
+          handleBars: [{
+            name: 'dateTime',
+            content: Utils.convertDate()
+          }, {
+            name: 'userName',
+            content: user.username
           },
-          {
-            name: 'device',
-            content: req.params.device,
-          }]
-      };
-      req.user = user;
-      req.project = project;
-      req.notification = {
-        success: true,
-        data: `${project.name} ${req.params.device} build complete`
-      };
-
-      mandrill.sendMail(req, res, () => {
-
-
-        const options = {
-          method: 'POST',
-          uri: `${config.socketURL}/ss/hooks`,
-          body: {
-            username: req.user.username,
-            label: req.notification.error ? req.notification.error.message : req.notification.data,
-            project:_.pick(req.project, ['_id', 'name']),
-            error: req.notification.error || false,
-            event:'projectBuild'
-          },
-          json: true // Automatically stringifies the body to JSON
+            {
+              name: 'projectName',
+              content: project.name,
+            },
+            {
+              name: 'device',
+              content: req.params.device,
+            }]
+        };
+        req.user = user;
+        req.project = project;
+        req.notification = {
+          success: true,
+          data: `${project.name} ${req.params.device} build complete`
         };
 
-        request(options)
-          .then((response) => {
-            console.log(response);
-          })
-          .catch( (err)  =>{
-            console.log(err);
-          });
-        notifications.create(req, false, false);
-        return res.status(200).json(req.notification);
+        mandrill.sendMail(req, res, () => {
 
-      })
-    }).error((e) => {
-      const err = new APIError('Something happen', httpStatus.BAD_REQUEST, true);
+
+          const options = {
+            method: 'POST',
+            uri: `${config.socketURL}/ss/hooks`,
+            body: {
+              username: req.user.username,
+              label: req.notification.error ? req.notification.error.message : req.notification.data,
+              project:_.pick(req.project, ['_id', 'name']),
+              error: req.notification.error || false,
+              event:'projectBuild'
+            },
+            json: true // Automatically stringifies the body to JSON
+          };
+
+          request(options)
+            .then((response) => {
+              console.log(response);
+            })
+            .catch( (err)  =>{
+              console.log(err);
+            });
+          notifications.create(req, false, false);
+          return res.status(200).json(req.notification);
+
+        })
+      }).error((e) => {
+        const err = new APIError('Something happen', httpStatus.BAD_REQUEST, true);
+        return next(err);
+      });
+    })
+    .catch(e=>{
+      const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
       return next(err);
     });
-  })
 }
 
 export default{build, validateKey};

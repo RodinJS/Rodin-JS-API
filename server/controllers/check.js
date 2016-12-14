@@ -118,7 +118,8 @@ function ifTokenValid(req, res, next) {
 			} else {
 				User.get(decoded.username).then((user) => {
 					if(user) {
-						req.user = {
+					  user = user.toObject();
+            req.user = {
 							email: user.email,
 							username: user.username,
 							role: user.role,
@@ -126,7 +127,12 @@ function ifTokenValid(req, res, next) {
 							storageSize:user.storageSize,
 							usernameConfirmed:user.usernameConfirmed,
 							stripe:user.stripe,
-							creationDate:user.createdAt
+							creationDate:user.createdAt,
+              github:!!(user.github || (user.github && Object.keys(user.github).length > 0)),
+              facebook:!!user.facebookId,
+              google:!!user.googleId,
+              steam:!!user.steamId,
+              oculus:!!user.oculusId,
 						};
 
 

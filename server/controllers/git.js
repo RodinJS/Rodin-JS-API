@@ -79,4 +79,9 @@ function successAuth(req, res, next){
   res.redirect(config.clientURL);
 }
 
-export default {getToken, getUser, successAuth};
+function successSync(req, res, next){
+  res.redirect(`${config.clientURL}/profile?token=${req.gitAccessToken}&id=${req.body.id}`);
+  //res.redirect(`http://localhost:8000/#/profile?token=${req.gitAccessToken}&id=${req.body.id}`);
+}
+
+export default {getToken, getUser, successAuth, successSync};
