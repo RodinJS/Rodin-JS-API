@@ -269,6 +269,7 @@ function create(req, res, next) {
           let rootDir = '/var/www/stuff/projects/' + savedUser.username;
           let publicDir = '/var/www/stuff/public/' + savedUser.username;
           let publishDir = '/var/www/stuff/publish/' + savedUser.username;
+          let historyDir = '/var/www/stuff/history/' + savedUser.username;
 
           if (!fs.existsSync(rootDir)) {
             fs.mkdirSync(rootDir); //creating root dir for project
@@ -280,6 +281,10 @@ function create(req, res, next) {
 
           if (!fs.existsSync(publishDir)) {
             fs.mkdirSync(publishDir); //creating root dir for publish
+          }
+
+          if (!fs.existsSync(historyDir)) {
+            fs.mkdirSync(historyDir); //creating root dir for history
           }
 
           if (req.body.invitationCode)

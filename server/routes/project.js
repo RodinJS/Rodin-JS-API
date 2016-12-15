@@ -282,6 +282,10 @@ router.route('/:id')
    */
   .delete(check.ifTokenValid, projectCtrl.get, projectCtrl.remove);
 
+
+router.route('/republish/:id')
+  .get(check.ifTokenValid, check.project, projectCtrl.rePublishProject);
+
 router.route('/publish/:id')
 	.get(check.ifTokenValid, check.project, projectCtrl.publishProject)
 	.delete(check.ifTokenValid, check.project, projectCtrl.unPublishProject);

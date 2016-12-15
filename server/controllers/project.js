@@ -18,28 +18,28 @@ import _ from 'lodash';
 import git from '../helpers/github';
 
 const getStatus = (project, device, cb) => {
-	console.log(JSON.stringify(project, null, 3));
-	request.get(
-		{
-			url: `${config[device].urls.getStatus}/${project.build[device].buildId}`,
-			headers: {
-				'app-id': config[device].appId,
-				'app-secret': config[device].appSecret
-			}
-		},
-		(err, httpResponse, body) => {
-			// console.log("1", err);
-			// console.log("2", httpResponse);
-			console.log("3", body);
-			if (err || httpResponse.statusCode !== 200) {
-				project.build[device].built = false;
-				return project.save(err => cb(err, project));
-			}
+  console.log(JSON.stringify(project, null, 3));
+  request.get(
+    {
+      url: `${config[device].urls.getStatus}/${project.build[device].buildId}`,
+      headers: {
+        'app-id': config[device].appId,
+        'app-secret': config[device].appSecret
+      }
+    },
+    (err, httpResponse, body) => {
+      // console.log("1", err);
+      // console.log("2", httpResponse);
+      console.log("3", body);
+      if (err || httpResponse.statusCode !== 200) {
+        project.build[device].built = false;
+        return project.save(err => cb(err, project));
+      }
 
-			project.build[device].built = JSON.parse(body).data.buildStatus;
-			return project.save(err => cb(err, project));
-		}
-	)
+      project.build[device].built = JSON.parse(body).data.buildStatus;
+      return project.save(err => cb(err, project));
+    }
+  )
 };
 
 /**
@@ -73,7 +73,7 @@ function get(req, res, next) {
       const err = new APIError('Project not found', httpStatus.NOT_FOUND, true);
       return next(e);
 
-		});
+    });
 }
 
 /**
@@ -84,128 +84,159 @@ function get(req, res, next) {
  * @returns {Project}
  */
 function create(req, res, next) {
-	Project.getByName(req.body.name, req.user.username)
-		.then(projectExist => {
-				if (projectExist) {
-					const message = 'Project exist';
-					const errorCode = httpStatus.PROJECT_EXIST;
-					const err = new APIError(message, errorCode, true);
-					return next(err);
-				}
+  Project.getByName(req.body.name, req.user.username)
+    .then(projectExist => {
+      if (projectExist) {
+        const message = 'Project exist';
+        const errorCode = httpStatus.PROJECT_EXIST;
+        const err = new APIError(message, errorCode, true);
+        return next(err);
+      }
 
-        let project = new Project({
-          name: req.body.name,
-          tags: req.body.tags,
-          root: req.body.name,
-          owner: req.user.username,
-          description: req.body.description,
-          isNew: true
-        });
+      let project = new Project({
+        name: req.body.name,
+        tags: req.body.tags,
+        root: req.body.name,
+        owner: req.user.username,
+        description: req.body.description,
+        isNew: true
+      });
 
-        project.saveAsync()
-          .catch((e) => {
-            console.log("-------1--------", e);
-            const message = e.code === 11000 ? 'Project exist' : httpStatus[400];
-            const errorCode = e.code === 11000 ? httpStatus.PROJECT_EXIST : httpStatus.BAD_REQUEST;
-            const err = new APIError(message, errorCode, true);
-            return next(err);
-          })
-          .then((savedProject) => {
+      project.saveAsync()
+        .catch((e) => {
+          console.log("-------1--------", e);
+          const message = e.code === 11000 ? 'Project exist' : httpStatus[400];
+          const errorCode = e.code === 11000 ? httpStatus.PROJECT_EXIST : httpStatus.BAD_REQUEST;
+          const err = new APIError(message, errorCode, true);
+          return next(err);
+        })
+        .then((savedProject) => {
 
-            if (!savedProject) return;
+          if (!savedProject) return;
 
 
-						let project = savedProject.toObject();
+          let project = savedProject.toObject();
 
-						let rootDir = '/var/www/stuff/projects/' + req.user.username + '/' + project.root;
+          let rootDir = '/var/www/stuff/projects/' + req.user.username + '/' + project.root;
 
-						if (!fs.existsSync(rootDir)) {
+          let historyDir = '/var/www/stuff/history/' + req.user.username + '/' + project.root;
 
-              fs.mkdirSync(rootDir); //creating root dir for project
+          if (!fs.existsSync(historyDir)){
+            fs.mkdirSync(historyDir); //creating root dir for project
+          }
 
-              if (req.body.templateId) {
+          if (!fs.existsSync(rootDir)) {
 
-                ProjectTemplates.getOne(req.body.templateId).then((templateProject) => {
+            fs.mkdirSync(rootDir); //creating root dir for project
 
-                  if (templateProject) {
+            if (req.body.templateId) {
 
-                    templateProject = templateProject.toObject();
+              ProjectTemplates.getOne(req.body.templateId).then((templateProject) => {
 
-                    let templateDir = 'resources/templates/' + templateProject.root;
+                if (templateProject) {
 
-                    // Check template exist
-                    if (fs.existsSync(templateDir)) {
+                  templateProject = templateProject.toObject();
 
-                      //copy tempate
-                      fsExtra.copy(templateDir, rootDir, function (err) {
-                        if (err)
-                          fs.appendFileSync(rootDir + '/error.log', err + '\n');
-                        else {
-                          Project.updateAsync(
-                            {
-                              _id: project._id,
-                              owner: req.user.username
-                            },
-                            {
-                              $set: {
-                                updatedAt: new Date(),
-                                templateOf: templateProject.name
+                  let templateDir = 'resources/templates/' + templateProject.root;
 
-                              }
+                  // Check template exist
+                  if (fs.existsSync(templateDir)) {
+
+                    //copy tempate
+                    fsExtra.copy(templateDir, rootDir, function (err) {
+                      if (err)
+                        fs.appendFileSync(rootDir + '/error.log', err + '\n');
+                      else {
+                        Project.updateAsync(
+                          {
+                            _id: project._id,
+                            owner: req.user.username
+                          },
+                          {
+                            $set: {
+                              updatedAt: new Date(),
+                              templateOf: templateProject.name
+
                             }
-                          ).then(result => {
-                          })
-                            .catch((e) => {
-                              fs.appendFileSync(rootDir + '/error.log', e + '\n');
-                            });
-                        }
+                          }
+                        ).then(result => {
+                        })
+                          .catch((e) => {
+                            fs.appendFileSync(rootDir + '/error.log', e + '\n');
+                          });
+                      }
 
-                      });
+                    });
 
-                    }
-                    else {
-                      fs.appendFileSync(rootDir + '/error.log', 'Template not exist' + '\n');
-                    }
                   }
                   else {
                     fs.appendFileSync(rootDir + '/error.log', 'Template not exist' + '\n');
                   }
+                }
+                else {
+                  fs.appendFileSync(rootDir + '/error.log', 'Template not exist' + '\n');
+                }
 
-                });
-              }
-
-              User.get(req.user.username)
-                .then(user => {
-                  if (!user) {
-                    const err = new APIError('User not found!', 310);
-                    return next(err);
-                  }
-
-                    User.updateAsync({username: req.user.username}, {
-                      $push: {
-                        "projects": savedProject._id
-                      }
-                    })
-                    .then(updatedUser => {
-                        return res.status(201).json({
-                          "success": true,
-                          "data": savedProject.outcome()
-                        });
-                    })
-                    .catch((e) => {
-                        console.log("-------2--------");
-                        const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
-                        return next(err);
-                    });
-                  
-                })
-                .error((e) => {
-                  const err = new APIError("Something went wrong!", 312, true);
-                  return next(err);
-                });
+              });
             }
 
-			     })
+            User.get(req.user.username)
+              .then(user => {
+                if (user) {
+                  User.updateAsync({username: req.user.username}, {
+                    $push: {
+                      "projects": savedProject._id
+                    }
+                  })
+                    .then(updatedUser => {
+                      return res.status(201).json({
+                        "success": true,
+                        "data": savedProject.outcome()
+                      });
+                    })
+                    .catch((e) => {
+                      console.log("-------2--------");
+                      const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+                      return next(err);
+                    });
+                }
+                else {
+                  const err = new APIError('User not found!', 310);
+                  return next(err);
+                }
+
+                User.get(req.user.username)
+                  .then(user => {
+                    if (user) {
+                      User.updateAsync({username: req.user.username}, {
+                        $push: {
+                          "projects": savedProject._id
+                        }
+                      })
+                        .then(updatedUser => {
+                          return res.status(201).json({
+                            "success": true,
+                            "data": savedProject.outcome()
+                          });
+                        })
+                        .catch((e) => {
+                          console.log("-------3--------");
+                          const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+                          return next(err);
+                        });
+                    } else {
+                      const err = new APIError('User not found!', 310);
+                      return next(err);
+                    }
+
+                  });
+              })
+              .error((e) => {
+                const err = new APIError("Something went wrong!", 312, true);
+                return next(err);
+              });
+          }
+        })
     })
     .catch(e => {
       console.log("-------4--------");
@@ -242,14 +273,14 @@ function update(req, res, next) {
  * @returns {Project[]}
  */
 function list(req, res, next) {
-	const {limit = 50, skip = 0} = req.query;
-	Project.list({limit, skip}, req.user.username, req.query._queryString).then((projects) => {
-		res.status(200).json({
-			success: true,
-			data: projects
-		})
-	})
-		.error((e) => next(e));
+  const {limit = 50, skip = 0} = req.query;
+  Project.list({limit, skip}, req.user.username, req.query._queryString).then((projects) => {
+    res.status(200).json({
+      success: true,
+      data: projects
+    })
+  })
+    .error((e) => next(e));
 }
 
 /**
@@ -308,7 +339,7 @@ function remove(req, res, next) {
         return next(err);
       }
 
-		});
+    });
 }
 
 /**
@@ -319,15 +350,15 @@ function remove(req, res, next) {
  * @returns {*}
  */
 function makePublic(req, res, next) {
-	if (!req.params.id) {
-		const err = new APIError('Provide project ID!', httpStatus.FILE_OR_PATH_DOES_NOT_EXIST, true);
-		return next(err);
-	}
+  if (!req.params.id) {
+    const err = new APIError('Provide project ID!', httpStatus.FILE_OR_PATH_DOES_NOT_EXIST, true);
+    return next(err);
+  }
 
-	if (!req.body.status) {
-		const err = new APIError('Provide project status!', httpStatus.FILE_OR_PATH_DOES_NOT_EXIST, true);
-		return next(err);
-	}
+  if (!req.body.status) {
+    const err = new APIError('Provide project status!', httpStatus.FILE_OR_PATH_DOES_NOT_EXIST, true);
+    return next(err);
+  }
 
 
   const id = req.params.id;
@@ -386,23 +417,23 @@ function makePublic(req, res, next) {
  */
 function publishProject(req, res, next) {
 
-	let projectFolder = help.generateFilePath(req, '');
-	let publishFolder = help.generateFilePath(req, '', 'publish');
+  let projectFolder = help.generateFilePath(req, '');
+  let publishFolder = help.generateFilePath(req, '', 'publish');
 
-	if (fs.existsSync(projectFolder)) {
+  if (fs.existsSync(projectFolder)) {
 
-		if (fs.existsSync(publishFolder)) {
-			fsExtra.removeSync(publishFolder)
-		}
+    if (fs.existsSync(publishFolder)) {
+      fsExtra.removeSync(publishFolder)
+    }
 
-		fsExtra.copy(projectFolder, publishFolder, function (err) {
-			if (err) {
-				const err = new APIError('Publishing error', httpStatus.BAD_REQUEST, true);
-				return next(err);
-			}
+    fsExtra.copy(projectFolder, publishFolder, function (err) {
+      if (err) {
+        const err = new APIError('Publishing error', httpStatus.BAD_REQUEST, true);
+        return next(err);
+      }
 
-			//Todo implement published public mechanizm
-			let publishedPublic = req.body.publishedPublic || true;
+      //Todo implement published public mechanizm
+      let publishedPublic = req.body.publishedPublic || true;
 
       Project.updateAsync({_id: req.params.id, owner: req.user.username}, {
         $set: {
@@ -444,15 +475,32 @@ function publishProject(req, res, next) {
         });
     });
 
-	}
-	else {
-		const err = new APIError('Project not found', httpStatus.NOT_FOUND, true);
-		return next(err);
-	}
+  }
+  else {
+    const err = new APIError('Project not found', httpStatus.NOT_FOUND, true);
+    return next(err);
+  }
 
 }
 
-/**
+
+function rePublishProject(req, res, next) {
+  const publishFolder = help.generateFilePath(req, '', 'publish');
+  const historyFolder = help.generateFilePath(req, '', 'history');
+  const projectBackupFolder = `${historyFolder}/${Date.now()}`;
+
+  fsExtra.copy(publishFolder, projectBackupFolder, function (err) {
+    if (err) {
+      const err = new APIError('Publishing error', httpStatus.BAD_REQUEST, true);
+      return next(err);
+    }
+    res.status(200).json({success: true, data: {}});
+  });
+
+
+}
+
+  /**
  * Unpublish user project
  * @param req
  * @param res
@@ -461,34 +509,34 @@ function publishProject(req, res, next) {
  */
 function unPublishProject(req, res, next) {
 
-	let publishFolder = help.generateFilePath(req, '', 'publish');
+  let publishFolder = help.generateFilePath(req, '', 'publish');
 
-	if (fs.existsSync(publishFolder)) {
-		fsExtra.removeSync(publishFolder);
-		Project.updateAsync({_id: req.params.id, owner: req.user.username}, {
-			$unset: {
-				publishDate: 1,
-				publishedPublic: 1
-			}
-		})
-			.then(result => {
-				if (result.nModified === 1) {
-					return res.status(200).json({success: true, data: 'Project unpublished'})
-				}
-				else {
-					const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
-					return next(err);
-				}
-			})
-			.catch((e) => {
-				const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
-				return next(err);
-			});
-	}
-	else {
-		const err = new APIError('Published project does not exist', httpStatus.BAD_REQUEST, true);
-		return next(err);
-	}
+  if (fs.existsSync(publishFolder)) {
+    fsExtra.removeSync(publishFolder);
+    Project.updateAsync({_id: req.params.id, owner: req.user.username}, {
+      $unset: {
+        publishDate: 1,
+        publishedPublic: 1
+      }
+    })
+      .then(result => {
+        if (result.nModified === 1) {
+          return res.status(200).json({success: true, data: 'Project unpublished'})
+        }
+        else {
+          const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+          return next(err);
+        }
+      })
+      .catch((e) => {
+        const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+        return next(err);
+      });
+  }
+  else {
+    const err = new APIError('Published project does not exist', httpStatus.BAD_REQUEST, true);
+    return next(err);
+  }
 
 
 }
@@ -501,23 +549,23 @@ function unPublishProject(req, res, next) {
  */
 function getPublishedProjects(req, res, next) {
 
-	const skip = parseInt(req.query.skip) || 0;
-	const limit = parseInt(req.query.limit) || 10;
+  const skip = parseInt(req.query.skip) || 0;
+  const limit = parseInt(req.query.limit) || 10;
 
 
-	Project.list({skip: skip, limit: limit}, false, false, true)
-		.then(publishedProject => {
-			return res.status(200).json({
-				success: true, data: _.map(publishedProject, (project) => {
-					return _.pick(project, ['name', 'owner', 'id', 'thumbnail', 'description', 'root'])
-				})
-			});
-		})
-		.catch((error) => {
-			console.log(error);
-			const err = new APIError('Can\'t get published projects', httpStatus.BAD_REQUEST, true);
-			return next(err);
-		});
+  Project.list({skip: skip, limit: limit}, false, false, true)
+    .then(publishedProject => {
+      return res.status(200).json({
+        success: true, data: _.map(publishedProject, (project) => {
+          return _.pick(project, ['name', 'owner', 'id', 'thumbnail', 'description', 'root'])
+        })
+      });
+    })
+    .catch((error) => {
+      console.log(error);
+      const err = new APIError('Can\'t get published projects', httpStatus.BAD_REQUEST, true);
+      return next(err);
+    });
 }
 
 /**
@@ -528,23 +576,23 @@ function getPublishedProjects(req, res, next) {
  */
 function getPublishedProject(req, res, next) {
 
-	if (!req.params.id) {
-		const err = new APIError('Provide project id', httpStatus.BAD_REQUEST, true);
-		return next(err);
-	}
+  if (!req.params.id) {
+    const err = new APIError('Provide project id', httpStatus.BAD_REQUEST, true);
+    return next(err);
+  }
 
 
-	Project.get(req.params.id)
-		.then(publishedProject => {
-			return res.status(200).json({
-				success: true,
-				data: _.pick(publishedProject, ['name', 'owner', 'id', 'thumbnail', 'description', 'root'])
-			});
-		})
-		.catch((error) => {
-			const err = new APIError('Can\'t get published project', httpStatus.BAD_REQUEST, true);
-			return next(err);
-		});
+  Project.get(req.params.id)
+    .then(publishedProject => {
+      return res.status(200).json({
+        success: true,
+        data: _.pick(publishedProject, ['name', 'owner', 'id', 'thumbnail', 'description', 'root'])
+      });
+    })
+    .catch((error) => {
+      const err = new APIError('Can\'t get published project', httpStatus.BAD_REQUEST, true);
+      return next(err);
+    });
 }
 
 /**
@@ -555,33 +603,33 @@ function getPublishedProject(req, res, next) {
  * @returns {*}
  */
 function getProjectsCount(req, res, next) {
-	if (!req.query.projectsCount) return next();
-	let query = {
-		$match: {
-			owner: req.user.username
-		}
-	};
-	let option = {
-		$group: {
-			_id: {$gt: ["$publishDate", null]},
-			count: {$sum: 1}
-		}
-	};
-	Project.aggregate(query, option)
-		.then(projects => {
-			req.projectsCount = {};
-			_.each(projects, (project) => {
+  if (!req.query.projectsCount) return next();
+  let query = {
+    $match: {
+      owner: req.user.username
+    }
+  };
+  let option = {
+    $group: {
+      _id: {$gt: ["$publishDate", null]},
+      count: {$sum: 1}
+    }
+  };
+  Project.aggregate(query, option)
+    .then(projects => {
+      req.projectsCount = {};
+      _.each(projects, (project) => {
 
-				if (!project._id)
-					req.projectsCount.unpublished = project.count;
-				else
-					req.projectsCount.published = project.count;
-			});
-			next();
-		})
-		.catch((e) => {
-			console.log(e);
-		})
+        if (!project._id)
+          req.projectsCount.unpublished = project.count;
+        else
+          req.projectsCount.published = project.count;
+      });
+      next();
+    })
+    .catch((e) => {
+      console.log(e);
+    })
 }
 /**
  *
@@ -592,15 +640,15 @@ function getProjectsCount(req, res, next) {
  */
 function importOnce(req, res, next) {
 
-	const projects = utils.getDefTemplatesObject();
+  const projects = utils.getDefTemplatesObject();
 
-	ProjectTemplates.insert(projects, (response) => {
-		if (!response.success) {
-			const err = new APIError('Inserting error', httpStatus.BAD_REQUEST, true);
-			return next(err);
-		}
-		res.status(200).send({success: true});
-	});
+  ProjectTemplates.insert(projects, (response) => {
+    if (!response.success) {
+      const err = new APIError('Inserting error', httpStatus.BAD_REQUEST, true);
+      return next(err);
+    }
+    res.status(200).send({success: true});
+  });
 }
 
 /**
@@ -610,24 +658,24 @@ function importOnce(req, res, next) {
  * @returns {ProjectTemplate[]}
  */
 function getTemplatesList(req, res, next) {
-	const {limit = 50, skip = 0} = req.query;
-	ProjectTemplates.list({limit, skip}).then((projects) => {
-		res.status(200).json({
-			success: true,
-			data: projects
-		})
-	}).error((e) => {
-		const err = new APIError('Bad request', httpStatus.BAD_REQUEST, true);
-		return next(err);
-	});
+  const {limit = 50, skip = 0} = req.query;
+  ProjectTemplates.list({limit, skip}).then((projects) => {
+    res.status(200).json({
+      success: true,
+      data: projects
+    })
+  }).error((e) => {
+    const err = new APIError('Bad request', httpStatus.BAD_REQUEST, true);
+    return next(err);
+  });
 }
 
 function getProjectSize(req, res, next) {
-	if (!req.query.projectSize) return next();
-	let rootDir = '/var/www/stuff/projects/' + req.user.username + '/' + req.project.root;
+  if (!req.query.projectSize) return next();
+  let rootDir = '/var/www/stuff/projects/' + req.user.username + '/' + req.project.root;
 
-	userCapacity.readSizeRecursive(rootDir, (err, size) => {
-		size = err ? 0 : size;
+  userCapacity.readSizeRecursive(rootDir, (err, size) => {
+    size = err ? 0 : size;
 
     req.project.projectSize = utils.byteToMb(size);
     return next();
@@ -635,20 +683,20 @@ function getProjectSize(req, res, next) {
 }
 
 function transpile(req, res, next) {
-	Project.getOne(req.params.id, req.user.username)
-		.then(project => {
-			if (!project) {
-				const err = new APIError('Project is empty', httpStatus.NOT_FOUND, true);
-				return next(err);
-			}
-			req.project = project;
-			transpiler.projectTranspile(req);
-			res.status(200).json({success: true, data: project.name + ' build start'});
-		})
-		.catch((e) => {
-			const err = new APIError("Bad request", 400, true);
-			return next(err);
-		});
+  Project.getOne(req.params.id, req.user.username)
+    .then(project => {
+      if (!project) {
+        const err = new APIError('Project is empty', httpStatus.NOT_FOUND, true);
+        return next(err);
+      }
+      req.project = project;
+      transpiler.projectTranspile(req);
+      res.status(200).json({success: true, data: project.name + ' build start'});
+    })
+    .catch((e) => {
+      const err = new APIError("Bad request", 400, true);
+      return next(err);
+    });
 }
 
 
@@ -664,6 +712,7 @@ export default {
   remove,
   makePublic,
   publishProject,
+  rePublishProject,
   unPublishProject,
   getPublishedProject,
   getPublishedProjects,

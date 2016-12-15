@@ -96,7 +96,8 @@ public/*
 !public/.gitkeap
 publish/*
 !publish/.gitkeap
-
+history/*
+!history/.gitkeap
 #uploads
 resrouces/uploads/**/*
 !resrouces/uploads/.gitkeap
