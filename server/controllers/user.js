@@ -125,9 +125,9 @@ function confirmUsername(req, res, next) {
 
   User.findOneAndUpdate({username: req.user.username}, {$set: req.body}, {new: true})
     .then(user=>{
-      let rootDir = 'projects/' + user.username;
-      let publicDir = 'public/' + user.username;
-      let publishDir = 'publish/' + user.username;
+      let rootDir = '/var/www/stuff/projects/' + user.username;
+      let publicDir = '/var/www/stuff/public/' + user.username;
+      let publishDir = '/var/www/stuff/publish/' + user.username;
 
       if (!fs.existsSync(rootDir)) {
         fs.mkdirSync(rootDir); //creating root dir for project

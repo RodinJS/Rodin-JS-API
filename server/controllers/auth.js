@@ -12,7 +12,7 @@ import _    from 'lodash';
 
 import commonHelpers from '../helpers/common';
 
-const config = require('../../config/env');
+import config from '../../config/env';
 
 /**
  * Returns jwt token if valid username and password is provided
@@ -177,9 +177,9 @@ function socialAuth(req, res, next) {
             //setup project folder for confirmed User
             if (userObject.usernameConfirmed) {
 
-              let rootDir = 'projects/' + savedUser.username;
-              let publicDir = 'public/' + savedUser.username;
-              let publishDir = 'publish/' + savedUser.username;
+              let rootDir = '/var/www/stuff/projects/' + savedUser.username;
+              let publicDir = '/var/www/stuff/public/' + savedUser.username;
+              let publishDir = '/var/www/stuff/publish/' + savedUser.username;
 
               if (!fs.existsSync(rootDir)) {
                 fs.mkdirSync(rootDir); //creating root dir for project
