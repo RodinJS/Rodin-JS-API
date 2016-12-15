@@ -176,61 +176,36 @@ function create(req, res, next) {
 
               User.get(req.user.username)
                 .then(user => {
-                  if (user) {
+                  if (!user) {
+                    const err = new APIError('User not found!', 310);
+                    return next(err);
+                  }
+
                     User.updateAsync({username: req.user.username}, {
                       $push: {
                         "projects": savedProject._id
                       }
                     })
-                      .then(updatedUser => {
+                    .then(updatedUser => {
                         return res.status(201).json({
                           "success": true,
                           "data": savedProject.outcome()
                         });
-                      })
-                      .catch((e) => {
+                    })
+                    .catch((e) => {
                         console.log("-------2--------");
                         const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
                         return next(err);
-                      });
-                  }
-                  else {
-                    const err = new APIError('User not found!', 310);
-                    return next(err);
-                  }
-
-                  User.get(req.user.username)
-                    .then(user => {
-                      if (user) {
-                        User.updateAsync({username: req.user.username}, {
-                          $push: {
-                            "projects": savedProject._id
-                          }
-                        })
-                          .then(updatedUser => {
-                            return res.status(201).json({
-                              "success": true,
-                              "data": savedProject.outcome()
-                            });
-                          })
-                          .catch((e) => {
-console.log("-------3--------");
-                            const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
-                            return next(err);
-                          });
-                      } else {
-                        const err = new APIError('User not found!', 310);
-                        return next(err);
-                      }
-
                     });
+                  
                 })
                 .error((e) => {
                   const err = new APIError("Something went wrong!", 312, true);
                   return next(err);
                 });
             }
-			})
+
+			     })
     })
     .catch(e => {
       console.log("-------4--------");
