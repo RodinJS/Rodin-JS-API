@@ -268,7 +268,8 @@ ProjectSchema.methods.outcome = function () {
     name: project.name,
     owner: project.owner,
     root: project.root,
-    picture: project.picture
+    picture: project.picture,
+    displayName: project.displayName
   }
 };
 
