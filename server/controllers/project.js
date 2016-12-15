@@ -104,6 +104,7 @@ function create(req, res, next) {
 
         project.saveAsync()
           .catch((e) => {
+            console.log("-------1--------");
             const message = e.code === 11000 ? 'Project exist' : httpStatus[400];
             const errorCode = e.code === 11000 ? httpStatus.PROJECT_EXIST : httpStatus.BAD_REQUEST;
             const err = new APIError(message, errorCode, true);
@@ -188,6 +189,7 @@ function create(req, res, next) {
                         });
                       })
                       .catch((e) => {
+                        console.log("-------2--------");
                         const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
                         return next(err);
                       });
@@ -212,6 +214,7 @@ function create(req, res, next) {
                             });
                           })
                           .catch((e) => {
+console.log("-------3--------");
                             const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
                             return next(err);
                           });
@@ -230,6 +233,7 @@ function create(req, res, next) {
 			})
     })
     .catch(e => {
+      console.log("-------4--------");
       const err = new APIError("Bad request", 400, true);
       return next(err);
     })
