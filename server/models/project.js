@@ -11,6 +11,10 @@ const ProjectSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  displayName: {
+    type: String,
+    required: true
+  },
   description: {
     type: String,
     required: true
@@ -236,7 +240,9 @@ ProjectSchema.pre("save", function (next) {
     if (i !== 0) {
       project.root += i;
     } else {
+      project.displayName = project.name;
       project.root = project.name.replace(/ /g, '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+      project.name = project.root
     }
 
     project.constructor.count({root: project.root}, (err, count) => {

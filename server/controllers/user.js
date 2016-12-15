@@ -80,11 +80,11 @@ function me(req, res) {
       profile: req.user.profile,
       creationDate: req.user.creationDate,
       usernameConfirmed: req.user.usernameConfirmed,
-      github:req.user.github,
-      facebook:req.user.facebook,
-      google:req.user.google,
-      steam:req.user.steam,
-      oculus:req.user.oculus,
+      github: req.user.github,
+      facebook: req.user.facebook,
+      google: req.user.google,
+      steam: req.user.steam,
+      oculus: req.user.oculus,
     }
   };
 
@@ -124,7 +124,7 @@ function confirmUsername(req, res, next) {
   req.body.usernameConfirmed = true;
 
   User.findOneAndUpdate({username: req.user.username}, {$set: req.body}, {new: true})
-    .then(user=>{
+    .then(user => {
       let rootDir = '/var/www/stuff/projects/' + user.username;
       let publicDir = '/var/www/stuff/public/' + user.username;
       let publishDir = '/var/www/stuff/publish/' + user.username;
@@ -144,7 +144,7 @@ function confirmUsername(req, res, next) {
       req.user = user;
       return next();
     })
-    .catch(e=>{
+    .catch(e => {
       const err = new APIError('Something went wrong', httpStatus.BAD_REQUEST, true);
       return res.status(httpStatus.BAD_REQUEST).json(err);
     });
@@ -264,11 +264,11 @@ function create(req, res, next) {
 
       user = new User(userObject);
 
-            user.saveAsync()
-                .then((savedUser) => {
-                    let rootDir = '/var/www/stuff/projects/' + savedUser.username;
-                    let publicDir = '/var/www/stuff/public/' + savedUser.username;
-                    let publishDir = '/var/www/stuff/publish/' + savedUser.username;
+      user.saveAsync()
+        .then((savedUser) => {
+          let rootDir = '/var/www/stuff/projects/' + savedUser.username;
+          let publicDir = '/var/www/stuff/public/' + savedUser.username;
+          let publishDir = '/var/www/stuff/publish/' + savedUser.username;
 
           if (!fs.existsSync(rootDir)) {
             fs.mkdirSync(rootDir); //creating root dir for project
@@ -393,12 +393,12 @@ function list(req, res, next) {
 function remove(req, res, next) {
   const username = req.user.username;
 
-    User.get(username)
-        .then(user => {
-            if (user) {
-                let rootDir = '/var/www/stuff/projects/' + username;
-                let publicDir = '/var/www/stuff/public/' + username;
-                let publishDir = '/var/www/stuff/publish/' + username;
+  User.get(username)
+    .then(user => {
+      if (user) {
+        let rootDir = '/var/www/stuff/projects/' + username;
+        let publicDir = '/var/www/stuff/public/' + username;
+        let publishDir = '/var/www/stuff/publish/' + username;
 
         fsExtra.removeSync(rootDir);
         fsExtra.removeSync(publicDir);
@@ -430,7 +430,13 @@ function remove(req, res, next) {
 }
 
 function validateInvitationCode(req, res, next) {
-  if (!req.body.invitationCode) return next();
+
+  //todo: temporary invitation code is required
+  if (!req.body.invitationCode){
+    const err = new APIError("Invitation code is required", httpStatus.BAD_REQUEST, true);
+    return next(err);
+    //return next();
+  }
 
   InvitationCode.get(req.body.invitationCode)
     .then((invitationCode) => {

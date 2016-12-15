@@ -245,6 +245,14 @@ function socialAuth(req, res, next) {
           userUpdate = {$set: {googleId: req.body.id}}
         }
 
+        else if (req.params.socialName === 'steam' && !user.steamId) {
+          userUpdate = {$set: {steamId: req.body.id}}
+        }
+
+        else if (req.params.socialName === 'oculus' && !user.oculusId) {
+          userUpdate = {$set: {oculusId: req.body.id}}
+        }
+
         else if (req.params.socialName === 'github') {
           if(req.body.sync){
             userUpdate = {$set: {'github.token': req.body.token, 'github.id':req.body.id}}
