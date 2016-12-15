@@ -101,3 +101,5 @@ publish/*
 resrouces/uploads/**/*
 !resrouces/uploads/.gitkeap
 
+#github tmp folder
+gago

@@ -93,6 +93,10 @@ const ProjectSchema = new mongoose.Schema({
       version:String,
     }
   },
+  github: {
+    git: { type: String },
+    https: { type: String }
+  },
   type: {
     type: String
   },

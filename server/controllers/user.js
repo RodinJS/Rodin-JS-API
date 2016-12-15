@@ -264,11 +264,11 @@ function create(req, res, next) {
 
       user = new User(userObject);
 
-      user.saveAsync()
-        .then((savedUser) => {
-          let rootDir = 'projects/' + savedUser.username;
-          let publicDir = 'public/' + savedUser.username;
-          let publishDir = 'publish/' + savedUser.username;
+            user.saveAsync()
+                .then((savedUser) => {
+                    let rootDir = '/var/www/stuff/projects/' + savedUser.username;
+                    let publicDir = '/var/www/stuff/public/' + savedUser.username;
+                    let publishDir = '/var/www/stuff/publish/' + savedUser.username;
 
           if (!fs.existsSync(rootDir)) {
             fs.mkdirSync(rootDir); //creating root dir for project
@@ -393,12 +393,12 @@ function list(req, res, next) {
 function remove(req, res, next) {
   const username = req.user.username;
 
-  User.get(username)
-    .then(user => {
-      if (user) {
-        let rootDir = 'projects/' + username;
-        let publicDir = 'public/' + username;
-        let publishDir = 'publish/' + username;
+    User.get(username)
+        .then(user => {
+            if (user) {
+                let rootDir = '/var/www/stuff/projects/' + username;
+                let publicDir = '/var/www/stuff/public/' + username;
+                let publishDir = '/var/www/stuff/publish/' + username;
 
         fsExtra.removeSync(rootDir);
         fsExtra.removeSync(publicDir);

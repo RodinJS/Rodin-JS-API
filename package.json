@@ -74,6 +74,7 @@
     "request": "^2.79.0",
     "request-promise": "^4.1.1",
     "shortid": "^2.2.6",
+    "simple-git": "^1.64.0",
     "socket.io": "^1.6.0",
     "stripe": "^4.12.0",
     "winston": "^2.1.1"

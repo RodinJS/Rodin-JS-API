@@ -116,7 +116,7 @@ const httpStatus = {
   USER_ALREADY_IN_ORGANIZATION: 325,
   ADD_YOURSELF_TO_YOUR_ORGANIZATION: 326,
   SOMETHING_WENT_WRONG: 327,
-//working with files
+// working with files [328-349]
   COULD_NOT_DELETE_OBJECT: 328,
   COULD_NOT_LIST_FILES: 329,
   COULD_NOT_READ_FILE: 330,
@@ -129,7 +129,12 @@ const httpStatus = {
   COULD_NOT_CREATE_FILE: 337,
   NOT_A_FILE: 338,
 
-// working with sockets
+// working with github [350-370]
+  GITHUB_NOT_LINKED: 350,
+  NO_PROJECT_ROOT: 351,
+  REPO_NAME_EXIST: 352,
+
+// working with sockets [600~]
   BAD_SOCKET_REQUEST: 600,
   BAD_SOCKET_CHANNEL: 601,
   UNKNOWN_SOCKET_CHANNEL: 601,
@@ -138,7 +143,11 @@ const httpStatus = {
   UNKNOWN_SOCKET_ACTION: 604,
   SOCKET_ACTION_COMPLETE : 605,
   SOCKET_ACTION_FAILED: 606,
-  SOCKET_ACTION_IN_PROGRESS:607
+  SOCKET_ACTION_IN_PROGRESS:607,
+
+// fatal [666]
+  FATAL: 666
+
 };
 
 export default httpStatus;

@@ -60,9 +60,6 @@ app.use('/ss', rodinSocketRoutes);
 // mount all socketRoutes on /socket path
 app.use('/socket', socketRoutes);
 
-// mount all previewRoutes on /preview path
-// app.use('/preview', previewRoutes);
-
 // if error is not an instanceOf APIError, convert it.
 app.use((err, req, res, next) => {
 	if (err instanceof expressValidation.ValidationError) {
