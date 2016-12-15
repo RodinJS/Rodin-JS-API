@@ -12,8 +12,7 @@ const ProjectSchema = new mongoose.Schema({
     required: true
   },
   displayName: {
-    type: String,
-    required: true
+    type: String
   },
   description: {
     type: String,
