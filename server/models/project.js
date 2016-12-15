@@ -240,8 +240,9 @@ ProjectSchema.pre("save", function (next) {
       project.root += i;
     } else {
       project.displayName = project.name;
-      project.root = project.name.replace(/ /g, '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-      project.name = project.root
+      let specialName = project.name.replace(/ /g, '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+      project.name = specialName;
+      project.root = specialName;
     }
 
     project.constructor.count({root: project.root}, (err, count) => {
