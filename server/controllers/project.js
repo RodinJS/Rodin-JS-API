@@ -489,6 +489,16 @@ function rePublishProject(req, res, next) {
   const historyFolder = help.generateFilePath(req, '', 'history');
   const projectBackupFolder = `${historyFolder}/${Date.now()}`;
 
+  let backUps = fs.readdirSync(historyFolder).filter(function(file) {
+    return fs.statSync(path.join(historyFolder, file)).isDirectory();
+  });
+
+  if(backUps.length == 3){
+    let oldestBackup = _.min(backUps);
+    utils.deleteFolderRecursive(`${historyFolder}/${oldestBackup}`);
+  }
+
+
   fsExtra.copy(publishFolder, projectBackupFolder, function (err) {
     if (err) {
       const err = new APIError('Publishing error', httpStatus.BAD_REQUEST, true);
