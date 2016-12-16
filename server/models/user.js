@@ -66,9 +66,15 @@ const UserSchema = new mongoose.Schema({
 		enum: ['Free', 'Premium', 'Enterprise', 'Admin', 'God'],
 		default: 'Free'
 	},
+  allowProjectsCount:{
+	  type:Number,
+    enum:[2, 5, 10],
+    default:2,
+
+  },
 	storageSize:{
 		type:Number,
-		enum:[100, 500, 1000],
+		enum:[100, 1000, 5000],
 		default:100
 	},
 	profile: {
@@ -115,8 +121,8 @@ const UserSchema = new mongoose.Schema({
 	},
 	github: {
 		id: 	{ type: String },
-		token: 	{ type: String } 
-	},    
+		token: 	{ type: String }
+	},
 	facebookId: {
 		type: String
 	},

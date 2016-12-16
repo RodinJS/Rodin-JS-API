@@ -256,6 +256,7 @@ function create(req, res, next) {
       if (req.body.invitationCode) {
         userObject.role = 'Premium';
         userObject.storageSize = 500;
+        userObject.allowProjectsCount = 5;
       }
 
       if (req.preSignUpData) {
@@ -287,8 +288,8 @@ function create(req, res, next) {
             fs.mkdirSync(historyDir); //creating root dir for history
           }
 
-          if (req.body.invitationCode)
-            InvitationCode.delete(req.body.invitationCode);
+          //if (req.body.invitationCode)
+            //InvitationCode.delete(req.body.invitationCode);
 
           if (req.preSignUpData)
             PreSignUp.delete(req.preSignUpData.code);
@@ -443,7 +444,12 @@ function validateInvitationCode(req, res, next) {
     //return next();
   }
 
-  InvitationCode.get(req.body.invitationCode)
+  if(req.body.invitationCode !== '2B5H7B'){
+    const err = new APIError("Invitation code is wrong", httpStatus.BAD_REQUEST, true);
+    return next(err);
+  }
+  next();
+ /* InvitationCode.get(req.body.invitationCode)
     .then((invitationCode) => {
 
       if (invitationCode) {
@@ -476,7 +482,7 @@ function validateInvitationCode(req, res, next) {
     let utc1 = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
     let utc2 = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate());
     return Math.floor((utc2 - utc1) / MS_PER_DAY);
-  }
+  }*/
 
 }
 

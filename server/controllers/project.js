@@ -84,6 +84,12 @@ function get(req, res, next) {
  * @returns {Project}
  */
 function create(req, res, next) {
+  if(req.projectsCount.total >= req.user.allowProjectsCount){
+    const err = new APIError(`Maximum projects count exceeded, allowend project count ${req.user.allowProjectsCount}`, 400, true);
+    return next(err);
+  }
+
+
   Project.getByName(req.body.name, req.user.username)
     .then(projectExist => {
       if (projectExist) {
@@ -121,7 +127,7 @@ function create(req, res, next) {
 
           let historyDir = '/var/www/stuff/history/' + req.user.username + '/' + project.root;
 
-          if (!fs.existsSync(historyDir)){
+          if (!fs.existsSync(historyDir)) {
             fs.mkdirSync(historyDir); //creating root dir for project
           }
 
@@ -253,14 +259,14 @@ function create(req, res, next) {
  */
 function update(req, res, next) {
   req.body.updatedAt = new Date();
-  Project.findOneAndUpdate({_id: req.params.id, owner: req.user.username}, {$set:req.body}, {new:true})
-    .then(project=>{
+  Project.findOneAndUpdate({_id: req.params.id, owner: req.user.username}, {$set: req.body}, {new: true})
+    .then(project => {
       return res.status(200).json({
         "success": true,
         "data": project
       });
     })
-    .catch(e=>{
+    .catch(e => {
       const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
       return next(err);
     });
@@ -419,7 +425,6 @@ function publishProject(req, res, next) {
 
   let projectFolder = help.generateFilePath(req, '');
   let publishFolder = help.generateFilePath(req, '', 'publish');
-
   if (fs.existsSync(projectFolder)) {
 
     if (fs.existsSync(publishFolder)) {
@@ -483,23 +488,40 @@ function publishProject(req, res, next) {
 
 }
 
-
-function rePublishProject(req, res, next) {
-  const publishFolder = help.generateFilePath(req, '', 'publish');
+/**
+ *
+ * @param req
+ * @param res
+ * @param next
+ */
+function getPublishedHistory(req, res, next) {
   const historyFolder = help.generateFilePath(req, '', 'history');
-  const projectBackupFolder = `${historyFolder}/${Date.now()}`;
-
-  let backUps = fs.readdirSync(historyFolder).filter(function(file) {
+  let backUps = _.sortBy(fs.readdirSync(historyFolder).filter((file) => {
     return fs.statSync(path.join(historyFolder, file)).isDirectory();
+  }), (date) => {
+    return -parseInt(date);
   });
+  res.status(200).json({success: true, data: backUps});
+}
 
-  if(backUps.length == 3){
-    let oldestBackup = _.min(backUps);
-    utils.deleteFolderRecursive(`${historyFolder}/${oldestBackup}`);
+function rollBack(req, res, next){
+  if(_.isUndefined(req.body.date)){
+    const err = new APIError('Select version date', httpStatus.BAD_REQUEST, true);
+    return next(err);
   }
 
+  const publishFolder = help.generateFilePath(req, '', 'publish');
+  const historyFolder = help.generateFilePath(req, '', 'history');
+  const projectBackupFolder = `${historyFolder}/${req.body.date}`;
 
-  fsExtra.copy(publishFolder, projectBackupFolder, function (err) {
+  if (!fs.existsSync(projectBackupFolder)) {
+    const err = new APIError('Project version not exist', httpStatus.BAD_REQUEST, true);
+    return next(err);
+  }
+
+  fsExtra.removeSync(publishFolder);
+
+  fsExtra.copy(projectBackupFolder, publishFolder, (err) => {
     if (err) {
       const err = new APIError('Publishing error', httpStatus.BAD_REQUEST, true);
       return next(err);
@@ -510,7 +532,38 @@ function rePublishProject(req, res, next) {
 
 }
 
-  /**
+/**
+ *
+ * @param req
+ * @param res
+ * @param next
+ */
+function rePublishProject(req, res, next) {
+  const publishFolder = help.generateFilePath(req, '', 'publish');
+  const historyFolder = help.generateFilePath(req, '', 'history');
+  const projectBackupFolder = `${historyFolder}/${Date.now()}`;
+
+  let backUps = fs.readdirSync(historyFolder).filter( (file) => {
+    return fs.statSync(path.join(historyFolder, file)).isDirectory();
+  });
+
+  if (backUps.length == 3) {
+    let oldestBackup = _.min(backUps);
+    utils.deleteFolderRecursive(`${historyFolder}/${oldestBackup}`);
+  }
+
+  fsExtra.copy(publishFolder, projectBackupFolder,  (err) => {
+    if (err) {
+      const err = new APIError('Publishing error', httpStatus.BAD_REQUEST, true);
+      return next(err);
+    }
+    res.status(200).json({success: true, data: {}});
+  });
+
+
+}
+
+/**
  * Unpublish user project
  * @param req
  * @param res
@@ -613,7 +666,7 @@ function getPublishedProject(req, res, next) {
  * @returns {*}
  */
 function getProjectsCount(req, res, next) {
-  if (!req.query.projectsCount) return next();
+  if (!req.query.projectsCount && req.baseUrl !== '/api/project') return next();
   let query = {
     $match: {
       owner: req.user.username
@@ -634,13 +687,16 @@ function getProjectsCount(req, res, next) {
           req.projectsCount.unpublished = project.count;
         else
           req.projectsCount.published = project.count;
+
       });
+      req.projectsCount.total =  (req.projectsCount.unpublished + req.projectsCount.published);
       next();
     })
     .catch((e) => {
       console.log(e);
     })
 }
+
 /**
  *
  * @param req
@@ -709,7 +765,6 @@ function transpile(req, res, next) {
     });
 }
 
-
 function finalize(req, res, next) {
   return res.status(200).json({success: true, data: req.project});
 }
@@ -722,6 +777,8 @@ export default {
   remove,
   makePublic,
   publishProject,
+  rollBack,
+  getPublishedHistory,
   rePublishProject,
   unPublishProject,
   getPublishedProject,

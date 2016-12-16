@@ -125,6 +125,7 @@ function ifTokenValid(req, res, next) {
 							role: user.role,
 							profile: user.profile,
 							storageSize:user.storageSize,
+              allowProjectsCount:user.allowProjectsCount,
 							usernameConfirmed:user.usernameConfirmed,
 							stripe:user.stripe,
 							creationDate:user.createdAt,
