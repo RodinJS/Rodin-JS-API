@@ -135,6 +135,7 @@ function theirs(username, id, projectRoot) {
 				if(user) {
 					if(user.github.token) {
 						token = user.github.token;
+							console.log("username: ", username, ", id: ", id);
 							Project.getOne(id, username)
 								.then(project => {
 									let repo_url = gitPathGenerator(token, project.github.https);
@@ -153,7 +154,7 @@ function theirs(username, id, projectRoot) {
 										});
 									});
 								}).catch(e => {
-									const err = new APIError(`Project with ${id} does not exist!`, httpStatus.BAD_REQUEST, true);
+									const err = new APIError(`Project with ${id} id does not exist!`, httpStatus.BAD_REQUEST, true);
 									reject(err);
 								});
 
@@ -181,6 +182,7 @@ function ours(username, id, projectRoot) {
 				if(user) {
 					if(user.github.token) {
 						token = user.github.token;
+						console.log("username: ", username, ", id: ", id);
 						Project.getOne(id, username)
 							.then(project => {
 								let repo_url = gitPathGenerator(token, project.github.https);
@@ -209,7 +211,7 @@ function ours(username, id, projectRoot) {
 									});
 								});
 							}).catch(e => {
-								const err = new APIError(`Project with ${id} does not exist!`, httpStatus.BAD_REQUEST, true);
+								const err = new APIError(`Project with ${id} id does not exist!`, httpStatus.BAD_REQUEST, true);
 								reject(err);
 							});
 					} else {

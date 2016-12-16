@@ -12,7 +12,7 @@ function cleanFileName(name) {
 }
 
 function generateFilePath (req, fileName, rootFolder){
-    rootFolder = rootFolder || 'projects';
+    rootFolder = rootFolder || '/var/www/stuff/projects';
 
     return rootFolder + '/' + req.user.username + '/' + req.project.root + '/' + cleanUrl(fileName);
 
