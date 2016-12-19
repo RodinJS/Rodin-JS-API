@@ -125,9 +125,9 @@ function confirmUsername(req, res, next) {
 
   User.findOneAndUpdate({username: req.user.username}, {$set: req.body}, {new: true})
     .then(user => {
-      let rootDir = '/var/www/stuff/projects/' + user.username;
-      let publicDir = '/var/www/stuff/public/' + user.username;
-      let publishDir = '/var/www/stuff/publish/' + user.username;
+      let rootDir = config.stuff_path + '/projects/' + user.username;
+      let publicDir = config.stuff_path + '/public/' + user.username;
+      let publishDir = config.stuff_path + '/publish/' + user.username;
 
       if (!fs.existsSync(rootDir)) {
         fs.mkdirSync(rootDir); //creating root dir for project
@@ -267,10 +267,10 @@ function create(req, res, next) {
 
       user.saveAsync()
         .then((savedUser) => {
-          let rootDir = '/var/www/stuff/projects/' + savedUser.username;
-          let publicDir = '/var/www/stuff/public/' + savedUser.username;
-          let publishDir = '/var/www/stuff/publish/' + savedUser.username;
-          let historyDir = '/var/www/stuff/history/' + savedUser.username;
+          let rootDir = config.stuff_path + '/projects/' + savedUser.username;
+          let publicDir = config.stuff_path + '/public/' + savedUser.username;
+          let publishDir = config.stuff_path + '/publish/' + savedUser.username;
+          let historyDir = config.stuff_path + '/history/' + savedUser.username;
 
           if (!fs.existsSync(rootDir)) {
             fs.mkdirSync(rootDir); //creating root dir for project
@@ -402,9 +402,9 @@ function remove(req, res, next) {
   User.get(username)
     .then(user => {
       if (user) {
-        let rootDir = '/var/www/stuff/projects/' + username;
-        let publicDir = '/var/www/stuff/public/' + username;
-        let publishDir = '/var/www/stuff/publish/' + username;
+        let rootDir = config.stuff_path + '/projects/' + username;
+        let publicDir = config.stuff_path + '/public/' + username;
+        let publishDir = config.stuff_path + '/publish/' + username;
 
         fsExtra.removeSync(rootDir);
         fsExtra.removeSync(publicDir);

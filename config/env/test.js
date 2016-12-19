@@ -35,5 +35,6 @@ export default {
         publish: 'pk_test_ubTC5Za2RM1vj2VlRYPhvX2r'
       }
     }
-  }
+  },
+  stuff_path: '/var/www/stuff'
 };

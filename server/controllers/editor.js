@@ -35,7 +35,7 @@ function getTreeJSON(req, res, next) {
           }
         };
 
-        const rootPath = `/var/www/stuff/projects/${req.user.username}/${project.root}`;
+        const rootPath = `${config.stuff_path}/projects/${req.user.username}/${project.root}`;
 
         if (req.query.getAll) {
 

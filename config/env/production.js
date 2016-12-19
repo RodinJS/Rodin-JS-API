@@ -73,5 +73,6 @@ export default {
       }
     }
   },
-  mandrill: 'ouOYaHWxlDaabLYVjrG1BA'
+  mandrill: 'ouOYaHWxlDaabLYVjrG1BA',
+  stuff_path: '/var/www/stuff'
 };

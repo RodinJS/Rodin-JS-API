@@ -1,3 +1,4 @@
+import config from '../../config/env';
 // don't let users crawl up the folder structure by using a/../../../c/d
 function cleanUrl(url) {
     url = decodeURIComponent(url);
@@ -12,7 +13,7 @@ function cleanFileName(name) {
 }
 
 function generateFilePath (req, fileName, rootFolder){
-    rootFolder = rootFolder || '/var/www/stuff/projects';
+    rootFolder = rootFolder || config.stuff_path + '/projects';
 
     return rootFolder + '/' + req.user.username + '/' + req.project.root + '/' + cleanUrl(fileName);
 

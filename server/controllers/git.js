@@ -90,7 +90,7 @@ function successSync(req, res, next){
 
 function create(req, res, next) {
   if(req.body.root && req.body.id) {
-    const projectRoot = '/var/www/stuff/projects/' + req.user.username + '/' + help.cleanUrl(req.body.root) + '/';
+    const projectRoot = config.stuff_path + '/projects/' + req.user.username + '/' + help.cleanUrl(req.body.root) + '/';
     git.createRepo(req.user.username, help.cleanUrl(req.body.name))
       .then(result => {
         req.body.updatedAt = new Date();
@@ -132,26 +132,26 @@ function create(req, res, next) {
                 {
                   new: true
                 }).then(projData => {
-                let repo_info = result;
-                git.createBranch(req.user.username, help.cleanUrl(req.body.id), projectRoot, "rodin_editor")
-                  .then(result => {
-                    return res.status(200).json({
-                      success: true,
-                      data: {
-                        name: repo_info.data.name,
-                        private: repo_info.data.private,
-                        git_url: repo_info.data.git_url,
-                        clone_url: repo_info.data.clone_url,
-                        location: repo_info.data.meta.location,
-                        status: repo_info.data.meta.status,
-                        branch: result
-                      }
+                  let repo_info = result;
+                  git.createBranch(req.user.username, help.cleanUrl(req.body.id), projectRoot, "rodin_editor")
+                    .then(result => {
+                      return res.status(200).json({
+                        success: true,
+                        data: {
+                          name: repo_info.data.name,
+                          private: repo_info.data.private,
+                          git_url: repo_info.data.git_url,
+                          clone_url: repo_info.data.clone_url,
+                          location: repo_info.data.meta.location,
+                          status: repo_info.data.meta.status,
+                          branch: result
+                        }
+                      });
+                    })
+                    .catch(e => {
+                      const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+                      return next(e);
                     });
-                  })
-                  .catch(e => {
-                    const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
-                    return next(e);
-                  });
               }).catch(e => {
                 const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
                 return next(e);
@@ -171,7 +171,7 @@ function create(req, res, next) {
 
 function branch(req, res, next) {
   if(req.body.root && req.body.id) {
-    const projectRoot = '/var/www/stuff/projects/' + req.user.username + '/' + help.cleanUrl(req.body.root) + '/';
+    const projectRoot = config.stuff_path + '/projects/' + req.user.username + '/' + help.cleanUrl(req.body.root) + '/';
     git.createBranch(req.user.username, help.cleanUrl(req.body.id), projectRoot, help.cleanUrl(req.body.branch))
       .then(result => {
         return res.status(200).json({
@@ -192,7 +192,7 @@ function branch(req, res, next) {
 
 function theirs(req, res, next) {
   if(req.body.root && req.body.id) {
-    const projectRoot = '/var/www/stuff/projects/' + req.user.username + '/' + help.cleanUrl(req.body.root) + '/';
+    const projectRoot = config.stuff_path + '/projects/' + req.user.username + '/' + help.cleanUrl(req.body.root) + '/';
     git.theirs(req.user.username, help.cleanUrl(req.body.id), projectRoot)
       .then(data => {
         return res.status(200).json({
@@ -210,7 +210,7 @@ function theirs(req, res, next) {
 
 function ours(req, res, next) {
   if(req.body.root && req.body.id) {
-    const projectRoot = '/var/www/stuff/projects/' + req.user.username + '/' + help.cleanUrl(req.body.root) + '/';
+    const projectRoot = config.stuff_path + '/projects/' + req.user.username + '/' + help.cleanUrl(req.body.root) + '/';
     git.ours(req.user.username, help.cleanUrl(req.body.id), projectRoot)
       .then(data => {
         return res.status(200).json({

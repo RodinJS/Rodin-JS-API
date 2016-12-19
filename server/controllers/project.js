@@ -123,9 +123,9 @@ function create(req, res, next) {
 
           let project = savedProject.toObject();
 
-          let rootDir = '/var/www/stuff/projects/' + req.user.username + '/' + project.root;
+          let rootDir = config.stuff_path + '/projects/' + req.user.username + '/' + project.root;
 
-          let historyDir = '/var/www/stuff/history/' + req.user.username + '/' + project.root;
+          let historyDir = config.stuff_path + '/history/' + req.user.username + '/' + project.root;
 
           if (!fs.existsSync(historyDir)) {
             fs.mkdirSync(historyDir); //creating root dir for project
@@ -305,11 +305,11 @@ function remove(req, res, next) {
           .then((deletedProject) => {
             if (deletedProject.result.ok === 1) {
 
-              const rootDir = '/var/www/stuff/projects/' + req.user.username + '/' + req.project.root;
+              const rootDir = config.stuff_path + '/projects/' + req.user.username + '/' + req.project.root;
 
-              const publishDir = '/var/www/stuff/public/' + req.user.username + '/' + req.project.root;
+              const publishDir = config.stuff_path + '/public/' + req.user.username + '/' + req.project.root;
 
-              const publicDir = '/var/www/stuff/publish/' + req.user.username + '/' + req.project.root;
+              const publicDir = config.stuff_path + '/publish/' + req.user.username + '/' + req.project.root;
 
               if (fs.existsSync(rootDir)) {
                 utils.deleteFolderRecursive(rootDir);
@@ -374,8 +374,8 @@ function makePublic(req, res, next) {
     .then(updatedProject => {
       if (updatedProject.nModified === 1) {
         if (status === 'true') {
-          const srcDir = `/var/www/stuff/projects/${username}/${help.cleanUrl(req.project.root)}`;
-          const publicDir = `/var/www/stuff/public/${username}/${help.cleanUrl(req.project.root)}`;
+          const srcDir = `${config.stuff_path}/projects/${username}/${help.cleanUrl(req.project.root)}`;
+          const publicDir = `${config.stuff_path}/public/${username}/${help.cleanUrl(req.project.root)}`;
 
           fsExtra.ensureSymlinkSync(srcDir, publicDir);
 
@@ -386,7 +386,7 @@ function makePublic(req, res, next) {
 
         }
         else {
-          const publicDir = `/var/www/stuff/public/${username}/${help.cleanUrl(req.project.root)}`;
+          const publicDir = `${config.stuff_path}/public/${username}/${help.cleanUrl(req.project.root)}`;
 
           if (fs.existsSync(publicDir)) {
             fs.unlinkSync(publicDir);
@@ -738,7 +738,7 @@ function getTemplatesList(req, res, next) {
 
 function getProjectSize(req, res, next) {
   if (!req.query.projectSize) return next();
-  let rootDir = '/var/www/stuff/projects/' + req.user.username + '/' + req.project.root;
+  let rootDir = config.stuff_path + '/projects/' + req.user.username + '/' + req.project.root;
 
   userCapacity.readSizeRecursive(rootDir, (err, size) => {
     size = err ? 0 : size;

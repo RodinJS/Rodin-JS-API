@@ -177,9 +177,9 @@ function socialAuth(req, res, next) {
             //setup project folder for confirmed User
             if (userObject.usernameConfirmed) {
 
-              let rootDir = '/var/www/stuff/projects/' + savedUser.username;
-              let publicDir = '/var/www/stuff/public/' + savedUser.username;
-              let publishDir = '/var/www/stuff/publish/' + savedUser.username;
+              let rootDir = config.stuff_path + '/projects/' + savedUser.username;
+              let publicDir = config.stuff_path + '/public/' + savedUser.username;
+              let publishDir = config.stuff_path + '/publish/' + savedUser.username;
 
               if (!fs.existsSync(rootDir)) {
                 fs.mkdirSync(rootDir); //creating root dir for project
