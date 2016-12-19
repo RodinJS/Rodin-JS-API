@@ -7,6 +7,7 @@ import _ from 'lodash';
 
 chai.config.includeStack = true;
 
+/*
 describe('## Invitation APIs', () => {
     let info = {
         user: {
@@ -84,3 +85,4 @@ describe('## Invitation APIs', () => {
     });
 
 });
+*/

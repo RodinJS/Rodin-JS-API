@@ -36,5 +36,5 @@ export default {
       }
     }
   },
-  stuff_path: '/var/www/stuff'
+  stuff_path: ''
 };

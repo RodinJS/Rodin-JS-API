@@ -183,7 +183,7 @@ describe('## Projects APIs', () => {
 
   it('should publish project', (done) => {
     request(app)
-      .get('/api/project/publish/' + project.info._id + '')
+      .post('/api/project/publish/' + project.info._id + '')
       .set(User.generateHeaders())
       .expect(httpStatus.OK)
       .then(res => {

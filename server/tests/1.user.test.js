@@ -13,6 +13,7 @@ describe('## User APIs', () => {
       email: 'gago@test.me',
       username: 'gagas',
       password: '1234567890AAa',
+      invitationCode:'2B5H7B',
       role: 'Free'
     },
     admin: {
@@ -58,7 +59,7 @@ describe('## User APIs', () => {
         .expect(httpStatus.OK)
         .then(res => {
           expect(res.body.data.user.email).to.equal(info.user.email);
-          expect(res.body.data.user.role).to.equal('Free');
+          expect(res.body.data.user.role).to.equal('Premium');
           info.user.token = res.body.data.token;
           done();
         });

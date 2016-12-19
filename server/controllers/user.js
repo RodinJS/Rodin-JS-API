@@ -125,9 +125,9 @@ function confirmUsername(req, res, next) {
 
   User.findOneAndUpdate({username: req.user.username}, {$set: req.body}, {new: true})
     .then(user => {
-      let rootDir = config.stuff_path + '/projects/' + user.username;
-      let publicDir = config.stuff_path + '/public/' + user.username;
-      let publishDir = config.stuff_path + '/publish/' + user.username;
+      let rootDir = config.stuff_path + 'projects/' + user.username;
+      let publicDir = config.stuff_path + 'public/' + user.username;
+      let publishDir = config.stuff_path + 'publish/' + user.username;
 
       if (!fs.existsSync(rootDir)) {
         fs.mkdirSync(rootDir); //creating root dir for project
@@ -267,10 +267,10 @@ function create(req, res, next) {
 
       user.saveAsync()
         .then((savedUser) => {
-          let rootDir = config.stuff_path + '/projects/' + savedUser.username;
-          let publicDir = config.stuff_path + '/public/' + savedUser.username;
-          let publishDir = config.stuff_path + '/publish/' + savedUser.username;
-          let historyDir = config.stuff_path + '/history/' + savedUser.username;
+          let rootDir = config.stuff_path + 'projects/' + savedUser.username;
+          let publicDir = config.stuff_path + 'public/' + savedUser.username;
+          let publishDir = config.stuff_path + 'publish/' + savedUser.username;
+          let historyDir = config.stuff_path + 'history/' + savedUser.username;
 
           if (!fs.existsSync(rootDir)) {
             fs.mkdirSync(rootDir); //creating root dir for project
@@ -402,9 +402,9 @@ function remove(req, res, next) {
   User.get(username)
     .then(user => {
       if (user) {
-        let rootDir = config.stuff_path + '/projects/' + username;
-        let publicDir = config.stuff_path + '/public/' + username;
-        let publishDir = config.stuff_path + '/publish/' + username;
+        let rootDir = config.stuff_path + 'projects/' + username;
+        let publicDir = config.stuff_path + 'public/' + username;
+        let publishDir = config.stuff_path + 'publish/' + username;
 
         fsExtra.removeSync(rootDir);
         fsExtra.removeSync(publicDir);

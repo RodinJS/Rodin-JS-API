@@ -110,7 +110,6 @@ function create(req, res, next) {
 
       project.saveAsync()
         .catch((e) => {
-          console.log("-------1--------", e);
           const message = e.code === 11000 ? 'Project exist' : httpStatus[400];
           const errorCode = e.code === 11000 ? httpStatus.PROJECT_EXIST : httpStatus.BAD_REQUEST;
           const err = new APIError(message, errorCode, true);
@@ -123,9 +122,9 @@ function create(req, res, next) {
 
           let project = savedProject.toObject();
 
-          let rootDir = config.stuff_path + '/projects/' + req.user.username + '/' + project.root;
+          let rootDir = config.stuff_path + 'projects/' + req.user.username + '/' + project.root;
 
-          let historyDir = config.stuff_path + '/history/' + req.user.username + '/' + project.root;
+          let historyDir = config.stuff_path + 'history/' + req.user.username + '/' + project.root;
 
           if (!fs.existsSync(historyDir)) {
             fs.mkdirSync(historyDir); //creating root dir for project
@@ -201,7 +200,6 @@ function create(req, res, next) {
                       });
                     })
                     .catch((e) => {
-                      console.log("-------2--------");
                       const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
                       return next(err);
                     });
@@ -226,7 +224,6 @@ function create(req, res, next) {
                           });
                         })
                         .catch((e) => {
-                          console.log("-------3--------");
                           const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
                           return next(err);
                         });
@@ -245,7 +242,6 @@ function create(req, res, next) {
         })
     })
     .catch(e => {
-      console.log("-------4--------");
       const err = new APIError("Bad request", 400, true);
       return next(err);
     })
@@ -305,11 +301,11 @@ function remove(req, res, next) {
           .then((deletedProject) => {
             if (deletedProject.result.ok === 1) {
 
-              const rootDir = config.stuff_path + '/projects/' + req.user.username + '/' + req.project.root;
+              const rootDir = config.stuff_path + 'projects/' + req.user.username + '/' + req.project.root;
 
-              const publishDir = config.stuff_path + '/public/' + req.user.username + '/' + req.project.root;
+              const publishDir = config.stuff_path + 'public/' + req.user.username + '/' + req.project.root;
 
-              const publicDir = config.stuff_path + '/publish/' + req.user.username + '/' + req.project.root;
+              const publicDir = config.stuff_path + 'publish/' + req.user.username + '/' + req.project.root;
 
               if (fs.existsSync(rootDir)) {
                 utils.deleteFolderRecursive(rootDir);
@@ -374,8 +370,8 @@ function makePublic(req, res, next) {
     .then(updatedProject => {
       if (updatedProject.nModified === 1) {
         if (status === 'true') {
-          const srcDir = `${config.stuff_path}/projects/${username}/${help.cleanUrl(req.project.root)}`;
-          const publicDir = `${config.stuff_path}/public/${username}/${help.cleanUrl(req.project.root)}`;
+          const srcDir = `${config.stuff_path}projects/${username}/${help.cleanUrl(req.project.root)}`;
+          const publicDir = `${config.stuff_path}public/${username}/${help.cleanUrl(req.project.root)}`;
 
           fsExtra.ensureSymlinkSync(srcDir, publicDir);
 
@@ -386,7 +382,7 @@ function makePublic(req, res, next) {
 
         }
         else {
-          const publicDir = `${config.stuff_path}/public/${username}/${help.cleanUrl(req.project.root)}`;
+          const publicDir = `${config.stuff_path}public/${username}/${help.cleanUrl(req.project.root)}`;
 
           if (fs.existsSync(publicDir)) {
             fs.unlinkSync(publicDir);
@@ -422,7 +418,6 @@ function makePublic(req, res, next) {
  * Publish user project
  */
 function publishProject(req, res, next) {
-
   let projectFolder = help.generateFilePath(req, '');
   let publishFolder = help.generateFilePath(req, '', 'publish');
   if (fs.existsSync(projectFolder)) {
@@ -738,7 +733,7 @@ function getTemplatesList(req, res, next) {
 
 function getProjectSize(req, res, next) {
   if (!req.query.projectSize) return next();
-  let rootDir = config.stuff_path + '/projects/' + req.user.username + '/' + req.project.root;
+  let rootDir = config.stuff_path + 'projects/' + req.user.username + '/' + req.project.root;
 
   userCapacity.readSizeRecursive(rootDir, (err, size) => {
     size = err ? 0 : size;

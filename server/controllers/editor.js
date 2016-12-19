@@ -16,10 +16,10 @@ import Promise from 'bluebird';
 import Minizip from 'node-minizip';
 
 import fileContentSearch from '../helpers/fileSearch';
+import config from '../../config/env';
 
 
 function getTreeJSON(req, res, next) {
-
   Project.get(req.params.id)
     .then((project) => {
       if (project) {
@@ -35,13 +35,12 @@ function getTreeJSON(req, res, next) {
           }
         };
 
-        const rootPath = `${config.stuff_path}/projects/${req.user.username}/${project.root}`;
+        const rootPath = `${config.stuff_path}projects/${req.user.username}/${project.root}`;
 
         if (req.query.getAll) {
 
           dirToJson(rootPath)
             .then((dirTree) => {
-              // console.log(dirTree);
               response.data.tree = dirTree;
               return res.status(200).json(response);
             })
@@ -69,7 +68,6 @@ function getTreeJSON(req, res, next) {
 
             const folderPath = req.query.folderPath ? `/${req.query.folderPath}` : '';
             let isSetFolderPath = !!folderPath;
-
             response.data.tree = dirTree((isSetFolderPath ? `${rootPath}${folderPath}` : rootPath), isSetFolderPath);
 
           }
@@ -78,6 +76,7 @@ function getTreeJSON(req, res, next) {
         }
 
         function dirTree(filename, isSetFolderPath) {
+
           let stats = fs.lstatSync(filename);
 
 

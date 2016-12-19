@@ -90,7 +90,7 @@ function successSync(req, res, next){
 
 function create(req, res, next) {
   if(req.body.root && req.body.id) {
-    const projectRoot = config.stuff_path + '/projects/' + req.user.username + '/' + help.cleanUrl(req.body.root) + '/';
+    const projectRoot = config.stuff_path + 'projects/' + req.user.username + '/' + help.cleanUrl(req.body.root) + '/';
     git.createRepo(req.user.username, help.cleanUrl(req.body.name))
       .then(result => {
         req.body.updatedAt = new Date();
@@ -171,7 +171,7 @@ function create(req, res, next) {
 
 function branch(req, res, next) {
   if(req.body.root && req.body.id) {
-    const projectRoot = config.stuff_path + '/projects/' + req.user.username + '/' + help.cleanUrl(req.body.root) + '/';
+    const projectRoot = config.stuff_path + 'projects/' + req.user.username + '/' + help.cleanUrl(req.body.root) + '/';
     git.createBranch(req.user.username, help.cleanUrl(req.body.id), projectRoot, help.cleanUrl(req.body.branch))
       .then(result => {
         return res.status(200).json({
@@ -192,7 +192,7 @@ function branch(req, res, next) {
 
 function theirs(req, res, next) {
   if(req.body.root && req.body.id) {
-    const projectRoot = config.stuff_path + '/projects/' + req.user.username + '/' + help.cleanUrl(req.body.root) + '/';
+    const projectRoot = config.stuff_path + 'projects/' + req.user.username + '/' + help.cleanUrl(req.body.root) + '/';
     git.theirs(req.user.username, help.cleanUrl(req.body.id), projectRoot)
       .then(data => {
         return res.status(200).json({
@@ -210,7 +210,7 @@ function theirs(req, res, next) {
 
 function ours(req, res, next) {
   if(req.body.root && req.body.id) {
-    const projectRoot = config.stuff_path + '/projects/' + req.user.username + '/' + help.cleanUrl(req.body.root) + '/';
+    const projectRoot = config.stuff_path + 'projects/' + req.user.username + '/' + help.cleanUrl(req.body.root) + '/';
     git.ours(req.user.username, help.cleanUrl(req.body.id), projectRoot)
       .then(data => {
         return res.status(200).json({
