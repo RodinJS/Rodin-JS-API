@@ -1,20 +1,20 @@
-import {THREE} from '../../_build/js/vendor/three/THREE.GLOBAL.js';
+import {THREE} from 'https://cdn.rodinapp.com/three/THREE.GLOBAL.js';
 
 import '../../_build/js/vendor/three/examples/js/loaders/OBJLoader.js';
 
-import * as RODIN from '../../_build/js/rodinjs/RODIN.js';
+import * as RODIN from 'https://cdn.rodinapp.com/rodinjs/RODIN.js';
 import {SceneManager} from '../../_build/js/rodinjs/scene/SceneManager.js';
 
 import {ModelLoader} from '../../_build/js/rodinjs/sculpt/ModelLoader.js';
-import {Animation} from '../../_build/js/rodinjs/animation/Animation.js';
-import {CubeObject} from '../../_build/js/rodinjs/sculpt/CubeObject.js';
+import {Animation} from 'https://cdn.rodinapp.com/rodinjs/animation/Animation.js';
+import {CubeObject} from 'https://cdn.rodinapp.com/rodinjs/sculpt/CubeObject.js';
 
 import {MouseController} from '../../_build/js/rodinjs/controllers/MouseController.js';
 import {DragAndDrop} from './DragAndDrop_c.js';
 
-import changeParent  from '../../_build/js/rodinjs/utils/ChangeParent.js';
-import {TWEEN} from '../../_build/js/rodinjs/Tween.js';
-import {EVENT_NAMES, CONTROLLER_HANDS} from '../../_build/js/rodinjs/constants/constants.js';
+import changeParent  from 'https://cdn.rodinapp.com/rodinjs/utils/ChangeParent.js';
+import {TWEEN} from 'https://cdn.rodinapp.com/rodinjs/Tween.js';
+import {EVENT_NAMES, CONTROLLER_HANDS} from 'https://cdn.rodinapp.com/rodinjs/constants/constants.js';
 
 //import './ViveControllers_c.js';
 
@@ -82,7 +82,7 @@ scene.add(light8);
 
 scene.add(new THREE.AmbientLight(0xd9d9d9, 0.3));
 
-// loading 3D models 
+// loading 3D models
 
 // room
 let room = ModelLoader.load('./models/Room.obj');

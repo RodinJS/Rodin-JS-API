@@ -90,7 +90,7 @@ function create(req, res, next) {
   }
 
 
-  Project.getByName(req.body.name, req.user.username)
+  Project.getByName(req.body.name, req.user.username, req.body.displayName)
     .then(projectExist => {
       if (projectExist) {
         const message = 'Project exist';
@@ -104,6 +104,7 @@ function create(req, res, next) {
         tags: req.body.tags,
         root: req.body.name,
         owner: req.user.username,
+        displayName:req.body.displayName,
         description: req.body.description,
         isNew: true
       });
@@ -372,7 +373,6 @@ function makePublic(req, res, next) {
         if (status === 'true') {
           const srcDir = `${config.stuff_path}projects/${username}/${help.cleanUrl(req.project.root)}`;
           const publicDir = `${config.stuff_path}public/${username}/${help.cleanUrl(req.project.root)}`;
-
           fsExtra.ensureSymlinkSync(srcDir, publicDir);
 
           return res.status(200).json({
@@ -403,8 +403,8 @@ function makePublic(req, res, next) {
         return next(err);
       }
     }).catch(e => {
-    const err = new APIError('Can\'t update info++', httpStatus.BAD_REQUEST, true);
-    return next(e);
+      const err = new APIError('Can\'t update info++', httpStatus.BAD_REQUEST, true);
+      return next(e);
   });
 }
 
@@ -435,14 +435,14 @@ function publishProject(req, res, next) {
       //Todo implement published public mechanizm
       let publishedPublic = req.body.publishedPublic || true;
 
-      Project.updateAsync({_id: req.params.id, owner: req.user.username}, {
+      Project.findOneAndUpdate({_id: req.params.id, owner: req.user.username}, {
         $set: {
           publishDate: new Date(),
           publishedPublic: publishedPublic
         }
-      })
-        .then(result => {
-          if (result.nModified === 1) {
+      }, {new: true})
+        .then(project => {
+          if (project) {
             //Send Mail
             req.mailSettings = {
               to: req.user.email,
@@ -461,7 +461,7 @@ function publishProject(req, res, next) {
             mandrill.sendMail(req, res, (response) => {
               //console.log(response);
             });
-            return res.status(200).json({success: true, data: 'Project published'})
+            return res.status(200).json({success: true, data: project})
 
           }
           else {
@@ -571,15 +571,15 @@ function unPublishProject(req, res, next) {
 
   if (fs.existsSync(publishFolder)) {
     fsExtra.removeSync(publishFolder);
-    Project.updateAsync({_id: req.params.id, owner: req.user.username}, {
+    Project.findOneAndUpdate({_id: req.params.id, owner: req.user.username}, {
       $unset: {
         publishDate: 1,
         publishedPublic: 1
       }
-    })
-      .then(result => {
-        if (result.nModified === 1) {
-          return res.status(200).json({success: true, data: 'Project unpublished'})
+    }, {new:true})
+      .then(project => {
+        if (project) {
+          return res.status(200).json({success: true, data: project})
         }
         else {
           const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
@@ -661,7 +661,7 @@ function getPublishedProject(req, res, next) {
  * @returns {*}
  */
 function getProjectsCount(req, res, next) {
-  if (!req.query.projectsCount && req.baseUrl !== '/api/project') return next();
+  //if (!req.query.projectsCount && req.baseUrl !== '/api/project') return next();
   let query = {
     $match: {
       owner: req.user.username

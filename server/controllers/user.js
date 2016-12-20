@@ -289,7 +289,7 @@ function create(req, res, next) {
           }
 
           //if (req.body.invitationCode)
-            //InvitationCode.delete(req.body.invitationCode);
+          //InvitationCode.delete(req.body.invitationCode);
 
           if (req.preSignUpData)
             PreSignUp.delete(req.preSignUpData.code);
@@ -343,22 +343,38 @@ function create(req, res, next) {
 
 /**
  * Update existing user
- * @property {string} req.body.email - The email of user.
- * @property {string} req.body.password - The password of user.
+ * @property {string} req.params.username - The email of user.
  * @returns {User}
  */
 function update(req, res, next) {
-  User.updateAsync(
-    {
-      username: req.params.username
-    },
-    {
-      $set: req.body
-    }
-  ).then(() => res.json({
-    "success": true,
-    "data": {}
-  }))
+
+  User.updateAsync({username: req.params.username}, {$set: req.body})
+    .then(() => res.json({
+      "success": true,
+      "data": {}
+    }))
+    .error((e) => next(e));
+}
+
+function unsyncSocial(req, res, next){
+  let field = {};
+  switch(req.params.socialName){
+    case 'facebook' : field.$unset = {facebookId:1}; break;
+    case 'github' : field.$unset = {github:1}; break;
+    case 'google' : field.$unset = {google:1}; break;
+    case 'steam' : field.$unset = {steamId:1}; break;
+    case 'oculus' : field.$unset = {oculusId:1}; break;
+  }
+  if(!field.$unset){
+    const err = new APIError('Provilde right Social ', 400);
+    return next(err);
+  }
+
+  User.updateAsync({username: req.params.username}, field)
+    .then(() => res.json({
+      "success": true,
+      "data": {}
+    }))
     .error((e) => next(e));
 }
 
@@ -438,51 +454,51 @@ function remove(req, res, next) {
 function validateInvitationCode(req, res, next) {
 
   //todo: temporary invitation code is required
-  if (!req.body.invitationCode){
+  if (!req.body.invitationCode) {
     const err = new APIError("Invitation code is required", httpStatus.BAD_REQUEST, true);
     return next(err);
     //return next();
   }
 
-  if(req.body.invitationCode !== '2B5H7B'){
+  if (req.body.invitationCode !== '2B5H7B') {
     const err = new APIError("Invitation code is wrong", httpStatus.BAD_REQUEST, true);
     return next(err);
   }
   next();
- /* InvitationCode.get(req.body.invitationCode)
-    .then((invitationCode) => {
+  /* InvitationCode.get(req.body.invitationCode)
+   .then((invitationCode) => {
 
-      if (invitationCode) {
+   if (invitationCode) {
 
-        invitationCode = invitationCode.toObject();
-        let dateDiff = dateDiffInDays(invitationCode.creationDate, new Date());
-        if (invitationCode.email == req.body.email && dateDiff < 7) {
-          return next();
-        }
-        else {
-          delete req.body.invitationCode;
+   invitationCode = invitationCode.toObject();
+   let dateDiff = dateDiffInDays(invitationCode.creationDate, new Date());
+   if (invitationCode.email == req.body.email && dateDiff < 7) {
+   return next();
+   }
+   else {
+   delete req.body.invitationCode;
 
-          if (dateDiff > 7)
-            InvitationCode.delete(invitationCode.invitationCode);
+   if (dateDiff > 7)
+   InvitationCode.delete(invitationCode.invitationCode);
 
-          return next();
-        }
-      }
-      else {
-        delete req.body.invitationCode;
-        return next();
-      }
-    });
+   return next();
+   }
+   }
+   else {
+   delete req.body.invitationCode;
+   return next();
+   }
+   });
 
 
-  // a and b are javascript Date objects
-  function dateDiffInDays(a, b) {
-    let MS_PER_DAY = 1000 * 60 * 60 * 24;
-    // Discard the time and time-zone information.
-    let utc1 = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
-    let utc2 = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate());
-    return Math.floor((utc2 - utc1) / MS_PER_DAY);
-  }*/
+   // a and b are javascript Date objects
+   function dateDiffInDays(a, b) {
+   let MS_PER_DAY = 1000 * 60 * 60 * 24;
+   // Discard the time and time-zone information.
+   let utc1 = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
+   let utc2 = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate());
+   return Math.floor((utc2 - utc1) / MS_PER_DAY);
+   }*/
 
 }
 
@@ -545,5 +561,6 @@ export default {
   confirmUsername,
   resetPassword,
   changePassword,
-  finalize
+  finalize,
+  unsyncSocial
 };

@@ -36,7 +36,7 @@ function sum(array){
 
 
 function getUserStroageSize(req, res, next){
-    if(!req.query.usedStorage) return next();
+    //if(!req.query.usedStorage) return next();
 
     let rootDir = 'projects/' + req.user.username;
     readSizeRecursive(rootDir, (err, size)=>{

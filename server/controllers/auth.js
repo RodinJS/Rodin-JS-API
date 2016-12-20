@@ -8,6 +8,7 @@ import Utils from '../helpers/common';
 import mandrill from '../helpers/mandrill';
 import fs from 'fs';
 import _    from 'lodash';
+import utils from '../helpers/common';
 
 
 import commonHelpers from '../helpers/common';
@@ -63,17 +64,27 @@ function finalizeUser(req, res, next) {
       expiresIn: "7d"
     });
 
+  let data = {
+    email: user.email,
+    username: user.username,
+    role: user.role,
+    profile: user.profile,
+    usernameConfirmed: req.user.usernameConfirmed,
+    creationDate:user.createdAt
+  };
+
+
+  //concat projects count
+  data.projects = req.projectsCount;
+
+  //concat usedStorage
+  data.usedStorage = utils.byteToMb(req.usedStorage);
+
   return res.status(200).json({
     "success": true,
     "data": {
       token,
-      user: {
-        email: user.email,
-        username: user.username,
-        role: user.role,
-        profile: user.profile,
-        usernameConfirmed: req.user.usernameConfirmed
-      }
+      user: data
     }
   });
 }

@@ -5,6 +5,9 @@ import paramValidation from '../../config/param-validation';
 import authCtrl from '../controllers/auth';
 import check from '../controllers/check';
 import config from '../../config/env';
+import userCapacity from '../helpers/directorySize';
+import projectCtrl from '../controllers/project';
+
 
 
 import passport from '../../config/passport';
@@ -60,7 +63,7 @@ const router = express.Router();	// eslint-disable-line new-cap
  *      }
  */
 router.route('/login')
-	.post(validate(paramValidation.login), authCtrl.login, authCtrl.finalizeUser);
+	.post(validate(paramValidation.login), authCtrl.login, userCapacity.getUserStroageSize, projectCtrl.getProjectsCount, authCtrl.finalizeUser);
 
 /**
  * @api {post} /api/auth/verify Verify token

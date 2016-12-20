@@ -48,7 +48,8 @@ export default {
   // POST /api/project
   createProject: {
     body: {
-      name: Joi.string().required(),
+      displayName: Joi.string().required(),
+      name:Joi.string().regex(/^[A-Za-z0-9?,_-]+$/).required(),
       description: Joi.string().required(),
       tags: Joi.array().optional(),
       templateId: Joi.string().optional()
@@ -61,8 +62,9 @@ export default {
       allowUnknownBody: false
     },
     body: {
-      name: Joi.string().optional(),
-      description: Joi.string().optional(),
+      displayName: Joi.string().required(),
+      name:Joi.string().regex(/^[A-Za-z0-9?,_-]+$/).required(),
+      description: Joi.string().required(),
       tags: Joi.array().optional(),
       url: Joi.string().optional(),
       thumbnail: Joi.string().optional(),
