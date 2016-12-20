@@ -12,11 +12,13 @@ describe('## Projects APIs', () => {
 
   let project = {
     blank: {
+      displayName:'testProject',
       name: 'testProject',
       tags: ['test'],
       description: 'test project description',
     },
     template: {
+      displayName: 'testProjectTemplate',
       name: 'testProjectTemplate',
       tags: ['test', 'template'],
       description: 'test project with template'
