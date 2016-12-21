@@ -6,7 +6,19 @@ export default {
     body: {
       email: Joi.string().required(),
       username: Joi.string().required(),
-      password: Joi.string().regex(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/).required()
+      password: Joi.string().regex(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/).required().label('Password').options({
+        language: {
+          any: {
+            empty: 'is not allowed to be empty',
+          },
+          string: {
+            regex: {
+              base: 'must be at least 8 characters long, contain a number and letter',
+              name: 'with value "{{!value}}" fails to match the {{name}} pattern'
+            },
+          }
+        }
+      })
     }
   },
 
@@ -48,8 +60,20 @@ export default {
   // POST /api/project
   createProject: {
     body: {
-      displayName: Joi.string().required(),
-      name:Joi.string().regex(/^[A-Za-z0-9?,_-]+$/).required(),
+      displayName: Joi.string().required().label('Project name'),
+      name:Joi.string().regex(/^[A-Za-z0-9?,_-]+$/).required().label('Project URL').options({
+        language: {
+          any: {
+            empty: 'is not allowed to be empty',
+          },
+          string: {
+            regex: {
+              base: 'should be alphanumeric and no spaces',
+              name: 'with value "{{!value}}" fails to match the {{name}} pattern'
+            },
+          }
+        }
+      }),
       description: Joi.string().max(256).required(),
       tags: Joi.array().optional(),
       templateId: Joi.string().optional()
@@ -62,8 +86,20 @@ export default {
       allowUnknownBody: false
     },
     body: {
-      displayName: Joi.string().required(),
-      name:Joi.string().regex(/^[A-Za-z0-9?,_-]+$/).required(),
+      displayName: Joi.string().required().label('Project name'),
+      name:Joi.string().regex(/^[A-Za-z0-9?,_-]+$/).required().label('register_tel').label('Project URL').options({
+        language: {
+          any: {
+            empty: 'is not allowed to be empty',
+          },
+          string: {
+            regex: {
+              base: 'should be alphanumeric and no spaces',
+              name: 'with value "{{!value}}" fails to match the {{name}} pattern'
+            },
+          }
+        }
+      }),
       description: Joi.string().max(256).required(),
       tags: Joi.array().optional(),
       url: Joi.string().optional(),

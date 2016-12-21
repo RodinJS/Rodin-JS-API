@@ -209,10 +209,14 @@ ProjectSchema.statics = {
     }
 
     if (_queryString) {
+      _queryString = _queryString.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
       const re = new RegExp(_queryString, 'gi');
       query.$or = [
         {
           name: re
+        },
+        {
+          displayName: re
         },
         {
           description: re
