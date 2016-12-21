@@ -1,8 +1,8 @@
 export default {
-  env: 'development',
+  env: 'local',
   jwtSecret: '4DNSrMPuQ3Y3McBu96wd2GzGheDXuft8gDqLEQVWHnXQfcaGFtM2ZBgyNYzPN7CK',
   db: 'mongodb://localhost/rodin-js-api-development',
-  clientURL:'http://localhost:3000',
+  clientURL:'http://localhost:8585/#',
   port: 3000,
   socketPort:4000,
   socketURL:'http://localhost:4000',

@@ -40,15 +40,6 @@ gulp.task('set-env', () => {
 		}
 	});
 });
-
-gulp.task('set-env-local', () => {
-  plugins.env({
-    vars: {
-      NODE_ENV: 'local'
-    }
-  });
-});
-
 // Lint Javascript
 // gulp.task('lint', () =>
 //   gulp.src(paths.js)
@@ -183,19 +174,14 @@ gulp.task('singletest', ['set-env'], () => {
 gulp.task('mocha', ['clean'], () => {
 	runSequence(
 		['copy', 'babel'],
-		'test'
+    'test'
 	);
 });
 
 // gulp serve for development
 gulp.task('serve', ['clean'], () => runSequence('nodemon'));
 
-// default task: clean dist, compile js files and copy non-js files.
-gulp.task('local', ['clean'], () => {
-	runSequence(
-		['set-env-local', 'copy', 'babel']
-	);
-});
+
 gulp.task('default', ['clean'], () => {
 	runSequence(
 		['copy', 'babel']
