@@ -50,7 +50,7 @@ export default {
     body: {
       displayName: Joi.string().required(),
       name:Joi.string().regex(/^[A-Za-z0-9?,_-]+$/).required(),
-      description: Joi.string().required(),
+      description: Joi.string().max(256).required(),
       tags: Joi.array().optional(),
       templateId: Joi.string().optional()
     }
@@ -64,7 +64,7 @@ export default {
     body: {
       displayName: Joi.string().required(),
       name:Joi.string().regex(/^[A-Za-z0-9?,_-]+$/).required(),
-      description: Joi.string().required(),
+      description: Joi.string().max(256).required(),
       tags: Joi.array().optional(),
       url: Joi.string().optional(),
       thumbnail: Joi.string().optional(),
