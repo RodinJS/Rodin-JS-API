@@ -2,10 +2,10 @@ export default {
   env: 'development',
   jwtSecret: '4DNSrMPuQ3Y3McBu96wd2GzGheDXuft8gDqLEQVWHnXQfcaGFtM2ZBgyNYzPN7CK',
   db: 'mongodb://localhost/rodin-js-api-development',
-  clientURL:'https://rodin.space',
+  clientURL:'http://localhost:3000',
   port: 3000,
   socketPort:4000,
-  socketURL:'https://ss.rodin.space',
+  socketURL:'http://localhost:4000',
   social: {
     facebook: {
       clientID: "216982868736046",
@@ -23,8 +23,8 @@ export default {
       callbackURL: "http://localhost:3000/api/auth/steam/callback"
     },
     github:{
-      clientId: "fa69c03ad5758fce1f10",
-      clientSecret: "f6168859547a3a420948257e946170cb0da80fa8"
+      clientId: "2350afe57c144672285b",
+      clientSecret: "3b16cafe190ecdc3a659198dc32b396b95dff77a"
     }
   },
   urlshortenerkey: "AIzaSyCe5zVHHHhhv40N-WzeffxWva377dPQnH8",
@@ -79,5 +79,5 @@ export default {
     }
   },
   mandrill:'ouOYaHWxlDaabLYVjrG1BA',
-  stuff_path: '/var/www/stuff/'
+  stuff_path: ''
 };
