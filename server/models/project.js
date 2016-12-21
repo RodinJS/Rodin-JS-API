@@ -148,7 +148,8 @@ ProjectSchema.statics = {
    */
   getByName(name, owner, displayName) {
     let specialName = name.replace(/ /g, '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-    return this.findOne({displayName: displayName || name, name:specialName, owner: owner})  //new RegExp('^' + id + '$', "i")
+
+    return this.findOne({name:specialName, owner: owner})  //new RegExp('^' + id + '$', "i")
       .execAsync().then((project) => {
         if (project) {
           return project;
