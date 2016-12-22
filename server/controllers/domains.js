@@ -31,42 +31,58 @@ function add(req, res, next) {
 							new: true
 						}).then(projData => {
 							const nginx_root_path = config.stuff_path + 'projects/' + req.user.username + '/' + project.root + '';
-							shell.exec(`cp template.conf /etc/nginx/custom/${domain}`, config.nginx_template_path, (error) => {
-								return(error);
-								// const err = new APIError(`Can\'t' create /etc/nginx/custom/${domain} config file from template!`, httpStatus.COULD_NOT_CREATE_TEMPLATE, true);
-								// return next(err);
-							});
 							
-							const nginx_conf_file = `/etc/nginx/custom/${domain}`;
-
-							fs.readFile(nginx_conf_file, 'utf8', (err, data) => {
-								if (err) {
-									const e = new APIError('Can\'t read file', httpStatus.COULD_NOT_READ_FILE, true);
-									return next(e);
+							let nginx_copy_rename = exec(`cp ${config.nginx_template_path}template.conf /etc/nginx/custom/${domain}`, (error, stdout, stderr) => {
+								if (error) {
+									return res.status(400).send({
+										success: false,
+										error: error
+									});
+									// const err = new APIError(`Can\'t' create /etc/nginx/custom/${domain} config file from template!`, httpStatus.COULD_NOT_CREATE_TEMPLATE, true);
+									// return next(err);
 								}
+								console.log('stdout: ' + stdout);
+								console.log('stderr: ' + stderr);
 
-								let result = data.replace('%DOMAIN%', `${domain}`);
-								result = result.replace('%ROOTPATH%', `${nginx_root_path}`);
+								const nginx_conf_file = `/etc/nginx/custom/${domain}`;
 
-								fs.writeFile(nginx_conf_file, result, 'utf8', (err, data) => {
-									if(err) {
-										const e = new APIError('Can\'t write file', httpStatus.COULD_NOT_WRITE_TO_FILE, true);
+								fs.readFile(nginx_conf_file, 'utf8', (err, data) => {
+									if (err) {
+										const e = new APIError('Can\'t read file', httpStatus.COULD_NOT_READ_FILE, true);
 										return next(e);
 									}
 
-									shell.exec(`systemctl reload nginx.service`, config.nginx_template_path, (error) => {
-										const err = new APIError(`Error in /etc/nginx/custom/${domain} config file! (NGINX)`, httpStatus.COULD_NOT_CREATE_TEMPLATE, true);
-										return next(err);								
-									});
-									return res.status(200).json({
-										success: true,
-										data: {
-											message: `${domain} domain name added to project successfuly!`
+									let result = data.replace('%DOMAIN%', `${domain}`);
+									result = result.replace('%ROOTPATH%', `${nginx_root_path}`);
+
+									fs.writeFile(nginx_conf_file, result, 'utf8', (err, data) => {
+										if(err) {
+											const e = new APIError('Can\'t write file', httpStatus.COULD_NOT_WRITE_TO_FILE, true);
+											return next(e);
 										}
-									});									
+
+										let nginx_reload = exec(`systemctl reload nginx.service`, (error, stdout, stderr) => {
+											if (error) {
+												return res.status(400).send({
+													success: false,
+													error: error
+												});
+											}
+											console.log('stdout: ' + stdout);
+											console.log('stderr: ' + stderr);
+
+											return res.status(200).json({
+												success: true,
+												data: {
+													message: `${domain} domain name added to project successfuly!`
+												}
+											});									
+										});
+										nginx_reload.kill();
+									});
 								});
 							});
-
+							nginx_copy_rename.kill();
 						}).catch(e => {
 							const err = new APIError('Can\'t update DB', httpStatus.BAD_REQUEST, true);
 							return next(e);
