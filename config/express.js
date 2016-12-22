@@ -27,7 +27,7 @@ if (config.env === 'development') {
 // parse body params and attache them to req.body
 // app.use(bodyParser.json());
 app.use(bodyParser.json({limit: '20mb'}));
-app.use(expressSanitized.middleware());
+//app.use(expressSanitized.middleware());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(passport.initialize());
 app.use(cookieParser());
