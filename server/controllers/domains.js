@@ -75,6 +75,12 @@ function add(req, res, next) {
 									});
 								});
 							});
+							return res.status(400).send({
+								success: false,
+								error: {
+									message: 'qaqot error'
+								}
+							});
 						}).catch(e => {
 							const err = new APIError('Can\'t update DB', httpStatus.BAD_REQUEST, true);
 							return next(e);
