@@ -32,7 +32,7 @@ function add(req, res, next) {
 						{
 							new: true
 						}).then(projData => {
-							const nginx_root_path = config.stuff_path + 'projects/' + req.user.username + '/' + project.root + '';
+							const nginx_root_path = config.stuff_path + 'publish/' + req.user.username + '/' + project.root + '';
 							
 							return fse.copy(`${config.nginx_template_path}template.conf`, `/etc/nginx/custom/${domain}`, function (err) {
 								if (err) return next(err);
