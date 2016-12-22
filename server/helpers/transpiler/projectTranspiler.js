@@ -29,6 +29,7 @@ process.on('message', (message) => {
 
 
   function onError(error) {
+    console.log(error);
     fsExtra.removeSync(project + '/pre_build');
     process.send({success: false, error: error});
     process.exit(1);
