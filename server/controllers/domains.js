@@ -1,6 +1,7 @@
 import fs from 'fs';
 import fse from 'fs-extra';
 import {exec} from 'child_process';
+import {spawn} from 'child_process';
 import request from 'request-promise';
 import config from '../../config/env';
 import APIError from '../helpers/APIError';
