@@ -116,6 +116,7 @@ const httpStatus = {
   USER_ALREADY_IN_ORGANIZATION: 325,
   ADD_YOURSELF_TO_YOUR_ORGANIZATION: 326,
   SOMETHING_WENT_WRONG: 327,
+  NO_PROJECT_ID: 328,
 // working with files [328-349]
   COULD_NOT_DELETE_OBJECT: 328,
   COULD_NOT_LIST_FILES: 329,
@@ -129,10 +130,14 @@ const httpStatus = {
   COULD_NOT_CREATE_FILE: 337,
   NOT_A_FILE: 338,
 
-// working with github [350-370]
+// working with github [350-360]
   GITHUB_NOT_LINKED: 350,
   NO_PROJECT_ROOT: 351,
   REPO_NAME_EXIST: 352,
+// working with custom domain names [360-370]
+  NO_DOMAIN_NAME: 360,
+  COULD_NOT_CREATE_TEMPLATE: 361,
+  ERROR_IN_CONFIG_FILE: 362,
 
 // working with sockets [600~]
   BAD_SOCKET_REQUEST: 600,

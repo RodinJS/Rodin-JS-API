@@ -1,6 +1,5 @@
 // execute a single shell command where "cmd" is a string
 exports.exec = (cmd, dir, cb) => {
-    console.log("----cmd-----", cmd);
     var child_process = require('child_process');
     var parts = cmd.split(/\s+/g);
     var p = child_process.spawn(parts[0], parts.slice(1), {stdio: 'inherit', cwd: dir});

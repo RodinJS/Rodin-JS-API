@@ -8,6 +8,7 @@ import paymentsRoutes from './payments';
 import hooksRoutes from './hooks';
 import notificationsRoute from './notifications';
 import gitRoute from './git';
+import domainsRoute from './domains';
 import expressSanitized from 'express-sanitize-escape';
 import _ from 'lodash';
 
@@ -48,6 +49,10 @@ const apiRoutes = {
   git: {
     route: '/git',
     module: gitRoute
+  },
+  domains: {
+    route: '/domains',
+    module: domainsRoute
   }
 
 };

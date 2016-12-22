@@ -100,6 +100,9 @@ const ProjectSchema = new mongoose.Schema({
     git: { type: String },
     https: { type: String }
   },
+  domain: {
+    type: String
+  },
   type: {
     type: String
   },

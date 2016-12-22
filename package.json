@@ -10,7 +10,7 @@
   },
   "scripts": {
     "start": "gulp serve",
-    "start:server":"cd ./dist; node socketServer",
+    "start:server": "cd ./dist; node socketServer",
     "build": "gulp",
     "lint": "gulp lint",
     "test": "gulp mocha",
@@ -71,6 +71,7 @@
     "passport-jwt": "^2.1.0",
     "passport-steam": "^1.0.7",
     "paypal-rest-sdk": "^1.7.0",
+    "replace-in-file": "^2.0.3",
     "request": "^2.79.0",
     "request-promise": "^4.1.1",
     "shortid": "^2.2.6",

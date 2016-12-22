@@ -79,5 +79,6 @@ export default {
     }
   },
   mandrill:'ouOYaHWxlDaabLYVjrG1BA',
-  stuff_path: ''
+  stuff_path: '',
+  nginx_template_path: 'resources/nginx/'
 };
