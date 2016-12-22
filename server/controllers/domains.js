@@ -78,7 +78,7 @@ function add(req, res, next) {
 							return next(e);
 						});
 				}).catch(e => {
-					const err = new APIError('No project with ${id} id!', httpStatus.FATAL, true);
+					const err = new APIError(`No project with ${id} id!`, httpStatus.FATAL, true);
 					return next(err);
 				});
 		} else {
