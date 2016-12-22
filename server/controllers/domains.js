@@ -47,7 +47,7 @@ function add(req, res, next) {
 									let result = data.replace('%DOMAIN%', `${domain}`);
 									result = result.replace('%ROOTPATH%', `${nginx_root_path}`);
 
-									fs.writeFile(nginx_conf_file, result, 'utf8', (err, data) => {
+									fs.writeFile(nginx_conf_file, result, 'utf8', (err) => {
 										if(err) {
 											const e = new APIError('Can\'t write file', httpStatus.COULD_NOT_WRITE_TO_FILE, true);
 											return next(e);
