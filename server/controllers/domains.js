@@ -52,15 +52,19 @@ function add(req, res, next) {
 											const e = new APIError('Can\'t write to file', httpStatus.COULD_NOT_WRITE_TO_FILE, true);
 											return next(e);
 										}
+											console.log("----pti mtni bash");
 										const deploySh = spawn('bash', [ `${config.nginx_template_path}nginx.reload.bash` ], {
 											env: Object.assign({}, process.env, { PATH: process.env.PATH + ':/usr/local/bin' })
 										}, (error, stdout, stderr) => {
+											console.log("----mtav bash");
 											if (error) {
+												console.log("----mtav bash error");
 												return res.status(400).send({
 													success: false,
 													error: error
 												});
 											}
+											console.log("----mtav bash ok");
 											console.log('stdout: ' + stdout);
 											console.log('stderr: ' + stderr);
 
