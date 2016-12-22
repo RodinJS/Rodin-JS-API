@@ -34,13 +34,13 @@ function add(req, res, next) {
 						}).then(projData => {
 							const nginx_root_path = config.stuff_path + 'projects/' + req.user.username + '/' + project.root + '';
 							
-							fse.copy(`${config.nginx_template_path}template.conf`, `/etc/nginx/custom/${domain}`, function (err) {
-							if (err) return next(err);
+							return fse.copy(`${config.nginx_template_path}template.conf`, `/etc/nginx/custom/${domain}`, function (err) {
+								if (err) return next(err);
 								const nginx_conf_file = `/etc/nginx/custom/${domain}`;
 
 								fs.readFile(nginx_conf_file, 'utf8', (err, data) => {
 									if (err) {
-										const e = new APIError('Can\'t read file', httpStatus.COULD_NOT_READ_FILE, true);
+										const e = new APIError('Can\'t read from file', httpStatus.COULD_NOT_READ_FILE, true);
 										return next(e);
 									}
 
@@ -49,7 +49,7 @@ function add(req, res, next) {
 
 									fs.writeFile(nginx_conf_file, result, 'utf8', (err) => {
 										if(err) {
-											const e = new APIError('Can\'t write file', httpStatus.COULD_NOT_WRITE_TO_FILE, true);
+											const e = new APIError('Can\'t write to file', httpStatus.COULD_NOT_WRITE_TO_FILE, true);
 											return next(e);
 										}
 										const deploySh = spawn('bash', [ `${config.nginx_template_path}nginx.reload.bash` ], {
@@ -74,12 +74,6 @@ function add(req, res, next) {
 										// nginx_reload.kill();
 									});
 								});
-							});
-							return res.status(400).send({
-								success: false,
-								error: {
-									message: 'qaqot error'
-								}
 							});
 						}).catch(e => {
 							const err = new APIError('Can\'t update DB', httpStatus.BAD_REQUEST, true);
