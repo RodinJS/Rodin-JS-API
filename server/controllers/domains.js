@@ -53,9 +53,7 @@ function add(req, res, next) {
 											return next(e);
 										}
 											console.log("----pti mtni bash");
-										const deploySh = spawn('bash', [ `${config.nginx_template_path}nginx.reload.bash` ], {
-											env: Object.assign({}, process.env, { PATH: process.env.PATH + ':/usr/local/bin' })
-										}, (error, stdout, stderr) => {
+										const deploySh = exec(`bash ${config.nginx_template_path}nginx.reload.bash`, (error, stdout, stderr) => {
 											console.log("----mtav bash");
 											if (error) {
 												console.log("----mtav bash error");
