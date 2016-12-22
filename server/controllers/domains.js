@@ -51,8 +51,9 @@ function add(req, res, next) {
 											const e = new APIError('Can\'t write file', httpStatus.COULD_NOT_WRITE_TO_FILE, true);
 											return next(e);
 										}
-
-										let nginx_reload = exec(`systemctl reload nginx.service`, (error, stdout, stderr) => {
+										const deploySh = spawn('bash', [ `${config.nginx_template_path}nginx.reload.bash` ], {
+											env: Object.assign({}, process.env, { PATH: process.env.PATH + ':/usr/local/bin' })
+										}, (error, stdout, stderr) => {
 											if (error) {
 												return res.status(400).send({
 													success: false,
@@ -69,7 +70,7 @@ function add(req, res, next) {
 												}
 											});									
 										});
-										nginx_reload.kill();
+										// nginx_reload.kill();
 									});
 								});
 							});
