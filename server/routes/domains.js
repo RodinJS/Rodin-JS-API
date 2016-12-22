@@ -57,6 +57,19 @@ router.route('/')
 	*				"status": 328,
 	*				"timestamp": 1482410651163
 	*			}
+	*		}	
+	*
+	* @apiError NoToken Token does not provided!
+	*
+	* @apiErrorExample {json} Bad Request:
+	*      HTTP/2 666
+	*		{
+	*		  "success": false,
+	*		  "error": {
+	*		    "message": "No project with ${id} id!",
+	*		    "status": 666,
+	*		    "timestamp": 1482410969774
+	*		  }
 	*		}
 	*
 	*/
