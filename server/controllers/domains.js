@@ -1,4 +1,5 @@
 import fs from 'fs';
+import fse from 'fs-extra';
 import {exec} from 'child_process';
 import request from 'request-promise';
 import config from '../../config/env';
@@ -32,18 +33,8 @@ function add(req, res, next) {
 						}).then(projData => {
 							const nginx_root_path = config.stuff_path + 'projects/' + req.user.username + '/' + project.root + '';
 							
-							let nginx_copy_rename = exec(`cp ${config.nginx_template_path}template.conf /etc/nginx/custom/${domain}`, (error, stdout, stderr) => {
-								if (error) {
-									return res.status(400).send({
-										success: false,
-										error: error
-									});
-									// const err = new APIError(`Can\'t' create /etc/nginx/custom/${domain} config file from template!`, httpStatus.COULD_NOT_CREATE_TEMPLATE, true);
-									// return next(err);
-								}
-								console.log('stdout: ' + stdout);
-								console.log('stderr: ' + stderr);
-
+							fse.copy(`${config.nginx_template_path}template.conf`, `/etc/nginx/custom/${domain}`, function (err) {
+							if (err) return next(err);
 								const nginx_conf_file = `/etc/nginx/custom/${domain}`;
 
 								fs.readFile(nginx_conf_file, 'utf8', (err, data) => {
@@ -82,7 +73,6 @@ function add(req, res, next) {
 									});
 								});
 							});
-							nginx_copy_rename.kill();
 						}).catch(e => {
 							const err = new APIError('Can\'t update DB', httpStatus.BAD_REQUEST, true);
 							return next(e);
