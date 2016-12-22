@@ -1,13 +1,10 @@
 import fs from 'fs';
 import fse from 'fs-extra';
 import {exec} from 'child_process';
-import {spawn} from 'child_process';
-import request from 'request-promise';
 import config from '../../config/env';
 import APIError from '../helpers/APIError';
 import httpStatus from '../helpers/httpStatus';
 import help from '../helpers/editor';
-import shell from '../helpers/shell';
 import Project from '../models/project';
 
 function add(req, res, next) {
@@ -26,17 +23,17 @@ function add(req, res, next) {
 						},
 						{
 							$set: {
-								domain: domain 
+								domain: domain
 							}
 						},
 						{
 							new: true
 						}).then(projData => {
 							const nginx_root_path = config.stuff_path + 'publish/' + req.user.username + '/' + project.root + '';
-							
-							return fse.copy(`${config.nginx_template_path}template.conf`, `/etc/nginx/custom/${domain}`, function (err) {
+
+							return fse.copy(`${config.nginx_template_path}template.conf`, `${config.nginx_dest_path}${domain}`, function (err) {
 								if (err) return next(err);
-								const nginx_conf_file = `/etc/nginx/custom/${domain}`;
+								const nginx_conf_file = `${config.nginx_dest_path}${domain}`;
 
 								fs.readFile(nginx_conf_file, 'utf8', (err, data) => {
 									if (err) {
@@ -52,11 +49,16 @@ function add(req, res, next) {
 											const e = new APIError('Can\'t write to file', httpStatus.COULD_NOT_WRITE_TO_FILE, true);
 											return next(e);
 										}
-										const deploySh = exec(`bash ${config.nginx_template_path}nginx.reload.bash`, (error, stdout, stderr) => {
+										exec(`bash ${config.nginx_template_path}nginx.reload.bash`, (error, stdout, stderr) => {
 											if (error) {
+											  const err = {
+											    status:400,
+                          code:1,
+                          message:'Something went wrong'
+                        };
 												return res.status(400).send({
 													success: false,
-													error: error
+													error: err
 												});
 											}
 											console.log('stdout: ' + stdout);
@@ -67,7 +69,7 @@ function add(req, res, next) {
 												data: {
 													message: `${domain} domain name added to project successfuly!`
 												}
-											});									
+											});
 										});
 										// nginx_reload.kill();
 									});
@@ -87,7 +89,7 @@ function add(req, res, next) {
 		}
 	} else {
 		const err = new APIError("Project id does not provided!", httpStatus.NO_PROJECT_ID, true);
-		return next(err);		
+		return next(err);
 	}
 }
 

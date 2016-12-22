@@ -80,5 +80,6 @@ export default {
   },
   mandrill:'ouOYaHWxlDaabLYVjrG1BA',
   stuff_path: '',
-  nginx_template_path: 'resources/nginx/'
+  nginx_template_path: 'resources/nginx/',
+  nginx_dest_path:'resources/domain_name/'
 };

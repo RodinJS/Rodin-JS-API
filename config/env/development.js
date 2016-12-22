@@ -80,5 +80,6 @@ export default {
   },
   mandrill:'ouOYaHWxlDaabLYVjrG1BA',
   stuff_path: '/var/www/stuff/',
-  nginx_template_path: '/var/www/api.rodin.space/resources/nginx/'
+  nginx_template_path: '/var/www/api.rodin.space/resources/nginx/',
+  nginx_dest_path:'/etc/nginx/custom/'
 };
