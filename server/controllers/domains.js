@@ -32,8 +32,9 @@ function add(req, res, next) {
 						}).then(projData => {
 							const nginx_root_path = config.stuff_path + 'projects/' + req.user.username + '/' + project.root + '';
 							shell.exec(`cp template.conf /etc/nginx/custom/${domain}`, config.nginx_template_path, (error) => {
-								const err = new APIError(`Can\'t' create /etc/nginx/custom/${domain} config file from template!`, httpStatus.COULD_NOT_CREATE_TEMPLATE, true);
-								return next(err);
+								return(error);
+								// const err = new APIError(`Can\'t' create /etc/nginx/custom/${domain} config file from template!`, httpStatus.COULD_NOT_CREATE_TEMPLATE, true);
+								// return next(err);
 							});
 							
 							const nginx_conf_file = `/etc/nginx/custom/${domain}`;
