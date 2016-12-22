@@ -1,6 +1,6 @@
-import request from 'request-promise';
 import fs from 'fs';
-// import replace from 'replace-in-file';
+import {exec} from 'child_process';
+import request from 'request-promise';
 import config from '../../config/env';
 import APIError from '../helpers/APIError';
 import httpStatus from '../helpers/httpStatus';
