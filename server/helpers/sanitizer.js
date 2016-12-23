@@ -30,6 +30,8 @@ const Sanitizer = {
     if (obj instanceof Object) {
       Object.keys(obj).forEach((prop) => {
         obj[prop] = Sanitizer._sanitize(obj[prop]);
+        if(typeof obj[prop] === 'string')
+          obj[prop] = obj[prop].replace(/&#10;/g, '');
       });
       return obj;
     }
@@ -39,7 +41,7 @@ const Sanitizer = {
   makeSanitize: function (req, res, next) {
     [req.body, req.query].forEach((val, ipar, request) => {
       if (_.size(val)) {
-        request[ipar] = Sanitizer._sanitize(request[ipar])
+        request[ipar] = Sanitizer._sanitize(request[ipar]);
       }
     });
 
