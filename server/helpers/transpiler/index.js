@@ -30,7 +30,6 @@ function projectTranspile(req) {
 
   executor.on('message', (message) => {
     req.notification = message;
-    console.log(message);
     if (message.error) {
       if(req.notification.error.message){
         let trimRootPath = req.notification.error.message.indexOf(req.project.root);

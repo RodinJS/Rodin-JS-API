@@ -8,7 +8,6 @@ import cors from 'cors';
 import httpStatus from '../server/helpers/httpStatus';
 import expressWinston from 'express-winston';
 import expressValidation from 'express-validation';
-import expressSanitized from 'express-sanitize-escape';
 import helmet from 'helmet';
 import winstonInstance from './winston';
 import apiRoutes from '../server/routes';
@@ -27,7 +26,6 @@ if (config.env === 'development') {
 // parse body params and attache them to req.body
 // app.use(bodyParser.json());
 app.use(bodyParser.json({limit: '20mb'}));
-//app.use(expressSanitized.middleware());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(passport.initialize());
 app.use(cookieParser());

@@ -9,50 +9,52 @@ import hooksRoutes from './hooks';
 import notificationsRoute from './notifications';
 import gitRoute from './git';
 import domainsRoute from './domains';
-import expressSanitized from 'express-sanitize-escape';
+import RodinSanitizer from '../helpers/sanitizer';
+
 import _ from 'lodash';
 
 const router = express.Router();	// eslint-disable-line new-cap
+
 const apiRoutes = {
   user: {
     route: '/user',
-    module: userRoutes,
+    module: [RodinSanitizer.makeSanitize, userRoutes],
   },
   project: {
     route: '/project',
-    module: projectRoutes
+    module: [RodinSanitizer.makeSanitize, projectRoutes]
   },
   auth: {
     route: '/auth',
-    module: authRoutes
+    module: [RodinSanitizer.makeSanitize, authRoutes]
   },
   editor: {
     route: '/editor',
-    module: editorRoutes
+    module: [editorRoutes]
   },
   ios: {
     route: '/ios',
-    module: iosRoutes
+    module: [RodinSanitizer.makeSanitize, iosRoutes]
   },
   payments: {
     route: '/payments',
-    module: paymentsRoutes
+    module: [RodinSanitizer.makeSanitize, paymentsRoutes]
   },
   hooks: {
     route: '/hooks',
-    module: hooksRoutes
+    module: [RodinSanitizer.makeSanitize, hooksRoutes]
   },
   notifications: {
     route: '/notifications',
-    module: notificationsRoute
+    module: [RodinSanitizer.makeSanitize, notificationsRoute]
   },
   git: {
     route: '/git',
-    module: gitRoute
+    module: [RodinSanitizer.makeSanitize, gitRoute]
   },
   domains: {
     route: '/domains',
-    module: domainsRoute
+    module: [RodinSanitizer.makeSanitize, domainsRoute]
   }
 };
 /** GET /health-check - Check service health */
