@@ -684,7 +684,7 @@ function getProjectsCount(req, res, next) {
           req.projectsCount.published = project.count;
 
       });
-      req.projectsCount.total =  (req.projectsCount.unpublished + req.projectsCount.published);
+      req.projectsCount.total =  ((req.projectsCount.unpublished || 0)+ (req.projectsCount.published || 0));
       next();
     })
     .catch((e) => {

@@ -85,6 +85,7 @@ function me(req, res) {
       google: req.user.google,
       steam: req.user.steam,
       oculus: req.user.oculus,
+      allowProjectsCount:req.user.allowProjectsCount
     }
   };
 
