@@ -43,6 +43,7 @@ function add(req, res, next) {
 
 									let result = data.replace('%DOMAIN%', `${domain}`);
 									result = result.replace('%ROOTPATH%', `${nginx_root_path}`);
+									result = result.replace('%ID%', `${id}`);
 
 									fs.writeFile(nginx_conf_file, result, 'utf8', (err) => {
 										if(err) {
@@ -52,10 +53,10 @@ function add(req, res, next) {
 										exec(`bash ${config.nginx_template_path}nginx.reload.bash`, (error, stdout, stderr) => {
 											if (error) {
 											  const err = {
-											    status:400,
-                          code:1,
-                          message:'Something went wrong'
-                        };
+													status:400,
+													code:1,
+													message:'Something went wrong'
+												};
 												return res.status(400).send({
 													success: false,
 													error: err
@@ -71,7 +72,6 @@ function add(req, res, next) {
 												}
 											});
 										});
-										// nginx_reload.kill();
 									});
 								});
 							});
