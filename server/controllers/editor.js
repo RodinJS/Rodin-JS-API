@@ -382,7 +382,7 @@ function searchInsideFiles(req, res, next) {
     return next(err);
   }
 
-  let mainPath = help.generateFilePath(req, req.query.path);
+  let mainPath = help.generateFilePath(req, req.query.path || '');
   let searchWord = req.query.search;
   let caseSensetive = req.query.caseSensitive;
 
