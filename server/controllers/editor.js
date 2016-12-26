@@ -386,7 +386,7 @@ function searchInsideFiles(req, res, next) {
   let searchWord = req.query.search;
   let caseSensetive = req.query.caseSensitive;
 
-  let fileSearch = new fileContentSearch(mainPath, searchWord, caseSensetive, false);
+  let fileSearch = new fileContentSearch(mainPath, searchWord, caseSensetive, false, false, req.project.root);
 
   fileSearch.search((error, data) => {
     if (error) {

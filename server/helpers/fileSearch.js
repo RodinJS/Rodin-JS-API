@@ -8,7 +8,7 @@ import utils from '../helpers/common';
 
 class fileContentSearch {
 
-    constructor(rootPath, searchWord, caseSensetive, isRegex, loopLimit) {
+    constructor(rootPath, searchWord, caseSensetive, isRegex, loopLimit, projectName) {
         caseSensetive = caseSensetive && caseSensetive.toLowerCase() === 'true' ? true : false;
         this.searchWord = searchWord;
         this.rootFolder = rootPath;
@@ -16,6 +16,7 @@ class fileContentSearch {
         this.readedLinesLength = 0;
         this.regexParams = caseSensetive ? 'i' : 'g';
         this.isRegex = isRegex || false;
+        this.projectName = projectName;
         this.foundedFiles = {};
     }
 
@@ -81,7 +82,7 @@ class fileContentSearch {
                 let match = re.exec(line);
                 if (match) {
                     let splitFilePath = file.split("/");
-                    let relativePath = splitFilePath.splice(2, splitFilePath.length).join('/');
+                    let relativePath = file.substr(file.indexOf(this.projectName));
 
                     if (!_this.foundedFiles[relativePath])
                         _this.foundedFiles[relativePath] = [];
