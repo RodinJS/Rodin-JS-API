@@ -7,5 +7,3 @@ import {SceneManager} from 'https://cdn.rodin.io/v0.0.1/rodinjs/scene/SceneManag
 import {CubeObject} from 'https://cdn.rodin.io/v0.0.1/rodinjs/sculpt/CubeObject.js';
 
 let scene = SceneManager.get();
-let mouseController = new MouseController();
-SceneManager.addController(mouseController);
