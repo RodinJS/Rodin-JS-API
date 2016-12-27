@@ -327,7 +327,13 @@ function create(req, res, next) {
                   email: savedUser.email,
                   username: savedUser.username,
                   role: savedUser.role,
-                  profile: savedUser.profile
+                  profile: savedUser.profile,
+                  projects:{
+                    unpublished:0,
+                    published:0,
+                    total:0
+                  },
+                  usedStorage:0
                 }
               }
             });
