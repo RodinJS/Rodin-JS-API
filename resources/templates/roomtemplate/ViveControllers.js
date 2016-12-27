@@ -1,8 +1,8 @@
-import * as RODIN from '../../_build/js/rodinjs/RODIN.js';
-import '../../_build/js/vendor/three/examples/js/loaders/OBJLoader.js';
+import * as RODIN from 'https://cdn.rodin.io/v0.0.1/rodinjs/RODIN.js';
+import 'https://cdn.rodin.io/v0.0.1/vendor/three/examples/js/loaders/OBJLoader.js';
 
-import {SceneManager} from '../../_build/js/rodinjs/scene/SceneManager.js';
-import {ViveController} from '../../_build/js/rodinjs/controllers/ViveController.js';
+import {SceneManager} from 'https://cdn.rodin.io/v0.0.1/rodinjs/scene/SceneManager.js';
+import {ViveController} from 'https://cdn.rodin.io/v0.0.1/rodinjs/controllers/ViveController.js';
 
 const scene = SceneManager.get();
 let controls = scene.controls;
