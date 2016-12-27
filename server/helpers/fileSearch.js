@@ -67,7 +67,7 @@ class fileContentSearch {
 
     searchInsideFile(file, cb) {
 
-        let lineNr = 0, _this = this;
+        let lineNr = 0;
         let lineReader = new LineByLineReader(file);
 
         lineReader
@@ -75,26 +75,25 @@ class fileContentSearch {
                 cb(false);
             })
             .on('line',  (line)=> {
-               let searchWord = _this.searchWord.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
-               let re = new RegExp(searchWord, _this.regexParams);
+               let searchWord = this.searchWord.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+               let re = new RegExp(searchWord, this.regexParams);
 
 
                 let match = re.exec(line);
                 if (match) {
-                    let splitFilePath = file.split("/");
                     let relativePath = file.substr(file.indexOf(this.projectName));
 
-                    if (!_this.foundedFiles[relativePath])
-                        _this.foundedFiles[relativePath] = [];
+                    if (!this.foundedFiles[relativePath])
+                      this.foundedFiles[relativePath] = [];
 
-                    _this.foundedFiles[relativePath].push({
+                  this.foundedFiles[relativePath].push({
                         fileName: relativePath,
                         line: lineNr,
                         column: match.index,
                         text: match.input.replace(/^\s\s*/, '').replace(/\s\s*$/, '')
                     });
                 }
-                _this.readedLinesLength++;
+              this.readedLinesLength++;
             })
             .on('end',  () => {
                 cb(true);

@@ -1,10 +1,10 @@
 'use strict';
 
-System.register(['https://cdn.rodinapp.com/rodinjs/RODIN.js',
-  'https://cdn.rodinapp.com/three/THREE.GLOBAL.js',
-  'https://cdn.rodinapp.com/rodinjs/Tween.js',
-  'https://cdn.rodinapp.com/nm/VRControls.js',
-  'https://cdn.rodinapp.com/nm/VREffect.js'], function (_export, _context) {
+System.register(['https://cdn.rodin.io/v0.0.1/rodinjs/RODIN.js',
+  'https://cdn.rodin.io/v0.0.1/vendor/three/THREE.GLOBAL.js',
+  'https://cdn.rodin.io/v0.0.1/rodinjs/Tween.js',
+  'https://cdn.rodin.io/v0.0.1/vendor/three/examples/js/controls/VRControls.js',
+  'https://cdn.rodin.io/v0.0.1/vendor/three/examples/js/effects/VREffect.js'], function (_export, _context) {
 
     "use strict";
 

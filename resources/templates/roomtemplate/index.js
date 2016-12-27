@@ -1,22 +1,22 @@
-import {THREE} from 'https://cdn.rodinapp.com/three/THREE.GLOBAL.js';
+import {THREE} from 'https://cdn.rodin.io/v0.0.1/vendor/three/THREE.GLOBAL.js';
 
-import '../../_build/js/vendor/three/examples/js/loaders/OBJLoader.js';
+import 'https://cdn.rodin.io/v0.0.1/vendor/three/examples/js/loaders/OBJLoader.js';
 
-import * as RODIN from 'https://cdn.rodinapp.com/rodinjs/RODIN.js';
-import {SceneManager} from '../../_build/js/rodinjs/scene/SceneManager.js';
+import * as RODIN from 'https://cdn.rodin.io/v0.0.1/rodinjs/RODIN.js';
+import {SceneManager} from 'https://cdn.rodin.io/v0.0.1/rodinjs/scene/SceneManager.js';
 
-import {ModelLoader} from '../../_build/js/rodinjs/sculpt/ModelLoader.js';
-import {Animation} from 'https://cdn.rodinapp.com/rodinjs/animation/Animation.js';
-import {CubeObject} from 'https://cdn.rodinapp.com/rodinjs/sculpt/CubeObject.js';
+import {ModelLoader} from 'https://cdn.rodin.io/v0.0.1/rodinjs/sculpt/ModelLoader.js';
+import {Animation} from 'https://cdn.rodin.io/v0.0.1/rodinjs/animation/Animation.js';
+import {CubeObject} from 'https://cdn.rodin.io/v0.0.1/rodinjs/sculpt/CubeObject.js';
 
-import {MouseController} from '../../_build/js/rodinjs/controllers/MouseController.js';
-import {DragAndDrop} from './DragAndDrop_c.js';
+import {MouseController} from 'https://cdn.rodin.io/v0.0.1/rodinjs/controllers/MouseController.js';
+import {DragAndDrop} from './DragAndDrop.js';
 
-import changeParent  from 'https://cdn.rodinapp.com/rodinjs/utils/ChangeParent.js';
-import {TWEEN} from 'https://cdn.rodinapp.com/rodinjs/Tween.js';
-import {EVENT_NAMES, CONTROLLER_HANDS} from 'https://cdn.rodinapp.com/rodinjs/constants/constants.js';
+import changeParent  from 'https://cdn.rodin.io/v0.0.1/rodinjs/utils/ChangeParent.js';
+import {TWEEN} from 'https://cdn.rodin.io/v0.0.1/rodinjs/Tween.js';
+import {EVENT_NAMES, CONTROLLER_HANDS} from 'https://cdn.rodin.io/v0.0.1/rodinjs/constants/constants.js';
 
-//import './ViveControllers_c.js';
+import './ViveControllers.js';
 
 let scene = SceneManager.get();
 let camera = scene.camera;
@@ -31,12 +31,12 @@ let mouseController = new MouseController();
 SceneManager.addController(mouseController);
 
 mouseController.onControllerUpdate = DragAndDrop.controllerUpdate;
-let skybox = new CubeObject(50, 'models/textures/skybox.jpg');
+let skybox = new CubeObject(50, './models/textures/skybox.jpg');
 
 skybox.on('ready', () => {
-    skybox.object3D.position.y = controls.userHeight;
-    skybox.object3D.rotation.y = Math.PI;
-    scene.add(skybox.object3D);
+  skybox.object3D.position.y = controls.userHeight;
+  skybox.object3D.rotation.y = Math.PI;
+  scene.add(skybox.object3D);
 });
 
 /// Add lights
@@ -87,98 +87,98 @@ scene.add(new THREE.AmbientLight(0xd9d9d9, 0.3));
 // room
 let room = ModelLoader.load('./models/Room.obj');
 room.on('ready', () => {
-    scene.add(room.object3D);
+  scene.add(room.object3D);
 });
 // sofa_01
 let sofa_01 = ModelLoader.load('./models/sofa_01.obj');
 sofa_01.on('ready', () => {
-    scene.add(sofa_01.object3D);
-    createRaycastablesObjects(sofa_01);
+  scene.add(sofa_01.object3D);
+  createRaycastablesObjects(sofa_01);
 });
 
 // sofa_02
 let sofa_02 = ModelLoader.load('./models/sofa_02.obj');
 sofa_02.on('ready', () => {
-    scene.add(sofa_02.object3D);
-    createRaycastablesObjects(sofa_02);
+  scene.add(sofa_02.object3D);
+  createRaycastablesObjects(sofa_02);
 });
 // table
 let table = ModelLoader.load('./models/table.obj');
 table.on('ready', () => {
-    scene.add(table.object3D);
-    createRaycastablesObjects(table);
+  scene.add(table.object3D);
+  createRaycastablesObjects(table);
 });
 // books
 let books = ModelLoader.load('./models/books.obj');
 books.on('ready', () => {
-    scene.add(books.object3D);
-    createRaycastablesObjects(books);
+  scene.add(books.object3D);
+  createRaycastablesObjects(books);
 });
 // vases
 let vases = ModelLoader.load('./models/vases.obj');
 vases.on('ready', () => {
-    scene.add(vases.object3D);
-    createRaycastablesObjects(vases);
+  scene.add(vases.object3D);
+  createRaycastablesObjects(vases);
 });
 // apples
 let apples = ModelLoader.load('./models/apples.obj');
 apples.on('ready', () => {
-    scene.add(apples.object3D);
-    createRaycastablesObjects(apples);
+  scene.add(apples.object3D);
+  createRaycastablesObjects(apples);
 });
 // picture_wall
 let picture_wall = ModelLoader.load('./models/picture_wall.obj');
 picture_wall.on('ready', () => {
-    scene.add(picture_wall.object3D);
-    createRaycastablesObjects(picture_wall);
+  scene.add(picture_wall.object3D);
+  createRaycastablesObjects(picture_wall);
 });
 // picture_table
 let picture_table = ModelLoader.load('./models/picture_table.obj');
 picture_table.on('ready', () => {
-    scene.add(picture_table.object3D);
-    createRaycastablesObjects(picture_table);
+  scene.add(picture_table.object3D);
+  createRaycastablesObjects(picture_table);
 });
 // TV
 let TV = ModelLoader.load('./models/TV.obj');
 TV.on('ready', () => {
-    scene.add(TV.object3D);
-    createRaycastablesObjects(TV);
+  scene.add(TV.object3D);
+  createRaycastablesObjects(TV);
 });
 
 function createRaycastablesObjects(model) {
-    let raycastablesObjectsLenght = model.object3D.children.length;
+  let raycastablesObjectsLenght = model.object3D.children.length;
 
-    for (let i = 0; i < raycastablesObjectsLenght; i++) {
-        let mesh = model.object3D.children[i];
-        if (mesh instanceof THREE.Mesh) {
+  for (let i = 0; i < raycastablesObjectsLenght; i++) {
+    let mesh = model.object3D.children[i];
+    if (mesh instanceof THREE.Mesh) {
 
-            let fn = function(){
-                let boundingSpherePos = new THREE.Vector3(
-                    mesh.geometry.boundingSphere.center.x,
-                    mesh.geometry.boundingSphere.center.y,
-                    mesh.geometry.boundingSphere.center.z
-                );
-                mesh.position.set(
-                    boundingSpherePos.x,
-                    boundingSpherePos.y,
-                    boundingSpherePos.z
-                );
-                mesh.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(
-                    -boundingSpherePos.x,
-                    -boundingSpherePos.y,
-                    -boundingSpherePos.z
-                ));
-                scene.postRenderFunctions.splice(scene.postRenderFunctions.indexOf(fn),1);
-            };
-            scene.postRender( fn );
+      let fn = function(){
+        let boundingSpherePos = new THREE.Vector3(
+          mesh.geometry.boundingSphere.center.x,
+          mesh.geometry.boundingSphere.center.y,
+          mesh.geometry.boundingSphere.center.z
+        );
+        mesh.position.set(
+          boundingSpherePos.x,
+          boundingSpherePos.y,
+          boundingSpherePos.z
+        );
+        mesh.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(
+          -boundingSpherePos.x,
+          -boundingSpherePos.y,
+          -boundingSpherePos.z
+        ));
+        scene.postRenderFunctions.splice(scene.postRenderFunctions.indexOf(fn),1);
+      };
+      scene.postRender( fn );
 
-            let raycastableObj = new RODIN.THREEObject(mesh);
-            raycastableObj.object3D.initialParent = raycastableObj.object3D.parent;
-            RODIN.Raycastables.push(raycastableObj.object3D);
-            raycastableObj.on(EVENT_NAMES.CONTROLLER_KEY_DOWN, DragAndDrop.controllerKeyDown);
-            raycastableObj.on(EVENT_NAMES.CONTROLLER_VALUE_CHANGE, DragAndDrop.controllerValueChange);
-        }
+      let raycastableObj = new RODIN.THREEObject(mesh);
+      raycastableObj.object3D.initialParent = raycastableObj.object3D.parent;
+      RODIN.Raycastables.push(raycastableObj.object3D);
+      raycastableObj.on(EVENT_NAMES.CONTROLLER_KEY_DOWN, DragAndDrop.controllerKeyDown);
+      raycastableObj.on(EVENT_NAMES.CONTROLLER_VALUE_CHANGE, DragAndDrop.controllerValueChange);
     }
+  }
 }
 
 
