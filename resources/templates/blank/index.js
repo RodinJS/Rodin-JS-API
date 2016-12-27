@@ -1,96 +1,11 @@
-'use strict';
+import {THREE} from 'https://cdn.rodin.io/v0.0.1/vendor/three/THREE.GLOBAL.js';
 
-System.register(['https://cdn.rodinapp.com/rodinjs/RODIN.js', 'https://cdn.rodinapp.com/nm/VRControls.js', 'https://cdn.rodinapp.com/nm/VREffect.js'], function (_export, _context) {
-    "use strict";
+import * as RODIN from 'https://cdn.rodin.io/v0.0.1/rodinjs/RODIN.js';
 
-    var RODIN, renderer, scene, camera, controls, effect, params, manager, lastRender, display;
+import {SceneManager} from 'https://cdn.rodin.io/v0.0.1/rodinjs/scene/SceneManager.js';
 
-    function animate(timestamp) {
-        // delta is used to tell your updating functions
-        // how much time has elapsed since last update
-        // it is recommended to use delta in animation logic
-        // to maintain stable speed across all fps situations
-        var delta = Math.min(timestamp - lastRender, 500);
-        lastRender = timestamp;
+import {CubeObject} from 'https://cdn.rodin.io/v0.0.1/rodinjs/sculpt/CubeObject.js';
 
-        // Update VR headset position and apply to camera.
-        controls.update();
-
-        // Render the scene through the manager.
-        manager.render(scene, camera, timestamp);
-
-        requestAnimationFrame(animate);
-    }
-
-    function onResize(e) {
-        effect.setSize(window.innerWidth, window.innerHeight);
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-    }
-
-    // Get the HMD, and if we're dealing with something that specifies
-    // stageParameters, rearrange the scene.
-    function setupStage() {
-        navigator.getVRDisplays().then(function (displays) {
-            if (displays.length > 0) {
-                display = displays[0];
-                if (display.stageParameters) {
-                    setStageDimensions(display.stageParameters);
-                }
-            }
-        });
-    }
-
-    function setStageDimensions(stage) {
-        if (stage.sizeX === 0 || stage.sizeZ === 0) return;
-        // Make the environment fit the stage.
-    }
-    return {
-        setters: [function (_buildJsRodinjsRODINJs) {
-            RODIN = _buildJsRodinjsRODINJs;
-        }, function (_node_modulesThreeExamplesJsControlsVRControlsJs) {}, function (_node_modulesThreeExamplesJsEffectsVREffectJs) {}],
-        execute: function () {
-            renderer = new THREE.WebGLRenderer({ antialias: false });
-
-            renderer.setPixelRatio(window.devicePixelRatio);
-
-            // Append the canvas element created by the renderer to document body element.
-            document.body.appendChild(renderer.domElement);
-
-            // Create a three.js scene.
-            scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
-            controls = new THREE.VRControls(camera);
-
-            controls.standing = true;
-
-            // Apply VR stereo rendering to renderer.
-            effect = new THREE.VREffect(renderer);
-
-            effect.setSize(window.innerWidth, window.innerHeight);
-
-            // Create a VR manager helper to enter and exit VR mode.
-            params = {
-                hideButton: false, // Default: false.
-                isUndistorted: false // Default: false.
-            };
-            manager = new WebVRManager(renderer, effect, params);
-
-
-            /*
-            
-            Your main code goes here
-            
-            */
-
-            // Kick off animation loop
-            requestAnimationFrame(animate);
-
-            window.addEventListener('resize', onResize, true);
-            window.addEventListener('vrdisplaypresentchange', onResize, true);
-
-            // Request animation frame loop function
-            lastRender = 0;
-        }
-    };
-});
+let scene = SceneManager.get();
+let mouseController = new MouseController();
+SceneManager.addController(mouseController);
