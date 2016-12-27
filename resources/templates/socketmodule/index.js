@@ -17,11 +17,11 @@ SceneManager.addController(mouseController);
 
 let socket = new Socket();
 
-let skybox = new CubeObject(15, 'img/boxW.jpg');
-skybox.on('ready', (evt) => {
-    scene.add(evt.target.object3D);
-    evt.target.object3D.position.y = scene.controls.userHeight;
-});
+// let skybox = new CubeObject(15, 'img/boxW.jpg');
+// skybox.on('ready', (evt) => {
+//     scene.add(evt.target.object3D);
+//     evt.target.object3D.position.y = scene.controls.userHeight;
+// });
 
 let users = [];
 
