@@ -14,6 +14,8 @@ import utils from '../helpers/common';
 import fsExtra from 'fs-extra';
 import Promise from 'bluebird';
 import Minizip from 'node-minizip';
+import extract from 'extract-zip'
+
 
 import fileContentSearch from '../helpers/fileSearch';
 import config from '../../config/env';
@@ -484,8 +486,11 @@ function startUpload(folderPath, req, action, res, next) {
   if (action === 'directory') {
     const zipFile = folderPath + '/' + req.files[0].originalname;
 
+
     Promise.all(promises).then(() => {
-      Minizip.unzip(zipFile, folderPath, (err) => {
+
+
+      extract(zipFile, {dir:folderPath}, (err) => {
         if (err) {
           const err = new APIError('Folder Upload error', httpStatus.BAD_REQUEST, true);
           return next(err);
