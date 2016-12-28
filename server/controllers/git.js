@@ -105,7 +105,7 @@ function create(req, res, next) {
             const err = {
               status:400,
               code:2,
-              message:'Something went wrong'
+              message:'Can\'t create git repo'
             };
             return res.status(400).send({
               success: false,
