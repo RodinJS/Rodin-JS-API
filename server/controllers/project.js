@@ -567,10 +567,12 @@ function rePublishProject(req, res, next) {
  */
 function unPublishProject(req, res, next) {
 
-  let publishFolder = help.generateFilePath(req, '', 'publish');
+  const publishFolder = help.generateFilePath(req, '', 'publish');
+  const historyFolder = help.generateFilePath(req, '', 'history');
 
   if (fs.existsSync(publishFolder)) {
     fsExtra.removeSync(publishFolder);
+    fsExtra.emptyDirSync(historyFolder);
     Project.findOneAndUpdate({_id: req.params.id, owner: req.user.username}, {
       $unset: {
         publishDate: 1,
