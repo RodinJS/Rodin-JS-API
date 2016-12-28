@@ -102,9 +102,14 @@ function create(req, res, next) {
 
         let gago = exec(`cd ${projectRoot}`, (error, stdout, stderr) => {
           if (error) {
+            const err = {
+              status:400,
+              code:2,
+              message:'Something went wrong'
+            };
             return res.status(400).send({
               success: false,
-              error: error
+              error: err
             });
           }
           console.log('stdout: ' + stdout);
