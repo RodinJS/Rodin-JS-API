@@ -17,7 +17,7 @@ const build = (req, res, next) => {
   project.appId = req.project._id;
   project.userId = req.user.username;
   project.version = req.body.version;
-  project.url = `https://${conf.clientURL}/${req.user.username}/${req.project.name}/`;
+  project.url = `https://${config.clientURL}/${req.user.username}/${req.project.name}/`;
 
   request.post({
     url: config.vive.urls.build,
