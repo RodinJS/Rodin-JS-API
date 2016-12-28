@@ -278,7 +278,9 @@ function update(req, res, next) {
  * @returns {Project[]}
  */
 function list(req, res, next) {
-  const {limit = 50, skip = 0} = req.query;
+  const limit = parseInt(req.query.limit) || 50;
+  const skip = parseInt(req.query.skip) || 0;
+
   Project.list({limit, skip}, req.user.username, req.query._queryString).then((projects) => {
     res.status(200).json({
       success: true,
