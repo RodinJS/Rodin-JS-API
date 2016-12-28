@@ -82,7 +82,7 @@ function remove(req, res, next){
   }
   const domain = help.cleanUrl(req.body.domain  || req.query.domain);
   const nginx_conf_file = `${config.nginx_dest_path}${domain}`;
-  if(fse.ensureFileSync(nginx_conf_file)){
+  if(fs.statSync(nginx_conf_file)){
     fse.removeSync(nginx_conf_file);
     return next();
   }
