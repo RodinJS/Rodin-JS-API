@@ -149,8 +149,10 @@ ProjectSchema.statics = {
    * @param {String} owner - The owner username of project.
    * @returns {Promise<User, APIError>}
    */
-  getByName(name, owner, displayName) {
+  getByName(name, owner) {
     let specialName = name.replace(/ /g, '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+
+    console.log(specialName, name, owner);
 
     return this.findOne({name:specialName, owner: owner})  //new RegExp('^' + id + '$', "i")
       .execAsync().then((project) => {

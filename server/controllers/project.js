@@ -90,8 +90,9 @@ function create(req, res, next) {
   }
 
 
-  Project.getByName(req.body.name, req.user.username, req.body.displayName)
+  Project.getByName(req.body.name, req.user.username)
     .then(projectExist => {
+      console.log('exist', projectExist);
       if (projectExist) {
         const message = 'Project exist';
         const errorCode = httpStatus.PROJECT_EXIST;
@@ -111,6 +112,7 @@ function create(req, res, next) {
 
       project.saveAsync()
         .catch((e) => {
+          console.log(e);
           const message = e.code === 11000 ? 'Project exist' : httpStatus[400];
           const errorCode = e.code === 11000 ? httpStatus.PROJECT_EXIST : httpStatus.BAD_REQUEST;
           const err = new APIError(message, errorCode, true);

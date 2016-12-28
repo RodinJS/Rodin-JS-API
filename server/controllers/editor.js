@@ -540,6 +540,7 @@ function deleteFile(req, res, next) {
     return next(err);
   }
 
+
   if (!fs.lstatSync(filePath).isDirectory()) { //check if file
     if (fs.existsSync(filePath)) {
       fs.unlink(filePath, (err) => {

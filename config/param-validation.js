@@ -102,8 +102,9 @@ export default {
       }),
       description: Joi.string().max(256).required(),
       tags: Joi.array().optional(),
-      url: Joi.string().optional(),
-      thumbnail: Joi.string().optional(),
+      domain: Joi.string().optional().allow(''),
+      url: Joi.string().optional().allow(''),
+      thumbnail: Joi.string().optional().allow(''),
       public: Joi.boolean().optional()
     }
     // params: {
