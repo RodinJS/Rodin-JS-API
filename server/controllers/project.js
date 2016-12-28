@@ -308,6 +308,8 @@ function remove(req, res, next) {
 
               const publicDir = config.stuff_path + 'publish/' + req.user.username + '/' + req.project.root;
 
+              const historyDir = config.stuff_path + 'history/' + req.user.username + '/' + req.project.root;
+
               if (fs.existsSync(rootDir)) {
                 utils.deleteFolderRecursive(rootDir);
               }
@@ -318,6 +320,10 @@ function remove(req, res, next) {
 
               if (fs.existsSync(publicDir)) {
                 utils.deleteFolderRecursive(publicDir);
+              }
+
+              if (fs.existsSync(historyDir)) {
+                utils.deleteFolderRecursive(historyDir);
               }
 
 

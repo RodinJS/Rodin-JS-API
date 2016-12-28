@@ -57,7 +57,7 @@ router.route('/')
 	*				"status": 328,
 	*				"timestamp": 1482410651163
 	*			}
-	*		}	
+	*		}
 	*
 	* @apiError NoToken Token does not provided!
 	*
@@ -73,6 +73,7 @@ router.route('/')
 	*		}
 	*
 	*/
-	.post(check.ifTokenValid, domainsCtrl.add);
+	.post(check.ifTokenValid, domainsCtrl.add, domainsCtrl.finalize)
+	.delete(check.ifTokenValid, domainsCtrl.remove, domainsCtrl.finalize);
 
 export default router;

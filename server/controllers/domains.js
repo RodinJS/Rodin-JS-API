@@ -6,6 +6,7 @@ import APIError from '../helpers/APIError';
 import httpStatus from '../helpers/httpStatus';
 import help from '../helpers/editor';
 import Project from '../models/project';
+import _ from 'lodash';
 
 function add(req, res, next) {
 	if(req.body.id) {
@@ -50,28 +51,7 @@ function add(req, res, next) {
 											const e = new APIError('Can\'t write to file', httpStatus.COULD_NOT_WRITE_TO_FILE, true);
 											return next(e);
 										}
-										exec(`bash ${config.nginx_template_path}nginx.reload.bash`, (error, stdout, stderr) => {
-											if (error) {
-											  const err = {
-													status:400,
-													code:1,
-													message:'Something went wrong'
-												};
-												return res.status(400).send({
-													success: false,
-													error: err
-												});
-											}
-											console.log('stdout: ' + stdout);
-											console.log('stderr: ' + stderr);
-
-											return res.status(200).json({
-												success: true,
-												data: {
-													message: `${domain} domain name added to project successfuly!`
-												}
-											});
-										});
+										return next();
 									});
 								});
 							});
@@ -93,4 +73,51 @@ function add(req, res, next) {
 	}
 }
 
-export default { add };
+function remove(req, res, next){
+
+
+  if(_.isUndefined(req.body.domain || req.query.domain)){
+    const err = new APIError(`Provide domain`, httpStatus.BAD_REQUEST, true);
+    return next(err);
+  }
+  const domain = help.cleanUrl(req.body.domain  || req.query.domain);
+  const nginx_conf_file = `${config.nginx_dest_path}${domain}`;
+  if(fse.ensureFileSync(nginx_conf_file)){
+    fse.removeSync(nginx_conf_file);
+    return next();
+  }
+  const err = new APIError(`Cant\'t remove`, httpStatus.BAD_REQUEST, true);
+  return next(err);
+
+}
+
+function finalize(req, res, next){
+
+  const domain = help.cleanUrl(req.body.domain || req.query.domain);
+
+  exec(`bash ${config.nginx_template_path}nginx.reload.bash`, (error, stdout, stderr) => {
+    if (error) {
+      const err = {
+        status:400,
+        code:1,
+        message:'Something went wrong'
+      };
+      return res.status(400).send({
+        success: false,
+        error: err
+      });
+    }
+    console.log('stdout: ' + stdout);
+    console.log('stderr: ' + stderr);
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        message: `${domain} ${req.method == 'DELETE' ? 'domain name unlinked successfuly!' : 'domain name added to project successfuly!'}`
+      }
+    });
+  });
+
+}
+
+export default { add, finalize, remove};
