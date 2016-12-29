@@ -629,7 +629,7 @@ function getPublishedProjects(req, res, next) {
     .then(publishedProject => {
       return res.status(200).json({
         success: true, data: _.map(publishedProject, (project) => {
-          return _.pick(project, ['name', 'owner', 'id', 'thumbnail', 'description', 'root'])
+          return _.pick(project, ['name', 'owner', 'id', 'thumbnail', 'description', 'root', 'displayName'])
         })
       });
     })
@@ -658,7 +658,7 @@ function getPublishedProject(req, res, next) {
     .then(publishedProject => {
       return res.status(200).json({
         success: true,
-        data: _.pick(publishedProject, ['name', 'owner', 'id', 'thumbnail', 'description', 'root'])
+        data: _.pick(publishedProject, ['name', 'owner', 'id', 'thumbnail', 'description', 'root', 'displayName'])
       });
     })
     .catch((error) => {
