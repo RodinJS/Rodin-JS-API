@@ -22,29 +22,29 @@
 </head>
 
 <body>
-<script type="text/javascript" src="https://cdn.rodin.io/v0.0.1/systemjs/system.js"></script>
+<script type="text/javascript" src="https://cdn.rodin.io/v0.0.2/systemjs/system.js"></script>
 
 <!--
     A polyfill for Promises. Needed for IE and Edge.
     -->
-<script src="https://cdn.rodin.io/v0.0.1/vendor/es6-promise/es6-promise.js"></script>
+<script src="https://cdn.rodin.io/v0.0.2/vendor/es6-promise/es6-promise.js"></script>
 
 <!--
     A polyfill for WebVR using the Device{Motion,Orientation}Event API.
     -->
-<script src="https://cdn.rodin.io/v0.0.1/vendor/webvr-polyfill/webvr-polyfill.js"></script>
+<script src="https://cdn.rodin.io/v0.0.2/vendor/webvr-polyfill/webvr-polyfill.js"></script>
 
 <!--
     Helps enter and exit VR mode, provides best practices while in VR.
     -->
-<script src="https://cdn.rodin.io/v0.0.1/vendor/webvr-boilerplate/webvr-manager.js"></script>
+<script src="https://cdn.rodin.io/v0.0.2/vendor/webvr-boilerplate/webvr-manager.js"></script>
 
 <script>
-  System.import('https://cdn.rodin.io/v0.0.1/vendor/three/THREE.GLOBAL.js');
+  System.import('https://cdn.rodin.io/v0.0.2/vendor/three/THREE.GLOBAL.js');
 
   System.config({
     map: {
-      glsl: 'https://cdn.rodin.io/v0.0.1/systemjs/glsl.js'  // path to glsl.js file
+      glsl: 'https://cdn.rodin.io/v0.0.2/systemjs/glsl.js'  // path to glsl.js file
     },
     meta: {
       'https://cdn.rodin.io/*.glsl': {   // for all glsl files on your project
@@ -52,7 +52,7 @@
       }
     },
     packages: {
-      "https://cdn.rodin.io/": {  // path to your project root
+      "https://cdn.rodin.io": {  // path to your project root
         "defaultJSExtensions": true
       }
     }
