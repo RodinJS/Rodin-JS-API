@@ -164,7 +164,8 @@ function project(req, res, next) {
 	Project.getOne(projectID, req.user.username).then((project) => {
 		req.project = {
 			name: project.name,
-			root: project.root
+			root: project.root,
+      displayName:project.displayName
 		};
 
 		return next();
