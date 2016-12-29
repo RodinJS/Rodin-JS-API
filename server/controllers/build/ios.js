@@ -73,4 +73,47 @@ const build = (req, res, next) => {
   });
 };
 
-export default {build}
+function remove(req, res, next){
+
+  const project = JSON.parse(req.body.project);
+  project.appId = req.project._id;
+  project.userId = req.user.username;
+  project.version = req.body.version;
+  project.url = `${config.clientURL}/${req.user.username}/${req.project.name}/`;
+
+  request.delete({
+    url: config.ios.urls.build,
+    headers: {
+      'app-id': config.ios.appId,
+      'app-secret': config.ios.appSecret
+    },
+    formData: {
+      'project': JSON.stringify(project),
+    }
+  }, (err, httpResponse, body) => {
+
+    console.log(err, httpResponse);
+
+    if (err || httpResponse.statusCode !== 200) {
+      return next(new APIError("something went wrong, try again later", httpStatus.BAD_REQUEST, true));
+    }
+
+    req.project.build.ios.requested = false;
+    req.project.build.ios.built = false;
+    req.project.build.ios.version = req.body.version;
+    req.project.build.ios.buildId = undefined;
+    req.project.saveAsync().then(
+      project => {
+        return res.status(200).json({
+          requested: true
+        })
+      })
+      .catch(
+        e => {
+          return next(new APIError("something went wrong, try again later", httpStatus.INTERNAL_SERVER_ERROR, true));
+        }
+      );
+  });
+}
+
+export default {build, remove}

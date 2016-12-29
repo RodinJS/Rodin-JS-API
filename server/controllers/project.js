@@ -28,9 +28,11 @@ const getStatus = (project, device, cb) => {
       }
     },
     (err, httpResponse, body) => {
-      // console.log("1", err);
-      // console.log("2", httpResponse);
-      console.log("3", body);
+
+       console.log("1", err);
+       console.log("2", httpResponse);
+       console.log("3", body);
+
       if (err || httpResponse.statusCode !== 200) {
         project.build[device].built = false;
         return project.save(err => cb(err, project));
@@ -92,7 +94,7 @@ function create(req, res, next) {
 
   Project.getByName(req.body.name, req.user.username)
     .then(projectExist => {
-      console.log('exist', projectExist);
+      //console.log('exist', projectExist);
       if (projectExist) {
         const message = 'Project exist';
         const errorCode = httpStatus.PROJECT_EXIST;
@@ -112,7 +114,7 @@ function create(req, res, next) {
 
       project.saveAsync()
         .catch((e) => {
-          console.log(e);
+          //console.log(e);
           const message = e.code === 11000 ? 'Project exist' : httpStatus[400];
           const errorCode = e.code === 11000 ? httpStatus.PROJECT_EXIST : httpStatus.BAD_REQUEST;
           const err = new APIError(message, errorCode, true);
