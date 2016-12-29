@@ -29,13 +29,20 @@ const getStatus = (project, device, cb) => {
     },
     (err, httpResponse, body) => {
 
-       console.log("1", err);
-       console.log("2", httpResponse);
-       console.log("3", body);
+      //console.log("1", err);
+      //console.log("2", httpResponse.statusCode);
+      //console.log("3", body);
 
       if (err || httpResponse.statusCode !== 200) {
         project.build[device].built = false;
-        return project.save(err => cb(err, project));
+
+        //Send error to user if build has failed
+        let error = false;
+        if (httpResponse.statusCode === 311){
+          error = true;
+        }
+
+        return project.save(err => cb(error, project));
       }
 
       project.build[device].built = JSON.parse(body).data.buildStatus;
@@ -55,6 +62,10 @@ function get(req, res, next) {
 
         if (req.query.device) {
           return getStatus(project, req.query.device, (err, project) => {
+            if(err){
+              const err = new APIError('Something went wrong', httpStatus.BAD_REQUEST, true);
+              return next(err);
+            }
             res.status(200).json({
               success: true,
               data: project
@@ -86,7 +97,7 @@ function get(req, res, next) {
  * @returns {Project}
  */
 function create(req, res, next) {
-  if(req.projectsCount.total >= req.user.allowProjectsCount){
+  if (req.projectsCount.total >= req.user.allowProjectsCount) {
     const err = new APIError(`Maximum projects count exceeded, allowend project count ${req.user.allowProjectsCount}`, 400, true);
     return next(err);
   }
@@ -107,7 +118,7 @@ function create(req, res, next) {
         tags: req.body.tags,
         root: req.body.name,
         owner: req.user.username,
-        displayName:req.body.displayName,
+        displayName: req.body.displayName,
         description: req.body.description,
         isNew: true
       });
@@ -415,8 +426,8 @@ function makePublic(req, res, next) {
         return next(err);
       }
     }).catch(e => {
-      const err = new APIError('Can\'t update info++', httpStatus.BAD_REQUEST, true);
-      return next(e);
+    const err = new APIError('Can\'t update info++', httpStatus.BAD_REQUEST, true);
+    return next(e);
   });
 }
 
@@ -511,8 +522,8 @@ function getPublishedHistory(req, res, next) {
   res.status(200).json({success: true, data: backUps});
 }
 
-function rollBack(req, res, next){
-  if(_.isUndefined(req.body.date)){
+function rollBack(req, res, next) {
+  if (_.isUndefined(req.body.date)) {
     const err = new APIError('Select version date', httpStatus.BAD_REQUEST, true);
     return next(err);
   }
@@ -526,7 +537,9 @@ function rollBack(req, res, next){
     return next(err);
   }
 
-  fsExtra.removeSync(publishFolder);
+  if (fs.existsSync(publishFolder)) {
+    fsExtra.removeSync(publishFolder);
+  }
 
   fsExtra.copy(projectBackupFolder, publishFolder, (err) => {
     if (err) {
@@ -546,11 +559,12 @@ function rollBack(req, res, next){
  * @param next
  */
 function rePublishProject(req, res, next) {
+  const projectFolder = help.generateFilePath(req, '');
   const publishFolder = help.generateFilePath(req, '', 'publish');
   const historyFolder = help.generateFilePath(req, '', 'history');
   const projectBackupFolder = `${historyFolder}/${Date.now()}`;
 
-  let backUps = fs.readdirSync(historyFolder).filter( (file) => {
+  let backUps = fs.readdirSync(historyFolder).filter((file) => {
     return fs.statSync(path.join(historyFolder, file)).isDirectory();
   });
 
@@ -559,12 +573,25 @@ function rePublishProject(req, res, next) {
     utils.deleteFolderRecursive(`${historyFolder}/${oldestBackup}`);
   }
 
-  fsExtra.copy(publishFolder, projectBackupFolder,  (err) => {
+  fsExtra.copy(publishFolder, projectBackupFolder, (err) => {
     if (err) {
       const err = new APIError('Publishing error', httpStatus.BAD_REQUEST, true);
       return next(err);
     }
-    res.status(200).json({success: true, data: {}});
+
+    if (fs.existsSync(publishFolder)) {
+      fsExtra.removeSync(publishFolder);
+    }
+
+    fsExtra.copy(projectFolder, publishFolder, function (err) {
+      if (err) {
+        const err = new APIError('Publishing error', httpStatus.BAD_REQUEST, true);
+        return next(err);
+      }
+      res.status(200).json({success: true, data: {}});
+    });
+
+
   });
 
 
@@ -590,7 +617,7 @@ function unPublishProject(req, res, next) {
         publishDate: 1,
         publishedPublic: 1
       }
-    }, {new:true})
+    }, {new: true})
       .then(project => {
         if (project) {
           return res.status(200).json({success: true, data: project})
@@ -698,7 +725,7 @@ function getProjectsCount(req, res, next) {
           req.projectsCount.published = project.count;
 
       });
-      req.projectsCount.total =  ((req.projectsCount.unpublished || 0)+ (req.projectsCount.published || 0));
+      req.projectsCount.total = ((req.projectsCount.unpublished || 0) + (req.projectsCount.published || 0));
       next();
     })
     .catch((e) => {
