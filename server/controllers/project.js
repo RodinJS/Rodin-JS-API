@@ -461,13 +461,13 @@ function publishProject(req, res, next) {
               from: 'team@rodin.space',
               fromName: 'Rodin team',
               templateName: 'rodin_publish',
-              subject: `${req.project.name} published`,
+              subject: `${req.project.displayName} published`,
               handleBars: [{
                 name: 'userName',
                 content: req.user.username
               }, {
                 name: 'publishUrl',
-                content: `${config.clientURL}/publish/${req.user.username}/${req.project.name}`
+                content: `${config.clientURL}/${req.user.username}/${req.project.name}`
               }]
             };
             mandrill.sendMail(req, res, (response) => {

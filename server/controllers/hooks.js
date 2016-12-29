@@ -63,7 +63,7 @@ function build(req, res, next) {
           from: 'team@rodin.space',
           fromName: 'Rodin team',
           templateName: 'rodin_build',
-          subject: `${project.name} ${req.params.device} build complete`,
+          subject: `${project.displayName} ${req.params.device} build complete`,
           handleBars: [{
             name: 'dateTime',
             content: Utils.convertDate()
