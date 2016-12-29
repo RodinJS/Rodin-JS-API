@@ -92,7 +92,6 @@ function remove(req, res, next){
     }
   }, (err, httpResponse, body) => {
 
-    console.log(err, httpResponse);
 
     if (err || httpResponse.statusCode !== 200) {
       return next(new APIError("something went wrong, try again later", httpStatus.BAD_REQUEST, true));
