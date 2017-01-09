@@ -366,9 +366,9 @@ function update(req, res, next) {
 function unsyncSocial(req, res, next){
   let field = {};
   switch(req.params.socialName){
-    case 'facebook' : field.$unset = {facebookId:1}; break;
+    case 'facebook' : field.$unset = {facebook:1}; break;
     case 'github' : field.$unset = {github:1}; break;
-    case 'google' : field.$unset = {googleId:1}; break;
+    case 'google' : field.$unset = {google:1}; break;
     case 'steam' : field.$unset = {steamId:1}; break;
     case 'oculus' : field.$unset = {oculusId:1}; break;
   }

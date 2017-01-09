@@ -121,14 +121,17 @@ const UserSchema = new mongoose.Schema({
 	},
 	github: {
 		id: 	{ type: String },
-		token: 	{ type: String }
+		token: 	{ type: String },
+    email:{ type:String }
 	},
-	facebookId: {
-		type: String
-	},
-	googleId: {
-		type: String
-	},
+  facebook:{
+	  id:{type:String},
+    email:{type:String},
+  },
+  google:{
+    id:{type:String},
+    email:{type:String},
+  },
 	steamId:{
 		type:String
 	},

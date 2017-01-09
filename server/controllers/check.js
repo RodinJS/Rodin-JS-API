@@ -129,9 +129,9 @@ function ifTokenValid(req, res, next) {
 							usernameConfirmed:user.usernameConfirmed,
 							stripe:user.stripe,
 							creationDate:user.createdAt,
-              github:!!(user.github || (user.github && Object.keys(user.github).length > 0)),
-              facebook:!!user.facebookId,
-              google:!!user.googleId,
+              github:user.github ? user.github.email : false,
+              facebook:user.facebook ? user.facebook.email : false,
+              google:user.google ? user.google.email : false,
               steam:!!user.steamId,
               oculus:!!user.oculusId,
 						};

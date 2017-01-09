@@ -70,7 +70,12 @@ function finalizeUser(req, res, next) {
     role: user.role,
     profile: user.profile,
     usernameConfirmed: req.user.usernameConfirmed,
-    creationDate:user.createdAt
+    creationDate:user.createdAt,
+    github:user.github ? user.github.email : false,
+    facebook:user.facebook ? user.facebook.email : false,
+    google:user.google ? user.google.email : false,
+    steam:user.steamId,
+    oculus:user.oculusId,
   };
 
 
@@ -101,11 +106,11 @@ function socialAuth(req, res, next) {
   let queryMethod = {};
 
   if (req.params.socialName === 'facebook') {
-    queryMethod = {$or: [{facebookId: req.body.id}, {email: req.body.email}]};
+    queryMethod = {$or: [{'facebook.id': req.body.id}, {email: req.body.email}]};
   }
 
   else if (req.params.socialName === 'google') {
-    queryMethod = {$or: [{googleId: req.body.id}, {email: req.body.email}]};
+    queryMethod = {$or: [{'google.id': req.body.id}, {email: req.body.email}]};
   }
 
   else if (req.params.socialName === 'steam') {
@@ -153,11 +158,17 @@ function socialAuth(req, res, next) {
         };
 
         if (req.params.socialName == 'facebook') {
-          userObject.facebookId = req.body.id;
+          userObject.facebook = {
+            id:req.body.id,
+            email:req.body.socialEmail
+          };
         }
 
         else if (req.params.socialName === 'google') {
-          userObject.googleId = req.body.id;
+          userObject.google = {
+            id:req.body.id,
+            email:req.body.socialEmail
+          }
         }
 
         else if (req.params.socialName === 'steam') {
@@ -171,7 +182,8 @@ function socialAuth(req, res, next) {
         else if (req.params.socialName === 'github') {
           userObject.github = {
             id: req.body.id,
-            token: req.gitAccessToken
+            token: req.gitAccessToken,
+            email:req.body.socialEmail
           }
         }
 
@@ -249,11 +261,11 @@ function socialAuth(req, res, next) {
         let userUpdate = false;
 
         if (req.params.socialName === 'facebook' && !user.facebookId) {
-          userUpdate = {$set: {facebookId: req.body.id}}
+          userUpdate = {$set: {'facebook.id': req.body.id, 'facebook.email':req.body.socialEmail}}
         }
 
         else if (req.params.socialName === 'google' && !user.googleId) {
-          userUpdate = {$set: {googleId: req.body.id}}
+          userUpdate = {$set: {'google.id': req.body.id, 'google.email':req.body.socialEmail}}
         }
 
         else if (req.params.socialName === 'steam' && !user.steamId) {
@@ -266,7 +278,7 @@ function socialAuth(req, res, next) {
 
         else if (req.params.socialName === 'github') {
           if(req.body.sync){
-            userUpdate = {$set: {'github.token': req.body.token, 'github.id':req.body.id}}
+            userUpdate = {$set: {'github.token': req.body.token, 'github.id':req.body.id, 'github.email':req.body.socialEmail}}
           }
           else{
             userUpdate = {$set: {'github.token': req.gitAccessToken}}
@@ -275,11 +287,22 @@ function socialAuth(req, res, next) {
 
         if (userUpdate) {
 
-          return User.updateAsync({username: user.username}, userUpdate)
-            .then(() => {
+          return User.findOneAndUpdate({username: user.username}, userUpdate, {new:true})
+            .then(updatedUser => {
 
               if(req.body.sync){
-                return res.status(200).json({success:true, data:user});
+                updatedUser =  updatedUser.toObject();
+                updatedUser = _.omit(updatedUser, ['password', 'stripe']);
+
+
+                updatedUser.github = updatedUser.github ? updatedUser.github.email : false;
+                updatedUser.facebook = updatedUser.facebook ? updatedUser.facebook.email : false;
+                updatedUser.google = updatedUser.google ? updatedUser.google.email : false;
+                updatedUser.steam = !!updatedUser.steamId;
+                updatedUser.oculus =!!updatedUser.oculusId;
+
+
+                return res.status(200).json({success:true, data:updatedUser});
               }
 
               req.user = user;
@@ -295,7 +318,7 @@ function socialAuth(req, res, next) {
               return next();
 
             })
-            .error((e) => {
+            .catch((e) => {
               const err = new APIError('Something wrong!', httpStatus.BAD_REQUEST, true);
               return next(err);
             });

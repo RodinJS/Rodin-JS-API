@@ -70,6 +70,7 @@ function getUser(req, res, next) {
       let primaryEmail = _.find(gitUserEmail, (email) => {
         return email.primary === true;
       }).email;
+      req.body.socialEmail = primaryEmail;
       req.body.email = primaryEmail;
       return next();
     })
@@ -84,7 +85,7 @@ function successAuth(req, res, next){
 }
 
 function successSync(req, res, next){
-  res.redirect(`${config.clientURL}/profile?token=${req.gitAccessToken}&id=${req.body.id}`);
+  res.redirect(`${config.clientURL}/profile?token=${req.gitAccessToken}&id=${req.body.id}&socialEmail=${req.body.socialEmail}`);
   //res.redirect(`http://localhost:8000/#/profile?token=${req.gitAccessToken}&id=${req.body.id}`);
 }
 
@@ -193,7 +194,6 @@ function branch(req, res, next) {
     return next(err);
   }
 }
-
 
 function theirs(req, res, next) {
   if(req.body.root && req.body.id) {

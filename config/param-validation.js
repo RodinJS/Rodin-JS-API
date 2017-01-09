@@ -60,7 +60,7 @@ export default {
   // POST /api/project
   createProject: {
     body: {
-      displayName: Joi.string().required().label('Project name'),
+      displayName: Joi.string().max(256).required().label('Project name'),
       name:Joi.string().regex(/^[A-Za-z0-9?,_-]+$/).required().label('Project URL').options({
         language: {
           any: {
@@ -86,7 +86,7 @@ export default {
       allowUnknownBody: false
     },
     body: {
-      displayName: Joi.string().required().label('Project name'),
+      displayName: Joi.string().max(256).required().label('Project name'),
       name:Joi.string().regex(/^[A-Za-z0-9?,_-]+$/).required().label('register_tel').label('Project URL').options({
         language: {
           any: {

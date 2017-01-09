@@ -30,7 +30,7 @@ const getStatus = (project, device, cb) => {
     (err, httpResponse, body) => {
 
       //console.log("1", err);
-      //console.log("2", httpResponse.statusCode);
+      console.log("2", httpResponse);
       //console.log("3", body);
 
       if (err || httpResponse.statusCode !== 200) {
@@ -583,7 +583,7 @@ function rePublishProject(req, res, next) {
       fsExtra.removeSync(publishFolder);
     }
 
-    fsExtra.copy(projectFolder, publishFolder, function (err) {
+    fsExtra.copy(projectFolder, publishFolder,  (err) => {
       if (err) {
         const err = new APIError('Publishing error', httpStatus.BAD_REQUEST, true);
         return next(err);
