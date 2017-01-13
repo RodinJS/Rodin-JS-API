@@ -94,8 +94,9 @@ function createBranch(username, id, projectRoot, branchName) {
 
                 shell.series([
                   `git checkout -b ${branchName}`,
-                  `git push -u origin master`
+                  `git push -u origin ${branchName}`
                 ], projectRoot, (err) => {
+                  console.log(err);
                   if (err) {
                     const err = new APIError(`${branchName} branch alredy exist!`, httpStatus.BAD_REQUEST, true);
                     reject(err);
@@ -207,7 +208,7 @@ function ours(username, id, projectRoot) {
                 shell.series([
                   'git add .',
                   'git commit -m \"update\"',
-                  `git push -u origin master`
+                  `git push -u origin rodin_editor`
                 ], projectRoot, (err) => {
 
                   console.log('git push error: ', err);
@@ -216,14 +217,14 @@ function ours(username, id, projectRoot) {
                     shell.series([
                       `git checkout --ours -- ./`,
                       `git config --global push.default matching`,
-                      `git push -u origin master`
+                      `git push -u origin rodin_editor`
                     ], projectRoot, (err) => {
                       console.log('git push/merge error: ', err);
                       reject(err);
                     });
                   });
 
-                  shell.exec(`git push -u origin master`, projectRoot, (err) => {
+                  shell.exec(`git push -u origin rodin_editor`, projectRoot, (err) => {
                     console.log('git push error: ', err);
                     reject(err);
                   });
