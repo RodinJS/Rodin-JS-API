@@ -1,4 +1,3 @@
-import {execSync} from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import Project from '../models/project';
@@ -15,7 +14,6 @@ import mandrill from '../helpers/mandrill';
 import userCapacity from '../helpers/directorySize';
 import transpiler from '../helpers/transpiler';
 import _ from 'lodash';
-import git from '../helpers/github';
 
 const getStatus = (project, device, cb) => {
   console.log(JSON.stringify(project, null, 3));
@@ -224,31 +222,6 @@ function create(req, res, next) {
                   const err = new APIError('User not found!', 310);
                   return next(err);
                 }
-
-                User.get(req.user.username)
-                  .then(user => {
-                    if (user) {
-                      User.updateAsync({username: req.user.username}, {
-                        $push: {
-                          "projects": savedProject._id
-                        }
-                      })
-                        .then(updatedUser => {
-                          return res.status(201).json({
-                            "success": true,
-                            "data": savedProject.outcome()
-                          });
-                        })
-                        .catch((e) => {
-                          const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
-                          return next(err);
-                        });
-                    } else {
-                      const err = new APIError('User not found!', 310);
-                      return next(err);
-                    }
-
-                  });
               })
               .error((e) => {
                 const err = new APIError("Something went wrong!", 312, true);
