@@ -101,7 +101,73 @@ function create(req, res, next) {
         let token = result.token;
         let repo_url = [clone_url.slice(0, position), token, '@', clone_url.slice(position)].join('');
 
-        let gago = exec(`cd ${projectRoot}`, {shell : '/bin/bash' }, (error, stdout, stderr) => {
+        try{
+          process.chdir(projectRoot);
+          console.log(`New directory: ${process.cwd()}`);
+          require('simple-git')(projectRoot)
+            .init()
+            .add('./*')
+            .commit("initial commit!")
+            .addRemote('origin', result.data.clone_url)
+            .push(['-u', repo_url], () => {
+              Project.findOneAndUpdateAsync(
+                {
+                  _id: req.body.id,
+                  owner: req.user.username
+                },
+                {
+                  $set: {
+                    github: {
+                      git: result.data.git_url,
+                      https: result.data.clone_url
+                    }
+                  }
+                },
+                {
+                  new: true
+                }).then(projData => {
+                let repo_info = result;
+                git.createBranch(req.user.username, help.cleanUrl(req.body.id), projectRoot, "rodin_editor")
+                  .then(result => {
+                    return res.status(200).json({
+                      success: true,
+                      data: {
+                        name: repo_info.data.name,
+                        private: repo_info.data.private,
+                        git_url: repo_info.data.git_url,
+                        clone_url: repo_info.data.clone_url,
+                        location: repo_info.data.meta.location,
+                        status: repo_info.data.meta.status,
+                        branch: result
+                      }
+                    });
+                  })
+                  .catch(e => {
+                    const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+                    return next(e);
+                  });
+              }).catch(e => {
+                const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+                return next(e);
+              });
+            });
+        }
+        catch(e){
+          console.log(e);
+          const err = {
+            status:400,
+            code:2,
+            message:'Can\'t create git repo'
+          };
+          return res.status(400).send({
+            success: false,
+            error: err
+          });
+
+        }
+
+
+       /* let gago = exec(`cd ${projectRoot}`, {shell : '/bin/bash' }, (error, stdout, stderr) => {
           if (error) {
             const err = {
               status:400,
@@ -118,7 +184,7 @@ function create(req, res, next) {
 
           require('simple-git')(projectRoot)
             .init()
-            .add('./*')
+            .add('./!*')
             .commit("initial commit!")
             .addRemote('origin', result.data.clone_url)
             .push(['-u', repo_url], () => {
@@ -164,7 +230,7 @@ function create(req, res, next) {
               });
             });
         });
-        gago.kill();
+        gago.kill();*/
       })
       .catch(e => {
         return next(e);
