@@ -108,8 +108,8 @@ function create(req, res, next) {
 
           shell.series([
             'git init',
-            'git add .',
-            `git commit -m "initial commit!"`,
+            'git add -A',
+            'git commit -m \"initial commit\"',
             `git remote add origin  ${result.data.clone_url}`,
             `git push - u origin ${result.data.clone_url}`
           ], projectRoot, (err) => {
