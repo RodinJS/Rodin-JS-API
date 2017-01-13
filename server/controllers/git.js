@@ -109,9 +109,9 @@ function create(req, res, next) {
           shell.series([
             'git init',
             'git add -A',
-            'git commit -m \"initial commit\"',
-            `git remote add origin  ${result.data.clone_url}`,
-            `git push - u origin ${result.data.clone_url}`
+            'git commit -m \"first\"',
+            `git remote add origin  ${repo_url}`,
+            `git push -u origin master`
           ], projectRoot, (err) => {
             console.log('git push error: ', err);
             if(err){
