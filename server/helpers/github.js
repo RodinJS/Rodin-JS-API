@@ -91,7 +91,22 @@ function createBranch(username, id, projectRoot, branchName) {
                 let position = clone_url.indexOf("github");
                 let repo_url = [clone_url.slice(0, position), token, '@', clone_url.slice(position)].join('');
 
-                require('simple-git')(projectRoot)
+
+                shell.series([
+                  `git checkout -b ${branchName}`,
+                  `git push -u origin master`
+                ], projectRoot, (err) => {
+                  if (err) {
+                    const err = new APIError(`${branchName} branch alredy exist!`, httpStatus.BAD_REQUEST, true);
+                    reject(err);
+                  }
+                  resolve({
+                    message: `${branchName} branch successfuly created`,
+                    repo_url: clone_url
+                  });
+                });
+
+               /* require('simple-git')(projectRoot)
                   .checkoutLocalBranch(branchName, gitErr => {
                     if (gitErr) {
                       const err = new APIError(`${branchName} branch alredy exist!`, httpStatus.BAD_REQUEST, true);
@@ -104,6 +119,9 @@ function createBranch(username, id, projectRoot, branchName) {
                       repo_url: clone_url
                     });
                   });
+                */
+
+
               }).catch(e => {
               const err = new APIError(`Project with ${id} does not exist!`, httpStatus.BAD_REQUEST, true);
               reject(err);
@@ -186,46 +204,34 @@ function ours(username, id, projectRoot) {
               .then(project => {
                 let repo_url = gitPathGenerator(token, project.github.https);
 
-                try {
-                  process.chdir(projectRoot);
-                  console.log(`New directory: ${process.cwd()}`);
-                  shell.series([
-                    'git add ./*',
-                    'git commit -m \"update\"',
-                    `git push -u origin master`
-                  ], projectRoot, (err) => {
+                shell.series([
+                  'git add .',
+                  'git commit -m \"update\"',
+                  `git push -u origin master`
+                ], projectRoot, (err) => {
 
-                    console.log('git push error: ', err);
+                  console.log('git push error: ', err);
 
-                    shell.exec(`git pull ${repo_url}`, projectRoot, (err) => {
-                      shell.series([
-                        `git checkout --ours -- ./`,
-                        `git config --global push.default matching`,
-                        `git push -u origin master`
-                      ], projectRoot, (err) => {
-                        console.log('git push/merge error: ', err);
-                        reject(err);
-                      });
-                    });
-
-                    shell.exec(`git push -u origin master`, projectRoot, (err) => {
-                      console.log('git push error: ', err);
+                  shell.exec(`git pull ${repo_url}`, projectRoot, (err) => {
+                    shell.series([
+                      `git checkout --ours -- ./`,
+                      `git config --global push.default matching`,
+                      `git push -u origin master`
+                    ], projectRoot, (err) => {
+                      console.log('git push/merge error: ', err);
                       reject(err);
                     });
-
-                    resolve({
-                      message: `GitHub repo successfuly synced`
-                    });
                   });
-                }
-                catch (e){
-                  const err = {
-                    status:400,
-                    code:2,
-                    message:'Can\'t push to git repo'
-                  };
-                  reject(err);
-                }
+
+                  shell.exec(`git push -u origin master`, projectRoot, (err) => {
+                    console.log('git push error: ', err);
+                    reject(err);
+                  });
+
+                  resolve({
+                    message: `GitHub repo successfuly synced`
+                  });
+                });
               }).catch(e => {
               const err = new APIError(`Project with ${id} id does not exist!`, httpStatus.BAD_REQUEST, true);
               reject(err);
