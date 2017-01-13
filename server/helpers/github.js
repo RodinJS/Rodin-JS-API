@@ -96,7 +96,6 @@ function createBranch(username, id, projectRoot, branchName) {
                   `git checkout -b ${branchName}`,
                   `git push -u origin ${branchName}`
                 ], projectRoot, (err) => {
-                  console.log(err);
                   if (err) {
                     const err = new APIError(`${branchName} branch alredy exist!`, httpStatus.BAD_REQUEST, true);
                     reject(err);
@@ -106,22 +105,6 @@ function createBranch(username, id, projectRoot, branchName) {
                     repo_url: clone_url
                   });
                 });
-
-               /* require('simple-git')(projectRoot)
-                  .checkoutLocalBranch(branchName, gitErr => {
-                    if (gitErr) {
-                      const err = new APIError(`${branchName} branch alredy exist!`, httpStatus.BAD_REQUEST, true);
-                      reject(err);
-                    }
-                  })
-                  .push(['-u', repo_url], () => {
-                    resolve({
-                      message: `${branchName} branch successfuly created`,
-                      repo_url: clone_url
-                    });
-                  });
-                */
-
 
               }).catch(e => {
               const err = new APIError(`Project with ${id} does not exist!`, httpStatus.BAD_REQUEST, true);
