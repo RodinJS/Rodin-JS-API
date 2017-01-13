@@ -7,7 +7,6 @@ import git from '../helpers/github';
 import Project from '../models/project';
 import request from 'request-promise';
 import _ from 'lodash';
-import shell from '../helpers/shell';
 
 
 const APIURLS = {
@@ -102,7 +101,7 @@ function create(req, res, next) {
         let token = result.token;
         let repo_url = [clone_url.slice(0, position), token, '@', clone_url.slice(position)].join('');
 
-        shell.nativeExec(`cd ${projectRoot}`, (error) => {
+        let gago = exec(`cd ${projectRoot}`, {shell : '/bin/bash' }, (error, stdout, stderr) => {
           if (error) {
             const err = {
               status:400,
@@ -165,6 +164,7 @@ function create(req, res, next) {
               });
             });
         });
+        gago.kill();
       })
       .catch(e => {
         return next(e);
