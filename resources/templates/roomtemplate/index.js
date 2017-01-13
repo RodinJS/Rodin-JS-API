@@ -1,20 +1,20 @@
-import {THREE} from 'https://cdn.rodin.io/v0.0.2/vendor/three/THREE.GLOBAL.js';
+import {THREE} from 'https://cdn.rodin.io/v0.0.1/vendor/three/THREE.GLOBAL.js';
 
-import 'https://cdn.rodin.io/v0.0.2/vendor/three/examples/js/loaders/OBJLoader.js';
+import 'https://cdn.rodin.io/v0.0.1/vendor/three/examples/js/loaders/OBJLoader.js';
 
-import * as RODIN from 'https://cdn.rodin.io/v0.0.2/rodinjs/RODIN.js';
-import {SceneManager} from 'https://cdn.rodin.io/v0.0.2/rodinjs/scene/SceneManager.js';
+import * as RODIN from 'https://cdn.rodin.io/v0.0.1/rodinjs/RODIN.js';
+import {SceneManager} from 'https://cdn.rodin.io/v0.0.1/rodinjs/scene/SceneManager.js';
 
-import {ModelLoader} from 'https://cdn.rodin.io/v0.0.2/rodinjs/sculpt/ModelLoader.js';
-import {Animation} from 'https://cdn.rodin.io/v0.0.2/rodinjs/animation/Animation.js';
-import {CubeObject} from 'https://cdn.rodin.io/v0.0.2/rodinjs/sculpt/CubeObject.js';
+import {ModelLoader} from 'https://cdn.rodin.io/v0.0.1/rodinjs/sculpt/ModelLoader.js';
+import {Animation} from 'https://cdn.rodin.io/v0.0.1/rodinjs/animation/Animation.js';
+import {CubeObject} from 'https://cdn.rodin.io/v0.0.1/rodinjs/sculpt/CubeObject.js';
 
-import {MouseController} from 'https://cdn.rodin.io/v0.0.2/rodinjs/controllers/MouseController.js';
+import {MouseController} from 'https://cdn.rodin.io/v0.0.1/rodinjs/controllers/MouseController.js';
 import {DragAndDrop} from './DragAndDrop.js';
 
-import changeParent  from 'https://cdn.rodin.io/v0.0.2/rodinjs/utils/ChangeParent.js';
-import {TWEEN} from 'https://cdn.rodin.io/v0.0.2/rodinjs/Tween.js';
-import {EVENT_NAMES, CONTROLLER_HANDS} from 'https://cdn.rodin.io/v0.0.2/rodinjs/constants/constants.js';
+import changeParent  from 'https://cdn.rodin.io/v0.0.1/rodinjs/utils/ChangeParent.js';
+import {TWEEN} from 'https://cdn.rodin.io/v0.0.1/rodinjs/Tween.js';
+import {EVENT_NAMES, CONTROLLER_HANDS} from 'https://cdn.rodin.io/v0.0.1/rodinjs/constants/constants.js';
 
 import './ViveControllers.js';
 
