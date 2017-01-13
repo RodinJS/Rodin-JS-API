@@ -185,32 +185,47 @@ function ours(username, id, projectRoot) {
             Project.getOne(id, username)
               .then(project => {
                 let repo_url = gitPathGenerator(token, project.github.https);
-                shell.series([
-                  'git add -A',
-                  'git commit -m \"update\"',
-                  `git push -u origin master`
-                ], projectRoot, (err) => {
-                  console.log('git push error: ', err);
 
-                  shell.exec(`git pull ${repo_url}`, projectRoot, (err) => {
-                    shell.series([
-                      `git checkout --ours -- ./`,
-                      `git config --global push.default matching`,
-                      `git push -u origin master`
-                    ], projectRoot, (err) => {
-                      console.log('git push/merge error: ', err);
+                try {
+                  process.chdir(projectRoot);
+                  console.log(`New directory: ${process.cwd()}`);
+                  shell.series([
+                    'git add ./*',
+                    'git commit -m \"update\"',
+                    `git push -u origin master`
+                  ], projectRoot, (err) => {
+
+                    console.log('git push error: ', err);
+
+                    shell.exec(`git pull ${repo_url}`, projectRoot, (err) => {
+                      shell.series([
+                        `git checkout --ours -- ./`,
+                        `git config --global push.default matching`,
+                        `git push -u origin master`
+                      ], projectRoot, (err) => {
+                        console.log('git push/merge error: ', err);
+                        reject(err);
+                      });
+                    });
+
+                    shell.exec(`git push -u origin master`, projectRoot, (err) => {
+                      console.log('git push error: ', err);
                       reject(err);
                     });
-                  });
 
-                  shell.exec(`git push -u origin master`, projectRoot, (err) => {
-                    console.log('git push error: ', err);
-                    reject(err);
+                    resolve({
+                      message: `GitHub repo successfuly synced`
+                    });
                   });
-                  resolve({
-                    message: `GitHub repo successfuly synced`
-                  });
-                });
+                }
+                catch (e){
+                  const err = {
+                    status:400,
+                    code:2,
+                    message:'Can\'t push to git repo'
+                  };
+                  reject(err);
+                }
               }).catch(e => {
               const err = new APIError(`Project with ${id} id does not exist!`, httpStatus.BAD_REQUEST, true);
               reject(err);
