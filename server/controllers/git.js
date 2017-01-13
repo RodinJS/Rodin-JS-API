@@ -108,12 +108,23 @@ function create(req, res, next) {
 
           shell.series([
             'git init',
-            'git add -A',
-            'git commit -m \"initial commit!\"',
+            'git add .',
+            `git commit -m "initial commit!"`,
             `git remote add origin  ${result.data.clone_url}`,
             `git push - u origin ${result.data.clone_url}`
           ], projectRoot, (err) => {
             console.log('git push error: ', err);
+            if(err){
+              const err = {
+                status:400,
+                code:3,
+                message:'Can\'t create git repo'
+              };
+              return res.status(400).send({
+                success: false,
+                error: err
+              });
+            }
             Project.findOneAndUpdateAsync(
               {
                 _id: req.body.id,
