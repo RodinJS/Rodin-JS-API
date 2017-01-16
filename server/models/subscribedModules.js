@@ -29,19 +29,19 @@ const subscribedModules = new mongoose.Schema({
 
 subscribedModules.statics = {
 
-    get(projectId) {
-        return this.findOne({projectId:mongoose.Types.ObjectId(projectId)}).execAsync()
-            .then((module) => {
-                if (module) {
-                    return module;
+    getByOwner(owner) {
+        return this.find({owner:owner}).execAsync()
+            .then((modules) => {
+                if (modules) {
+                    return modules;
                 }
                 else {
-                    const err = new APIError('No such project exists!----', httpStatus.NOT_FOUND, true);
+                    const err = new APIError('User dont have subscribed modules!----', httpStatus.NOT_FOUND, true);
                     return Promise.reject(err);
                 }
             })
             .catch((e) => {
-                const err = new APIError('No such project exists!', httpStatus.NOT_FOUND, true);
+                const err = new APIError('User dont have subscribed modules!', httpStatus.NOT_FOUND, true);
                 return Promise.reject(err);
             });
     },
