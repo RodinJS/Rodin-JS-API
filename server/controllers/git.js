@@ -101,71 +101,72 @@ function create(req, res, next) {
         let position = clone_url.indexOf("github");
         let token = result.token;
         let repo_url = [clone_url.slice(0, position), token, '@', clone_url.slice(position)].join('');
+        shell.series([
+          'git init',
+          'git add -A',
+          'git commit -m \"first\"',
+          `git remote add origin  ${repo_url}`,
+          `git push -u origin master`
+        ], projectRoot, (err) => {
+          console.log('git push error: ', err);
+          if(err){
+            const err = {
+              status:400,
+              code:3,
+              message:'Can\'t create git repo'
+            };
+            return res.status(400).send({
+              success: false,
+              error: err
+            });
+          }
+          Project.findOneAndUpdateAsync(
+            {
+              _id: req.body.id,
+              owner: req.user.username
+            },
+            {
+              $set: {
+                github: {
+                  git: result.data.git_url,
+                  https: result.data.clone_url
+                }
+              }
+            },
+            {
+              new: true
+            }).then(projData => {
+            let repo_info = result;
+            git.createBranch(req.user.username, help.cleanUrl(req.body.id), projectRoot, "rodin_editor")
+              .then(result => {
+                return res.status(200).json({
+                  success: true,
+                  data: {
+                    name: repo_info.data.name,
+                    private: repo_info.data.private,
+                    git_url: repo_info.data.git_url,
+                    clone_url: repo_info.data.clone_url,
+                    location: repo_info.data.meta.location,
+                    status: repo_info.data.meta.status,
+                    branch: result
+                  }
+                });
+              })
+              .catch(e => {
+                const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+                return next(e);
+              });
+          }).catch(e => {
+            const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+            return next(e);
+          });
+        });
 
-        try{
+        /*try{
           process.chdir(projectRoot);
           console.log(`New directory: ${process.cwd()}`);
 
-          shell.series([
-            'git init',
-            'git add -A',
-            'git commit -m \"first\"',
-            `git remote add origin  ${repo_url}`,
-            `git push -u origin master`
-          ], projectRoot, (err) => {
-            console.log('git push error: ', err);
-            if(err){
-              const err = {
-                status:400,
-                code:3,
-                message:'Can\'t create git repo'
-              };
-              return res.status(400).send({
-                success: false,
-                error: err
-              });
-            }
-            Project.findOneAndUpdateAsync(
-              {
-                _id: req.body.id,
-                owner: req.user.username
-              },
-              {
-                $set: {
-                  github: {
-                    git: result.data.git_url,
-                    https: result.data.clone_url
-                  }
-                }
-              },
-              {
-                new: true
-              }).then(projData => {
-              let repo_info = result;
-              git.createBranch(req.user.username, help.cleanUrl(req.body.id), projectRoot, "rodin_editor")
-                .then(result => {
-                  return res.status(200).json({
-                    success: true,
-                    data: {
-                      name: repo_info.data.name,
-                      private: repo_info.data.private,
-                      git_url: repo_info.data.git_url,
-                      clone_url: repo_info.data.clone_url,
-                      location: repo_info.data.meta.location,
-                      status: repo_info.data.meta.status,
-                      branch: result
-                    }
-                  });
-                })
-                .catch(e => {
-                  const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
-                  return next(e);
-                });
-            }).catch(e => {
-              const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
-              return next(e);
-            });
-          });
+
 
         }
         catch(e){
@@ -180,7 +181,7 @@ function create(req, res, next) {
             error: err
           });
 
-        }
+        }*/
       })
       .catch(e => {
         return next(e);
