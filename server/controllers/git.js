@@ -161,27 +161,6 @@ function create(req, res, next) {
             return next(e);
           });
         });
-
-        /*try{
-          process.chdir(projectRoot);
-          console.log(`New directory: ${process.cwd()}`);
-
-
-
-        }
-        catch(e){
-          console.log(e);
-          const err = {
-            status:400,
-            code:2,
-            message:'Can\'t create git repo'
-          };
-          return res.status(400).send({
-            success: false,
-            error: err
-          });
-
-        }*/
       })
       .catch(e => {
         return next(e);
