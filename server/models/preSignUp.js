@@ -10,30 +10,29 @@ const preSignUpSchema = new mongoose.Schema({
 
     userId: {
         type: String,
-        required: true
+        required: true,
     },
     source: {
         type: String,
         enum: ['steam', 'oculus'],
-        required: true
+        required: true,
     },
     code: {
         type: String,
-        required: true
+        required: true,
     },
-    createdAt:{
+    createdAt: {
         type: Date,
         required: true,
-        default: Date.now
-    }
+        default: Date.now,
+    },
 
 });
 
 preSignUpSchema.statics = {
 
-
     get(code) {
-        return this.findOne({code: code})  //new RegExp('^' + id + '$', "i")
+        return this.findOne({ code: code })  //new RegExp('^' + id + '$', "i")
             .execAsync().then((preUser) => {
                 if (preUser) {
                     return preUser;
@@ -48,8 +47,8 @@ preSignUpSchema.statics = {
             });
     },
 
-    delete(code){
-        return this.removeAsync({code: new RegExp('^' + code + '$', "i")})
+    delete(code) {
+        return this.removeAsync({ code: new RegExp('^' + code + '$', 'i') })
             .then((preUser) => {
                 if (preUser) {
                     return preUser;
@@ -60,7 +59,7 @@ preSignUpSchema.statics = {
                 const err = new APIError('No such pre sign up code exists!', httpStatus.NOT_FOUND, true);
                 return Promise.reject(err);
             });
-    }
+    },
 
 };
 

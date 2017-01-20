@@ -26,6 +26,7 @@ class fileContentSearch {
             if (err) {
                 cb(err, null);
             }
+
             cb(false, _this.foundedFiles);
         });
     }
@@ -40,7 +41,6 @@ class fileContentSearch {
                 if (!file) return done(null, results);
 
                 let lastCharacter = dir.slice(-1) == '/' ? '' : '/';
-
 
                 file = dir + lastCharacter + file;
                 fs.stat(file, (err, stat) => {
@@ -75,9 +75,8 @@ class fileContentSearch {
                 cb(false);
             })
             .on('line',  (line)=> {
-               let searchWord = this.searchWord.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
-               let re = new RegExp(searchWord, this.regexParams);
-
+                let searchWord = this.searchWord.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
+                let re = new RegExp(searchWord, this.regexParams);
 
                 let match = re.exec(line);
                 if (match) {
@@ -86,14 +85,15 @@ class fileContentSearch {
                     if (!this.foundedFiles[relativePath])
                       this.foundedFiles[relativePath] = [];
 
-                  this.foundedFiles[relativePath].push({
+                    this.foundedFiles[relativePath].push({
                         fileName: relativePath,
                         line: lineNr,
                         column: match.index,
-                        text: match.input.replace(/^\s\s*/, '').replace(/\s\s*$/, '')
+                        text: match.input.replace(/^\s\s*/, '').replace(/\s\s*$/, ''),
                     });
                 }
-              this.readedLinesLength++;
+
+                this.readedLinesLength++;
             })
             .on('end',  () => {
                 cb(true);

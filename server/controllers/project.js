@@ -1,3 +1,4 @@
+// jscs:disable
 import fs from 'fs';
 import path from 'path';
 import Project from '../models/project';
@@ -22,13 +23,13 @@ const getStatus = (project, device, cb) => {
       url: `${config[device].urls.getStatus}/${project.build[device].buildId}`,
       headers: {
         'app-id': config[device].appId,
-        'app-secret': config[device].appSecret
-      }
+        'app-secret': config[device].appSecret,
+      },
     },
     (err, httpResponse, body) => {
 
       //console.log("1", err);
-      console.log("2", httpResponse);
+      //console.log("2", httpResponse);
       //console.log("3", body);
 
       if (err || httpResponse.statusCode !== 200) {
@@ -46,7 +47,7 @@ const getStatus = (project, device, cb) => {
       project.build[device].built = JSON.parse(body).data.buildStatus;
       return project.save(err => cb(err, project));
     }
-  )
+  );
 };
 
 /**
@@ -57,28 +58,24 @@ function get(req, res, next) {
   Project.getOne(req.params.id, req.user.username)
     .then((project) => {
       if (project) {
-
         if (req.query.device) {
           return getStatus(project, req.query.device, (err, project) => {
             if(err){
               const err = new APIError('Something went wrong', httpStatus.BAD_REQUEST, true);
               return next(err);
             }
-            res.status(200).json({
+            return res.status(200).json({
               success: true,
               data: project
             });
-          })
+          });
         }
 
         req.project = project.toObject();
         return next();
-
       }
-      else {
-        const err = new APIError('Project is empty', httpStatus.NOT_FOUND, true);
-        return next(err);
-      }
+      const err = new APIError('Project is empty', httpStatus.NOT_FOUND, true);
+      return next(err);
     })
     .catch((e) => {
       const err = new APIError('Project not found', httpStatus.NOT_FOUND, true);
@@ -778,7 +775,7 @@ function finalize(req, res, next) {
   return res.status(200).json({success: true, data: req.project});
 }
 
-export default {
+export default {// jscs:ignore
   get,
   create,
   update,

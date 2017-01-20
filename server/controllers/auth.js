@@ -1,3 +1,4 @@
+// jscs:disable
 import User from '../models/user';
 import PreSignUp from '../models/preSignUp';
 import InvitationCode from '../models/invitationCode';

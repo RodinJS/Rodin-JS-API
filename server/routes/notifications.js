@@ -13,5 +13,4 @@ router.route('/')
   .put(check.ifTokenValid, notificationsCtrl.update)
   .delete(check.ifTokenValid, notificationsCtrl.remove);
 
-
 export default router;

@@ -14,15 +14,15 @@ describe('## User  APIs', () => {
             email: 'gago@test.me',
             username: 'gagas',
             password: '1234567890AAa',
-            role: 'Free'
-        }
+            role: 'Free',
+        },
     };
 
     before(function (done) {
         User.login(()=> {
             User.getTestProjects(()=> {
-                done()
-            })
+                done();
+            });
         });
     });
 
@@ -31,7 +31,7 @@ describe('## User  APIs', () => {
         it('should remove user', (done) => {
 
             request(app)
-                .del('/api/user/'+info.user.username)
+                .del('/api/user/' + info.user.username)
                 .set(User.generateHeaders())
                 .expect(httpStatus.OK)
                 .then(res => {

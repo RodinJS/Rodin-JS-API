@@ -9,50 +9,49 @@ const ObjectId = Schema.ObjectId;
 /**
  * Project Schema
  */
-const purchasedModulesSchema = new mongoose.Schema({
+const assignedModulesSchema = new mongoose.Schema({
 
     moduleId: {
         type: ObjectId,
-        required: true
+        required: true,
     },
     projectId: {
         type: ObjectId,
-        required: true
+        required: true,
     },
     owner: {
         type: String,
-        required: true
+        required: true,
     },
-    allowedHosts:{
+    allowedHosts: {
         type: Array,
         required: true,
-    }
+    },
 
 });
 
-purchasedModulesSchema.statics = {
+assignedModulesSchema.statics = {
 
     get(projectId) {
-        return this.findOne({projectId:mongoose.Types.ObjectId(projectId)}).execAsync()
-            .then((module) => {
-                if (module) {
-                    return module;
-                }
-                else {
-                    const err = new APIError('No such project exists!----', httpStatus.NOT_FOUND, true);
-                    return Promise.reject(err);
-                }
-            })
-            .catch((e) => {
-                const err = new APIError('No such project exists!', httpStatus.NOT_FOUND, true);
+        return this.findOne({ projectId: mongoose.Types.ObjectId(projectId) }).execAsync()
+          .then((module) => {
+            if (module) {
+                return module;
+            } else {
+                const err = new APIError('No such project exists!----', httpStatus.NOT_FOUND, true);
                 return Promise.reject(err);
-            });
+            }
+        })
+          .catch((e) => {
+            const err = new APIError('No such project exists!', httpStatus.NOT_FOUND, true);
+            return Promise.reject(err);
+        });
     },
 
-    delete(code){
+    delete(code) {
 
-    }
+    },
 
 };
 
-export default mongoose.model('AssignedModules', purchasedModulesSchema);
+export default mongoose.model('AssignedModules', assignedModulesSchema);

@@ -1,5 +1,5 @@
 import express from 'express';
-import OculusBuildController from '../../controllers/build/oculus'
+import OculusBuildController from '../../controllers/build/oculus';
 
 const router = express.Router();
 

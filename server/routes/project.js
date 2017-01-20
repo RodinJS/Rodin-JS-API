@@ -282,7 +282,6 @@ router.route('/:id')
    */
   .delete(check.ifTokenValid, projectCtrl.get, projectCtrl.remove);
 
-
 router.route('/publish/rollback/:id')
   .post(check.ifTokenValid, check.project, projectCtrl.rollBack);
 
@@ -291,7 +290,6 @@ router.route('/publish/:id')
   .post(check.ifTokenValid, check.project, projectCtrl.publishProject)
   .put(check.ifTokenValid, check.project, projectCtrl.rePublishProject)
   .delete(check.ifTokenValid, check.project, projectCtrl.unPublishProject);
-
 
 router.route('/published/list')
   .get(projectCtrl.getPublishedProjects);
@@ -311,7 +309,6 @@ router.route('/templates/importOnce')
  */
 router.route('/templates/list')
   .get(check.ifTokenValid, projectCtrl.getTemplatesList);
-
 
 router.route('/:id/build/transpile')
   .get(check.ifTokenValid, check.isProjectOwn, projectCtrl.transpile);

@@ -1,3 +1,4 @@
+// jscs:disable validateIndentation
 import express from 'express';
 import domainsCtrl from '../controllers/domains';
 import check from '../controllers/check';

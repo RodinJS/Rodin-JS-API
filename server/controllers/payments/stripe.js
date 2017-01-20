@@ -6,7 +6,6 @@ import User from '../../models/user';
 const stripeKeys = config.payments.tokens.stripe;
 const stripe = require('stripe')(stripeKeys.secret);
 
-
 function createPlan(req, res, next) {
 
     if (_.isUndefined(req.body.planId)) {
@@ -39,7 +38,7 @@ function createPlan(req, res, next) {
         interval: req.body.interval,
         name: req.body.planName,
         currency: req.body.currency,
-        id: req.body.planId
+        id: req.body.planId,
     };
 
     stripe.plans.create(params, (err, plan) => {
@@ -47,7 +46,8 @@ function createPlan(req, res, next) {
             const err = new APIError('Plan creation error!', httpStatus.BAD_REQUEST, true);
             return next(err);
         }
-        res.status(200).json({success: true, data: plan});
+
+        res.status(200).json({ success: true, data: plan });
     });
 }
 
@@ -60,17 +60,18 @@ function getPlan(req, res, next) {
                 const err = new APIError('Wrong plan id!', httpStatus.BAD_REQUEST, true);
                 return next(err);
             }
-            res.status(200).json({success: true, data: plan});
+
+            res.status(200).json({ success: true, data: plan });
         });
-    }
-    else {
+    } else {
         stripe.plans.list({}, (err, plan)=> {
             if (err) {
                 const err = new APIError('Plan get error!', httpStatus.BAD_REQUEST, true);
                 return next(err);
             }
-            res.status(200).json({success: true, data: plan.data});
-        })
+
+            res.status(200).json({ success: true, data: plan.data });
+        });
     }
 
 }
@@ -87,8 +88,9 @@ function removePlan(req, res, next) {
             const err = new APIError('Wrong plan id!', httpStatus.BAD_REQUEST, true);
             return next(err);
         }
-        res.status(200).json({success: true, data: plan});
-    })
+
+        res.status(200).json({ success: true, data: plan });
+    });
 }
 
 function createCustomer(req, res, next) {
@@ -101,8 +103,8 @@ function createCustomer(req, res, next) {
         email: req.user.email,
         source: req.body.stripeToken,
         metadata: {
-            username: req.user.username
-        }
+            username: req.user.username,
+        },
     };
 
     stripe.customers.create(requestData, (err, customer) => {
@@ -110,7 +112,8 @@ function createCustomer(req, res, next) {
             const err = new APIError('Customer creation error!', httpStatus.BAD_REQUEST, true);
             return next(err);
         }
-        req.payment = {stripe: {}};
+
+        req.payment = { stripe: {} };
         req.payment.stripe.customerId = customer.id;
         req.message = customer;
         next();
@@ -125,11 +128,11 @@ function getCustomer(req, res, next) {
                 const err = new APIError('Customer error!', httpStatus.BAD_REQUEST, true);
                 return next(err);
             }
-            res.status(200).json({success: true, data: customer});
+
+            res.status(200).json({ success: true, data: customer });
         });
-    }
-    else {
-        res.status(200).json({success: true, data: null});
+    } else {
+        res.status(200).json({ success: true, data: null });
     }
 }
 
@@ -141,15 +144,15 @@ function updateCustomer(req, res, next) {
     }
 
     if (req.user.stripe && req.user.stripe.customerId) {
-        stripe.customers.update(req.user.stripe.customerId, {default_source: req.query.default_source}, (err, customer)=> {
+        stripe.customers.update(req.user.stripe.customerId, { default_source: req.query.default_source }, (err, customer)=> {
             if (err) {
                 const err = new APIError('Customer update error!', httpStatus.BAD_REQUEST, true);
                 return next(err);
             }
-            res.status(200).json({success: true, data: customer});
+
+            res.status(200).json({ success: true, data: customer });
         });
-    }
-    else {
+    } else {
         const err = new APIError('No Customer!', httpStatus.BAD_REQUEST, true);
         return next(err);
     }
@@ -160,16 +163,17 @@ function createCard(req, res, next) {
         const err = new APIError('Provide stripe token!', httpStatus.BAD_REQUEST, true);
         return next(err);
     }
+
     if (req.user.stripe && req.user.stripe.customerId) {
-        stripe.customers.createSource(req.user.stripe.customerId, {source: req.body.stripeToken}, (err, card) => {
+        stripe.customers.createSource(req.user.stripe.customerId, { source: req.body.stripeToken }, (err, card) => {
             if (err) {
                 const err = new APIError('Card creation error!', httpStatus.BAD_REQUEST, true);
                 return next(err);
             }
-            res.status(200).json({success: true, data: card});
+
+            res.status(200).json({ success: true, data: card });
         });
-    }
-    else {
+    } else {
         const err = new APIError('Customer does not exist!', httpStatus.BAD_REQUEST, true);
         return next(err);
     }
@@ -181,16 +185,17 @@ function deleteCard(req, res, next) {
         const err = new APIError('Provide card id!', httpStatus.BAD_REQUEST, true);
         return next(err);
     }
+
     if (req.user.stripe && req.user.stripe.customerId) {
         stripe.customers.deleteCard(req.user.stripe.customerId, req.query.cardId, (err, confirmation) => {
             if (err) {
                 const err = new APIError('Card deletion error!', httpStatus.BAD_REQUEST, true);
                 return next(err);
             }
-            res.status(200).json({success: true, data: 'Card successfuly deleted'});
+
+            res.status(200).json({ success: true, data: 'Card successfuly deleted' });
         });
-    }
-    else {
+    } else {
         const err = new APIError('Customer does not exist!', httpStatus.BAD_REQUEST, true);
         return next(err);
     }
@@ -248,7 +253,7 @@ function createSubscription(req, res, next) {
 
     const requestData = {
         customer: req.user.stripe.customerId,
-        plan: req.body.planId
+        plan: req.body.planId,
         //source: req.body.stripeToken
     };
 
@@ -257,7 +262,8 @@ function createSubscription(req, res, next) {
             const err = new APIError('Subscription error!', httpStatus.BAD_REQUEST, true);
             return next(err);
         }
-        req.payment = {stripe: req.user.stripe, planId:subscription.plan.id};
+
+        req.payment = { stripe: req.user.stripe, planId: subscription.plan.id };
         req.payment.stripe.subscriptionId = subscription.id;
         req.message = 'Subscription created successfuly';
         next();
@@ -277,7 +283,7 @@ function updateSubscription(req, res, next) {
     }
 
     const requestData = {
-        plan: req.body.planId
+        plan: req.body.planId,
     };
 
     stripe.subscriptions.update(req.user.stripe.subscriptionId, requestData, (err, subscription) => {
@@ -285,7 +291,8 @@ function updateSubscription(req, res, next) {
             const err = new APIError('Subscription error!', httpStatus.BAD_REQUEST, true);
             return next(err);
         }
-        req.payment = {stripe: req.user.stripe, planId:subscription.plan.id};
+
+        req.payment = { stripe: req.user.stripe, planId: subscription.plan.id };
         req.payment.stripe.subscriptionId = subscription.id;
         req.message = 'Subscription created successfuly';
         next();
@@ -298,7 +305,8 @@ function getSubscription(req, res, next) {
             const err = new APIError('Subscription error!', httpStatus.BAD_REQUEST, true);
             return next(err);
         }
-        res.status(200).json({success: true, data: subscription});
+
+        res.status(200).json({ success: true, data: subscription });
     });
 }
 
@@ -309,7 +317,8 @@ function deleteSubscription(req, res, next) {
             const err = new APIError('Subscription deletion error!', httpStatus.BAD_REQUEST, true);
             return next(err);
         }
-        req.payment = {stripe: _.omit(req.user.stripe.toObject(), 'subscriptionId'), planId:'Free'};
+
+        req.payment = { stripe: _.omit(req.user.stripe.toObject(), 'subscriptionId'), planId: 'Free' };
         req.message = 'Subscription deleted successfuly';
         next();
     });
@@ -320,32 +329,31 @@ function updateUser(req, res, next) {
 
     let updatingData = req.payment;
 
-    if(req.payment.planId){
+    if (req.payment.planId) {
         updatingData.role = req.payment.planId;
         delete updatingData.planId;
     }
 
-  User.findOneAndUpdate({username: req.user.username}, {$set: updatingData}, {new: true})
-    .then(user=>{
-      return  res.json({
-        "success": true,
-        "data": user//req.message || {}
-      });
+    User.findOneAndUpdate({ username: req.user.username }, { $set: updatingData }, { new: true })
+      .then(user=> {
+        return res.json({
+            success: true,
+            data: user,//req.message || {}
+        });
     })
-    .catch(e=>{
-      const err = new APIError('Update error!', httpStatus.BAD_REQUEST, true);
-      return next(err);
+      .catch(e=> {
+        const err = new APIError('Update error!', httpStatus.BAD_REQUEST, true);
+        return next(err);
     });
 
-   /* User.findOneAndUpdate({username: req.user.username}, {$set: updatingData}, {new: true}, (err, user)=> {
-        if (err) {
+    /* User.findOneAndUpdate({username: req.user.username}, {$set: updatingData}, {new: true}, (err, user)=> {
+         if (err) {
 
-        }
+         }
 
-    })*/
+     })*/
 
 }
-
 
 export default {
     createPlan,
@@ -360,5 +368,5 @@ export default {
     deleteSubscription,
     updateUser,
     createCard,
-    deleteCard
+    deleteCard,
 };

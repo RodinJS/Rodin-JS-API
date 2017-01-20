@@ -1,3 +1,4 @@
+// jscs:disable validateIndentation
 import express from 'express';
 import validate from 'express-validation';
 import expressJwt from 'express-jwt';
@@ -7,8 +8,6 @@ import check from '../controllers/check';
 import config from '../../config/env';
 import userCapacity from '../helpers/directorySize';
 import projectCtrl from '../controllers/project';
-
-
 
 import passport from '../../config/passport';
 
@@ -100,9 +99,6 @@ router.route('/login')
 router.route('/verify')
 	.post(authCtrl.verify);
 
-
-
-
 /**
  * @api {post} /api/auth/verify/email Verify if email exists
  * @apiName VerifyIfEmailExists
@@ -135,8 +131,6 @@ router.route('/verify')
  *          "isOperational": true
  *      }
  */
-// router.route('/verify/email')
-// 	.post(check.ifEmailExists);
 
 /**
  * @api {post} /api/auth/logout Logout
@@ -163,8 +157,6 @@ router.route('/verify')
 router.route('/logout')
 	.post(authCtrl.logout);
 
-
-
 router.route('/social/:socialName')
 	.post(authCtrl.socialAuth, authCtrl.finalizeUser);
 
@@ -173,8 +165,6 @@ router.route('/social/:socialName')
 
 router.route('/steam/callback')
 	.get(passport.authenticate('steam', {failureRedirect: '/login'}));*/
-
-
 
 /**
  *

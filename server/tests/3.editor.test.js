@@ -9,25 +9,24 @@ import _  from 'lodash';
 
 chai.config.includeStack = true;
 
-
 let filesMocks = {
-   CREATE:{
-       path: '.',
-       type: 'file',
-       name: 'testfile.js'
-   },
-   COPY:{
-       path: '.',
-       type: 'file',
-       srcPath: 'testfile.js',
-       name: 'testfile_copy.js',
-       action:'copy'
-   },
-   EDIT:{
-       path: '.',
-       filename: 'testfile.js',
-       content: '[1,2,3].map(n => n + 1);'
-   }
+    CREATE: {
+        path: '.',
+        type: 'file',
+        name: 'testfile.js',
+    },
+    COPY: {
+        path: '.',
+        type: 'file',
+        srcPath: 'testfile.js',
+        name: 'testfile_copy.js',
+        action: 'copy',
+    },
+    EDIT: {
+        path: '.',
+        filename: 'testfile.js',
+        content: '[1,2,3].map(n => n + 1);',
+    },
 };
 
 const requestMocks = {
@@ -35,47 +34,45 @@ const requestMocks = {
         action: 'create',
         path: '.',
         type: 'directory',
-        name: 'testfolder'
+        name: 'testfolder',
     },
     COPY_FOLDER: {
         action: 'copy',
         path: '.',
         type: 'directory',
         name: 'testfolder_copy',
-        srcPath: 'testfolder'
+        srcPath: 'testfolder',
     },
     UPLOAD_FILES: {
         path: '.',
         testUpload: true,
         files: [{
             buffer: new Buffer([91, 49, 44, 50, 44, 51, 93, 46, 109, 97, 112, 40, 110, 32, 61, 62, 32, 110, 32, 43, 32, 49, 41, 59, 10]),
-            originalname: 'test_buffer_file.js'
-        }]
-    }
+            originalname: 'test_buffer_file.js',
+        },],
+    },
 };
 
-requestMocks.CREATE_FILE = _.assignIn({action: 'create'}, filesMocks.CREATE);
+requestMocks.CREATE_FILE = _.assignIn({ action: 'create' }, filesMocks.CREATE);
 requestMocks.COPY_FILE = filesMocks.COPY;
-requestMocks.EDIT_FILE = _.assignIn({action: 'save'}, filesMocks.EDIT);
-requestMocks.RENAME_FILE = _.assignIn({action: 'rename', newName: 'testfile_rename.js'}, filesMocks.EDIT);
-requestMocks.REPLACE_UPLOAD_FILES = _.assignIn({action: 'replace', type:'file'}, requestMocks.UPLOAD_FILES);
-requestMocks.RENAME_UPLOAD_FILES = _.assignIn({action: 'rename', type:'file'}, requestMocks.UPLOAD_FILES);
-requestMocks.UPLOAD_FOLDER = _.omit(_.assignIn({type:'directory'}, requestMocks.UPLOAD_FILES), 'files');
+requestMocks.EDIT_FILE = _.assignIn({ action: 'save' }, filesMocks.EDIT);
+requestMocks.RENAME_FILE = _.assignIn({ action: 'rename', newName: 'testfile_rename.js' }, filesMocks.EDIT);
+requestMocks.REPLACE_UPLOAD_FILES = _.assignIn({ action: 'replace', type: 'file' }, requestMocks.UPLOAD_FILES);
+requestMocks.RENAME_UPLOAD_FILES = _.assignIn({ action: 'rename', type: 'file' }, requestMocks.UPLOAD_FILES);
+requestMocks.UPLOAD_FOLDER = _.omit(_.assignIn({ type: 'directory' }, requestMocks.UPLOAD_FILES), 'files');
 
 const removableFilesAndFolder = ['testfolder', 'testfile_copy.js', 'testfolder_copy', 'testfile_rename.js'];
 const removableUploadFilesAndFolder = ['index.js', 'index.html', 'test_buffer_file.js', 'test_buffer_file_1.js'];
 
 describe('## Editor APIs', () => {
 
-
     before(function (done) {
         User.login(()=> {
             User.getTestProjects(()=> {
-                done()
-            })
+                done();
+            });
         });
     });
-
 
     describe('# POST /api/editor/serve', ()=> {
 
@@ -242,16 +239,16 @@ describe('## Editor APIs', () => {
                 });
         });
 
-        it('should search file by text', (done)=>{
+        it('should search file by text', (done)=> {
             request(app)
                 .get('/api/editor/search?id=' + User.getProject()._id + '&path=&search=[1,2,3]')
                 .set(User.generateHeaders())
                 .expect(httpStatus.OK)
-                .then(res=>{
+                .then(res=> {
                     expect(res.body.success).to.equal(true);
                     expect(Object.keys(res.body.data).length).to.equal(2);
                     done();
-                })
+                });
         });
 
         it('should delete uploaded files', (done) => {

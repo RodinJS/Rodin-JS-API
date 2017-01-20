@@ -171,7 +171,6 @@ router.route('/me')
  */
   .get(check.ifTokenValid, userCapacity.getUserStroageSize, projectCtrl.getProjectsCount, userCtrl.me);
 
-
 router.route('/unsync/:username/:socialName')
   .get(check.ifTokenValid, userCtrl.unsyncSocial);
 
@@ -309,7 +308,6 @@ router.route('/:username')
 	 *      }
    */
   .delete(check.ifTokenValid, userCtrl.remove);
-
 
 router.route('/confirmUsername')
   .post(check.ifTokenValid, userCtrl.confirmUsername, authCtrl.finalizeUser);

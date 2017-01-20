@@ -2,7 +2,7 @@
 exports.exec = (cmd, dir, cb) => {
     var child_process = require('child_process');
     var parts = cmd.split(/\s+/g);
-    var p = child_process.spawn(parts[0], parts.slice(1), {stdio: 'inherit', cwd: dir});
+    var p = child_process.spawn(parts[0], parts.slice(1), { stdio: 'inherit', cwd: dir });
     p.on('exit', (code) => {
         var err = null;
         if (code) {
@@ -11,6 +11,7 @@ exports.exec = (cmd, dir, cb) => {
             err.cmd = cmd;
             err.dir = dir;
         }
+
         if (cb) cb(err);
     });
 };
@@ -27,5 +28,6 @@ exports.series = (cmds, dir, cb) => {
             }
         });
     };
+
     execNext();
 };

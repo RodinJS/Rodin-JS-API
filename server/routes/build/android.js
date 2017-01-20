@@ -1,5 +1,5 @@
 import express from 'express';
-import AndroidBuildController from '../../controllers/build/android'
+import AndroidBuildController from '../../controllers/build/android';
 
 const router = express.Router();
 
