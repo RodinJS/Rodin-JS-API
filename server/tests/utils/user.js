@@ -4,8 +4,19 @@
 
 import request from 'supertest-as-promised';
 import app from '../../../index';
+import UserModel from '../../models/user';
+import _ from 'lodash';
+import async from 'async';
+import mongoose from 'mongoose';
 
 const common = {};
+
+const god = {
+    email: 'odin@asgard.io',
+    username: 'odin',
+    password: 'Lokiis603',
+    role: 'God',
+};
 
 function login(done) {
 
@@ -14,26 +25,40 @@ function login(done) {
         password: '1234567890AAa',
     };
 
-    request(app)
-        .post('/api/auth/login')
-        .send(user)
-        .then(res => {
-            common.token = res.body.data.token;
-            common.username = user.username;
-            common.passowrd = user.password;
-            done();
-        });
+    request
+    (app)
+      .post('/api/auth/login')
+      .send(user)
+      .then(res => {
+        common.token = res.body.data.token;
+        common.username = user.username;
+        common.passowrd = user.password;
+        done();
+    });
 
+}
+
+function loginAsGod(done) {
+    request
+    (app)
+      .post('/api/auth/login')
+      .send(_.pick(god, 'username', 'password'))
+      .then(res => {
+        common.token = res.body.data.token;
+        common.username = god.username;
+        common.passowrd = god.password;
+        done();
+    });
 }
 
 function getTestProjects(done) {
     request(app)
-        .get('/api/project')
-        .set(generateHeaders())
-        .then(res=> {
-            common.project = res.body.data[0];
-            done();
-        });
+      .get('/api/project')
+      .set(generateHeaders())
+      .then(res => {
+        common.project = res.body.data[0];
+        done();
+    });
 }
 
 function generateHeaders() {
@@ -48,6 +73,14 @@ function generateHookHeader() {
     };
 }
 
+function setProject(project) {
+    common.project = project;
+}
+
+function getProject() {
+    return common.project;
+}
+
 function getToken() {
     return common.token;
 }
@@ -60,4 +93,25 @@ function getUserName() {
     return common.username;
 }
 
-export default { login, getToken, getTestProjects, getProject, generateHeaders, generateHookHeader, getUserName };
+function createGod() {
+    const GOD = new UserModel(god);
+    GOD.save()
+      .then(response=> {
+    })
+      .catch(err=> {
+    });
+}
+
+function dropCollections(callback) {
+
+    let collections = _.keys(mongoose.connection.collections);
+    async.forEach(collections, function (collectionName, done) {
+        let collection = mongoose.connection.collections[collectionName];
+        collection.drop((err) => {
+            if (err && err.message != 'ns not found') done(err);
+            done(null);
+        });
+    }, callback);
+}
+
+export default { login, getToken, getTestProjects, getProject, generateHeaders, generateHookHeader, getUserName, createGod, loginAsGod,  dropCollections, setProject };

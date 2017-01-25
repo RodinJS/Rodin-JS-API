@@ -7,24 +7,22 @@ import babelCompiler from 'babel-core/register';
 import * as isparta from 'isparta';
 import apidoc from 'gulp-apidoc';
 
-
 const plugins = gulpLoadPlugins();
 const testPath = './server/tests/';
 const paths = {
-	js: ['./**/*.js', '!dist/**', '!projects/**', '!publish/**', '!public/**', '!node_modules/**', '!coverage/**'],
-	nonJs: ['./package.json', './.gitignore'],
-	tests: './server/tests/*.js',
-	singleTestFile: [''+testPath+'1.user.test.js', ''+testPath+'2.projects.test.js', ''+testPath+'99.removeUser.test.js']
+    js: ['./**/*.js', '!dist/**', '!projects/**', '!publish/**', '!public/**', '!node_modules/**', '!coverage/**'],
+    nonJs: ['./package.json', './.gitignore'],
+    tests: './server/tests/*.js',
+    singleTestFile: ['' + testPath + '1.user.test.js', `${testPath}2.projects.test.js`, `${testPath}7.modules.test.js`, '' + testPath + '99.removeUser.test.js'],
 };
 
-
 const options = {
-	codeCoverage: {
-		reporters: ['lcov', 'text-summary'],
-		thresholds: {
-			global: { statements: 80, branches: 80, functions: 80, lines: 80 }
-		}
-	}
+    codeCoverage: {
+        reporters: ['lcov', 'text-summary'],
+        thresholds: {
+            global: { statements: 80, branches: 80, functions: 80, lines: 80 },
+        },
+    },
 };
 
 // Clean up dist and coverage directory
@@ -34,11 +32,11 @@ gulp.task('clean', () =>
 
 // Set env variables for testing process
 gulp.task('set-env', () => {
-	plugins.env({
-		vars: {
-			NODE_ENV: 'test'
-		}
-	});
+    plugins.env({
+        vars: {
+            NODE_ENV: 'test',
+        },
+    });
 });
 // Lint Javascript
 // gulp.task('lint', () =>
@@ -55,10 +53,10 @@ gulp.task('set-env', () => {
 // );
 
 gulp.task('apidoc', (done) => {
-	apidoc({
-	src: "./server",
-	dest: "./doc"
-	}, done);
+    apidoc({
+        src: './server',
+        dest: './doc',
+    }, done);
 });
 
 // Copy non-js files to dist
@@ -75,22 +73,22 @@ gulp.task('babel', () =>
 		.pipe(plugins.sourcemaps.init())
 		.pipe(plugins.babel())
 		.pipe(plugins.sourcemaps.write('.', {
-			includeContent: false,
-			sourceRoot(file) {
-				return path.relative(file.path, __dirname);
-			}
-		}))
+    includeContent: false,
+    sourceRoot(file) {
+        return path.relative(file.path, __dirname);
+    },
+}))
 		.pipe(gulp.dest('dist'))
 );
 
 // Start server with restart on file changes
 gulp.task('nodemon', ['copy', 'babel'], () =>
 	plugins.nodemon({
-		script: path.join('dist', 'index.js'),
-		ext: 'js',
-		ignore: ['node_modules/**/*.js', 'dist/**/*.js', 'projects/**', 'public/**'],
-		tasks: ['copy', 'babel']
-	})
+    script: path.join('dist', 'index.js'),
+    ext: 'js',
+    ignore: ['node_modules/**/*.js', 'dist/**/*.js', 'projects/**', 'public/**'],
+    tasks: ['copy', 'babel'],
+})
 );
 
 // covers files for code coverage
@@ -98,92 +96,91 @@ gulp.task('pre-test', () =>
 	gulp.src([...paths.js, '!gulpfile.babel.js'])
 		// Covering files
 		.pipe(plugins.istanbul({
-			instrumenter: isparta.Instrumenter,
-			includeUntested: true
-		}))
+    instrumenter: isparta.Instrumenter,
+    includeUntested: true,
+}))
 		// Force `require` to return covered files
 		.pipe(plugins.istanbul.hookRequire())
 );
 
 // triggers mocha test with code coverage
 gulp.task('test', ['pre-test', 'set-env'], () => {
-	let reporters;
-	let	exitCode = 0;
+    let reporters;
+    let	exitCode = 0;
 
-	if (plugins.util.env['code-coverage-reporter']) {
-		reporters = [...options.codeCoverage.reporters, plugins.util.env['code-coverage-reporter']];
-	} else {
-		reporters = options.codeCoverage.reporters;
-	}
+    if (plugins.util.env['code-coverage-reporter']) {
+        reporters = [...options.codeCoverage.reporters, plugins.util.env['code-coverage-reporter']];
+    } else {
+        reporters = options.codeCoverage.reporters;
+    }
 
-	return gulp.src([paths.tests], { read: false })
-		.pipe(plugins.plumber())
-		.pipe(plugins.mocha({
-			reporter: plugins.util.env['mocha-reporter'] || 'spec',
-			ui: 'bdd',
-			timeout: 6000,
-			compilers: {
-				js: babelCompiler
-			}
-		}))
-		.once('error', (err) => {
-			plugins.util.log(err);
-			exitCode = 1;
-		})
-		// Creating the reports after execution of test cases
-		.pipe(plugins.istanbul.writeReports({
-			dir: './coverage',
-			reporters
-		}))
-		// Enforce test coverage
-		// .pipe(plugins.istanbul.enforceThresholds({
-		//   thresholds: options.codeCoverage.thresholds
-		// }))
-		.once('end', () => {
-			plugins.util.log('completed !!');
-			process.exit(exitCode);
-		});
+    return gulp.src([paths.tests], { read: false })
+     .pipe(plugins.plumber())
+     .pipe(plugins.mocha({
+        reporter: plugins.util.env['mocha-reporter'] || 'spec',
+        ui: 'bdd',
+        timeout: 6000,
+        compilers: {
+            js: babelCompiler,
+        },
+    }))
+     .once('error', (err) => {
+        plugins.util.log(err);
+        exitCode = 1;
+    })
+     // Creating the reports after execution of test cases
+     .pipe(plugins.istanbul.writeReports({
+        dir: './coverage',
+        reporters,
+    }))
+     // Enforce test coverage
+     // .pipe(plugins.istanbul.enforceThresholds({
+     //   thresholds: options.codeCoverage.thresholds
+     // }))
+     .once('end', () => {
+        plugins.util.log('completed !!');
+        process.exit(exitCode);
+    });
 });
 
 
 // run single test
 gulp.task('singletest', ['set-env'], () => {
-	let reporters;
-	let	exitCode = 0;
+    let reporters;
+    let	exitCode = 0;
 
-	return gulp.src([...paths.singleTestFile], { read: false })
-		.pipe(plugins.mocha({
-			reporter: plugins.util.env['mocha-reporter'] || 'spec',
-			ui: 'bdd',
-			timeout: 6000,
-			compilers: {
-				js: babelCompiler
-			}
-		}))
-		.once('error', (err) => {
-			plugins.util.log(err);
-			exitCode = 1;
-		})
-		.once('end', () => {
-			plugins.util.log('completed !!');
-			process.exit(exitCode);
-		});
+    return gulp.src([...paths.singleTestFile], { read: false })
+     .pipe(plugins.mocha({
+        reporter: plugins.util.env['mocha-reporter'] || 'spec',
+        ui: 'bdd',
+        timeout: 6000,
+        compilers: {
+            js: babelCompiler,
+        },
+    }))
+     .once('error', (err) => {
+        plugins.util.log(err);
+        exitCode = 1;
+    })
+     .once('end', () => {
+        plugins.util.log('completed !!');
+        process.exit(exitCode);
+    });
 });
 
 // clean dist, compile js files, copy non-js files and execute tests
 gulp.task('mocha', ['clean'], () => {
-	runSequence(
-		['copy', 'babel'],
-    'test'
-	);
+    runSequence(
+     ['copy', 'babel'],
+       'test'
+    );
 });
 
 // gulp serve for development
 gulp.task('serve', ['clean'], () => runSequence('nodemon'));
 
-
 gulp.task('default', ['clean'], () => {
-	runSequence(
-		['copy', 'babel']
-	);
+    runSequence(
+     ['copy', 'babel']
+    );
 });

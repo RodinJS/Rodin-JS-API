@@ -80,7 +80,7 @@ function create(req, res, next) {
         return next(err);
     }
 
-    const savingData = _.pick(req.body, ['title', 'description', 'thumbnail', 'author', 'exampleLink', 'documentationLink']);
+    const savingData = _.pick(req.body, ['title', 'description', 'thumbnail', 'author', 'price', 'url', 'exampleLink', 'documentationLink']);
 
     let module = new Modules(savingData);
 
@@ -91,13 +91,22 @@ function create(req, res, next) {
 }
 
 function subscribe(req, res, next) {
-    let subscribeModule = new ModulesSubscribe({
-        moduleId: req.module._id,
-        owner: req.user.username,
-    });
+    ModulesSubscribe.findOne({ moduleId: req.module._id, owner: req.user.username })
+      .then(module=> {
+        if (module) {
+            const err = new APIError(`Module already purchased`, httpStatus.BAD_REQUEST, true);
+            return next(err);
+        }
 
-    subscribeModule.saveAsync()
-      .then(subscribedModule => onSuccess(subscribedModule, res))
+        let subscribeModule = new ModulesSubscribe({
+            moduleId: req.module._id,
+            owner: req.user.username,
+        });
+
+        subscribeModule.saveAsync()
+          .then(subscribedModule => onSuccess(subscribedModule, res))
+          .catch(err => onError(err, next));
+    })
       .catch(err => onError(err, next));
 
 }

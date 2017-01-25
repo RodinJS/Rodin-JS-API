@@ -66,6 +66,7 @@ const UserSchema = new mongoose.Schema({
         type: String,
         enum: ['Free', 'Premium', 'Enterprise', 'Admin', 'God'],
         default: 'Free',
+        required: true,
     },
     allowProjectsCount: {
         type: Number,

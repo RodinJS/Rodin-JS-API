@@ -3,6 +3,9 @@ import httpStatus from '../helpers/httpStatus';
 import chai from 'chai';
 import { expect } from 'chai';
 import app from '../../index';
+import UserUtils from './utils/user';
+UserUtils.createGod();
+UserUtils.dropCollections();
 
 chai.config.includeStack = true;
 
@@ -21,6 +24,12 @@ describe('## User APIs', () => {
             username: 'admin',
             password: '1234567890AAa',
             role: 'Admin',
+        },
+        god: {
+            email: 'mega@god.me',
+            username: 'god',
+            password: '1234567890AAa',
+            role: 'god',
         },
         signUpUserfacebook: {
             id: 1580547325,
@@ -365,70 +374,30 @@ describe('## User APIs', () => {
 
     });
 
-    /*  describe('#ADMIN ROLE', () => {
+    /*describe('#ADMIN ROLE', () => {
         it('should create a new user with admin role', (done) => {
-          request(app)
-            .post('/api/user')
-            .send(info.admin)
-            .expect(httpStatus.OK)
-            .then(res => {
-              expect(res.body.data.user.email).to.equal(info.admin.email);
-              expect(res.body.data.user.role).to.equal('Admin');
-              done();
+            request(app)
+              .post('/api/user')
+              .send(info.admin)
+              .expect(httpStatus.OK)
+              .then(res => {
+                expect(res.body.data.user.email).to.equal(info.admin.email);
+                expect(res.body.data.user.role).to.equal('Admin');
+                done();
             });
         });
 
         it('should login admin', (done) => {
-          request(app)
-            .post('/api/auth/login')
-            .send({email: info.admin.email, password: info.admin.password})
-            .expect(httpStatus.OK)
-            .then(res => {
-              expect(res.body.data.user.email).to.equal(info.admin.email);
-              expect(res.body.data.user.role).to.equal('Admin');
-              info.admin.token = res.body.data.token;
-              done();
+            request(app)
+              .post('/api/auth/login')
+              .send({ email: info.admin.email, password: info.admin.password })
+              .expect(httpStatus.OK)
+              .then(res => {
+                expect(res.body.data.user.email).to.equal(info.admin.email);
+                expect(res.body.data.user.role).to.equal('Admin');
+                info.admin.token = res.body.data.token;
+                done();
             });
         });
-
-        it('should get all users', (done) => {
-          request(app)
-            .get('/api/user')
-            .set({'x-access-token': info.admin.token})
-            .expect(httpStatus.OK)
-            .then(res => {
-              expect(res.body).to.be.an('array');
-              done();
-            });
-        });
-      });*/
-
-
-    // describe('# GET /api/user/:userEmail', () => {
-    //   it('should get user details', (done) => {
-    //     request(app)
-    //       .get(`/api/user/${user.email}`)
-    //       .expect(httpStatus.OK)
-    //       .then(res => {
-    //         expect(res.body.email).to.equal(user.email);
-    //         expect(res.body.role).to.equal('Free');
-    //         done();
-    //       });
-    //   });
-
-
-    // describe('# PUT /api/user/:userEmail', () => {
-    //   it('should update user details', (done) => {
-    //     user.email = 'gago@test.de';
-    //     request(app)
-    //       .put(`/api/user/${user.email}`)
-    //       .send(user)
-    //       .expect(httpStatus.OK)
-    //       .then(res => {
-    //         expect(res.body.email).to.equal('gago@test.de');
-    //         expect(res.body.role).to.equal('Free');
-    //         done();
-    //       });
-    //   });
-    // });
+    });*/
 });

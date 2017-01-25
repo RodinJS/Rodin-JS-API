@@ -11,18 +11,15 @@ import fsExtra from 'fs-extra';
 process.on('message', (message) => {
 
     const project = message.project;
-    gulp.task('transpiler', () => {
-        return gulp.src([project + '/**/*.js', '!' + project + '/build/**', '!' + project + '/pre_build/**'])
+    gulp.task('transpiler', () => gulp.src([project + '/**/*.js', '!' + project + '/build/**', '!' + project + '/pre_build/**'])
           .pipe(babel({
             presets: ['es2015'],
             plugins: ['transform-es2015-modules-systemjs'],
         }))
           .on('error', onError)
-          //.pipe(rename({suffix: '_c'}))
-
           .pipe(gulp.dest(project + '/pre_build'))
-          .on('error', onError);
-    });
+          .on('error', onError)
+    );
 
     gulp.start('transpiler', completeTranspile);
 

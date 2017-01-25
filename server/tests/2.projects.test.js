@@ -42,6 +42,7 @@ describe('## Projects APIs', () => {
           .expect(httpStatus.CREATED)
           .then(res => {
             project.info = res.body.data;
+            User.setProject(res.body.data);
             expect(res.body.success).to.equal(true);
             done();
         });
@@ -141,8 +142,8 @@ describe('## Projects APIs', () => {
                 return file.name;
             });
 
-            expect(files[0]).to.equal('index.html');
-            expect(files[1]).to.equal('index.js');
+            expect(files[0]).to.equal('.gitignore');
+            expect(files[1]).to.equal('index.html');
             done();
         });
     });
@@ -189,7 +190,6 @@ describe('## Projects APIs', () => {
           .expect(httpStatus.OK)
           .then(res => {
             expect(res.body.success).to.equal(true);
-            //expect(res.body.data).to.equal('Project published');
             done();
         });
     });
