@@ -44,20 +44,28 @@ function getMyModules(req, res, next) {
           .then(modules => {
             ModulesAssign.find({
                 owner: req.user.username,
-                projectId: req.query.projectId,
                 moduleId: { $in: subscribedModulesIds },
             })
               .then(assignedModules => {
 
                 const mappedModules = _.map(modules.map(m => m.toObject()), (module) => {
-                    let assigned = _.find(assignedModules, (m) => m.toObject().moduleId.toString() === module._id.toString());
-                    if (assigned) {
-                        req.module = module;
-                        module.script = generateScript(req);
+                    let assigned = _.filter(assignedModules, (m) => m.toObject().moduleId.toString() === module._id.toString());
+                    if (assigned.length > 0) {
+                        module.projects = _.map(assigned, (assign) => {
+                            req.module = module;
+                            let override = {
+                                projectId: assign.projectId,
+                                allowedHosts: assign.allowedHosts,
+                                script: generateScript(req),
+                            };
+                            return override;
+                        });
                     }
 
                     return module;
                 });
+
+                console.log(mappedModules);
 
                 return onSuccess(mappedModules, res);
             })
@@ -90,9 +98,29 @@ function create(req, res, next) {
 
 }
 
+function update(req, res, next) {
+    if (_.isUndefined(req.body.allowedHosts) || _.isEmpty(req.body.allowedHosts)) {
+        const err = new APIError('Provide allowed hosts', 400, true);
+        return next(err);
+    }
+
+    if (_.isUndefined(req.body.projectId)) {
+        const err = new APIError('Provide project id', 400, true);
+        return next(err);
+    }
+
+    const query = { owner: req.user.username, projectId: req.body.projectId, moduleId: req.module._id };
+    const update = { $set: { allowedHosts: req.body.allowedHosts } };
+
+    ModulesAssign.findOneAndUpdate(query, update, { new: true })
+      .then(assignedModule => onSuccess(assignedModule, res))
+      .catch(err => onError(err, next));
+
+}
+
 function subscribe(req, res, next) {
     ModulesSubscribe.findOne({ moduleId: req.module._id, owner: req.user.username })
-      .then(module=> {
+      .then(module => {
         if (module) {
             const err = new APIError(`Module already purchased`, httpStatus.BAD_REQUEST, true);
             return next(err);
@@ -169,4 +197,4 @@ function onError(e, next) {
     return next(err);
 }
 
-export default { list, getById, create, subscribe, assignToProject, checkIsSubscribed, getMyModules };
+export default { list, getById, create, subscribe, assignToProject, checkIsSubscribed, getMyModules, update };

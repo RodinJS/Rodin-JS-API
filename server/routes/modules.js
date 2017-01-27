@@ -13,7 +13,8 @@ router.route('/')
   .post(check.isGod, modulesCtrl.create);
 
 router.route('/mine')
-  .get(check.ifTokenValid, modulesCtrl.getMyModules);
+  .get(check.ifTokenValid, modulesCtrl.getMyModules)
+  .put(check.ifTokenValid, modulesCtrl.checkIsSubscribed, modulesCtrl.getById, modulesCtrl.update);
 
 router.route('/subscribe')
   .post(check.ifTokenValid, modulesCtrl.getById, modulesCtrl.subscribe);
