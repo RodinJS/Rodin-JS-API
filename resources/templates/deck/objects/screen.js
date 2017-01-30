@@ -4,6 +4,7 @@ import {THREEObject} from 'https://cdn.rodin.io/v0.0.1/rodinjs/sculpt/THREEObjec
 import {SceneManager} from 'https://cdn.rodin.io/v0.0.1/rodinjs/scene/SceneManager';
 import {Animation} from 'https://cdn.rodin.io/v0.0.1/rodinjs/animation/Animation';
 import {EVENT_NAMES} from 'https://cdn.rodin.io/v0.0.1/rodinjs/constants/constants';
+import {Event} from 'https://cdn.rodin.io/v0.0.1/rodinjs/Event';
 
 const scene = SceneManager.get();
 
@@ -32,6 +33,8 @@ export class Screen extends THREEObject {
         const height = width / p;
 
         super(new THREE.Mesh(new THREE.PlaneGeometry(width, height, 1, 1), new THREE.MeshBasicMaterial({side: THREE.DoubleSide})));
+        this.locked = false;
+        this.lastChanged = 0;
 
         this.animator.add(hoverAnimation, hoverOutAnimation);
 
@@ -44,20 +47,21 @@ export class Screen extends THREEObject {
         ];
 
         this.on('ready', () => {
-            this.currentIndex = 0;
+            this.currentIndex = -1;
             this.show(0);
+            this.lock();
 
             this.backButton = new Element({
-                width: .15,
-                height: .15,
+                width: .2,
+                height: .2,
                 background: {
                     color: 0xaaaaaa,
                     opacity: 0
                 },
                 image: {
                     url: "./images/backbutton.png",
-                    width: .15,
-                    height: .15,
+                    width: .2,
+                    height: .2,
                     opacity: 1,
                     position: {
                         h: 50,
@@ -98,8 +102,12 @@ export class Screen extends THREEObject {
     }
 
     show(slideIndex) {
+        if(Date.now() - this.lastChanged < 200) return;
+        this.lastChanged = Date.now();
+        if(this.locked || this.currentIndex === slideIndex) return;
         this.object3D.material.map = this.slides[slideIndex];
         this.currentIndex = slideIndex;
+        this.emit('change', new Event(this));
     }
 
     next() {
@@ -112,6 +120,14 @@ export class Screen extends THREEObject {
         if (this.currentIndex > 0) {
             this.show(this.currentIndex - 1);
         }
+    }
+
+    lock() {
+        this.locked = true;
+    }
+
+    unlock() {
+        this.locked = false;
     }
 }
 
