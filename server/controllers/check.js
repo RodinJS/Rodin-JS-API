@@ -83,6 +83,26 @@ function isGod(req, res, next) {
     });
 }
 
+function checkAdminPermission(req, res, next) {
+    const token = req.headers['x-access-token']; //TODO: Get from Auth header
+    const allowedRoles = ['Admin', 'God'];
+    // verifies secret and checks exp date
+    jwt.verify(token, config.jwtSecret, function (err, decoded) {
+        if (err) {
+            let error = new APIError('You are not authenticated!', httpStatus.UNAUTHORIZED, true);
+            return next(error);
+        }
+
+        if (allowedRoles.indexOf(decoded.role) > -1) {
+            return next();
+
+        }
+
+        let error = new APIError('You are not authorized to perform this operation!', httpStatus.FORBIDDEN, true);
+        return next(error);
+    });
+}
+
 /**
  * Check if email exists.
  * @param req
@@ -228,4 +248,4 @@ function validateStorage(req, res, next) {
     });
 }
 
-export default { ifAdmin, ifPremium, isGod, ifTokenValid, project, ifSelfUpdate, isProjectOwn, validateStorage };
+export default { ifAdmin, ifPremium, isGod, ifTokenValid, project, ifSelfUpdate, isProjectOwn, validateStorage, checkAdminPermission};

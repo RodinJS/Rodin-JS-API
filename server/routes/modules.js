@@ -17,7 +17,8 @@ router.route('/mine')
   .put(check.ifTokenValid, modulesCtrl.checkIsSubscribed, modulesCtrl.getById, modulesCtrl.update);
 
 router.route('/subscribe')
-  .post(check.ifTokenValid, modulesCtrl.getById, modulesCtrl.subscribe);
+  .post(check.ifTokenValid, modulesCtrl.getById, modulesCtrl.subscribe)
+  .delete(check.ifTokenValid, modulesCtrl.getById, modulesCtrl.unsubscribe);
 
 router.route('/assign')
   .post(check.ifTokenValid, modulesCtrl.checkIsSubscribed, modulesCtrl.getById,  modulesCtrl.assignToProject);

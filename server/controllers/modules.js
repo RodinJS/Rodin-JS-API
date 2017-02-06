@@ -30,10 +30,6 @@ function getById(req, res, next) {
 }
 
 function getMyModules(req, res, next) {
-    if (_.isUndefined(req.query.projectId)) {
-        const err = new APIError('Provide project id', 400, true);
-        return next(err);
-    }
 
     ModulesSubscribe.getByOwner(req.user.username)
       .then(subscribedModules => {
@@ -42,6 +38,7 @@ function getMyModules(req, res, next) {
 
         Modules.find({ _id: { $in: subscribedModulesIds } })
           .then(modules => {
+
             ModulesAssign.find({
                 owner: req.user.username,
                 moduleId: { $in: subscribedModulesIds },
@@ -60,12 +57,12 @@ function getMyModules(req, res, next) {
                             };
                             return override;
                         });
+                        let moduleInfo = _.find(subscribedModules, (subscribedModule) => subscribedModule.moduleId.toString() === module._id.toString());
+                        module.unsubscribed = moduleInfo.unsubscribed;
                     }
 
                     return module;
                 });
-
-                console.log(mappedModules);
 
                 return onSuccess(mappedModules, res);
             })
@@ -139,6 +136,15 @@ function subscribe(req, res, next) {
 
 }
 
+function unsubscribe(req, res, next) {
+
+    //ModulesSubscribe.findOneAndUpdate({ moduleId: req.module._id, owner: req.user.username }, { $set: { unsubscribed: true } }, { new: true })
+    ModulesSubscribe.findOneAndRemove({ moduleId: req.module._id, owner: req.user.username })
+      .then(unsubscribed => onSuccess(unsubscribed, res))
+      .catch(err => onError(err, next));
+
+}
+
 function checkIsSubscribed(req, res, next) {
     if (_.isUndefined(req.body.moduleId)) {
         const err = new APIError('Provide module id', 400, true);
@@ -152,10 +158,10 @@ function checkIsSubscribed(req, res, next) {
 }
 
 function assignToProject(req, res, next) {
-    if (_.isUndefined(req.body.allowedHosts) || _.isEmpty(req.body.allowedHosts)) {
+    /*if (_.isUndefined(req.body.allowedHosts) || _.isEmpty(req.body.allowedHosts)) {
         const err = new APIError('Provide allowed hosts', 400, true);
         return next(err);
-    }
+    }*/
 
     if (_.isUndefined(req.body.projectId)) {
         const err = new APIError('Provide project id', 400, true);
@@ -173,7 +179,6 @@ function assignToProject(req, res, next) {
             owner: req.user.username,
             projectId: req.body.projectId,
             moduleId: req.module._id,
-            allowedHosts: req.body.allowedHosts,
         });
         assignModule.save()
           .then(assignedModule => onSuccess(generateScript(req), res))
@@ -197,4 +202,4 @@ function onError(e, next) {
     return next(err);
 }
 
-export default { list, getById, create, subscribe, assignToProject, checkIsSubscribed, getMyModules, update };
+export default { list, getById, create, subscribe, assignToProject, checkIsSubscribed, getMyModules, update, unsubscribe };

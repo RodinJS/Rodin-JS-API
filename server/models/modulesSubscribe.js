@@ -23,6 +23,9 @@ const subscribedModules = new mongoose.Schema({
         default: Date.now,
         required: true,
     },
+    unsubscribed: {
+        type: Boolean,
+    },
     expiredAt: {
         type: Date,
         default: (Date.now() + 2629746000), //currentDate + one month

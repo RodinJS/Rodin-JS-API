@@ -87,7 +87,7 @@ router.route('/')
 	 *          }
 	 *      }
  */
-  .get(check.ifAdmin, userCtrl.list)
+  .get(check.checkAdminPermission, userCtrl.list)
 
   /**
    * @api {post} /api/user Create new user

@@ -193,7 +193,7 @@ function resetPassword(req, res, next) {
               {
                 name: 'resetLink',
                 content: `${config.clientURL}/reset-password?t=${resetToken}`,
-            }, ],
+            },],
         };
         mandrill.sendMail(req, res, () => {
             let responseMessage = 'Mail sent';
@@ -316,7 +316,7 @@ function create(req, res, next) {
                 }, {
                     name: 'userName',
                     content: savedUser.username,
-                }, ],
+                },],
             };
 
             mandrill.sendMail(req, res, () => {
@@ -412,7 +412,7 @@ function updatePassword(req, res, next) {
  */
 function list(req, res, next) {
     const { limit = 50, skip = 0 } = req.query;
-    User.list({ limit, skip }).then((users) => res.json(users))
+    User.list({ limit, skip }).then((users) => res.status(200).json({ success: true, data: users }))
       .error((e) => next(e));
 }
 

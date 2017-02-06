@@ -1,19 +1,12 @@
 // jscs:disable validateIndentation
 import express from 'express';
 import validate from 'express-validation';
-import expressJwt from 'express-jwt';
 import paramValidation from '../../config/param-validation';
 import authCtrl from '../controllers/auth';
-import check from '../controllers/check';
-import config from '../../config/env';
 import userCapacity from '../helpers/directorySize';
 import projectCtrl from '../controllers/project';
-
-import passport from '../../config/passport';
-
+import check from '../controllers/check';
 const router = express.Router();	// eslint-disable-line new-cap
-
-// const requireAuth = passport.authenticate('jwt', { session: false }); // eslint-disable-line
 
 /**
  * @api {post} /api/auth/login Login
@@ -63,6 +56,9 @@ const router = express.Router();	// eslint-disable-line new-cap
  */
 router.route('/login')
 	.post(validate(paramValidation.login), authCtrl.login, userCapacity.getUserStroageSize, projectCtrl.getProjectsCount, authCtrl.finalizeUser);
+
+router.route('/login/admin')
+  .post(validate(paramValidation.login), authCtrl.login, check.checkAdminPermission, authCtrl.finalizeUser);
 
 /**
  * @api {post} /api/auth/verify Verify token

@@ -23,10 +23,6 @@ const assignedModulesSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    allowedHosts: {
-        type: Array,
-        required: true,
-    },
 
 });
 
