@@ -128,12 +128,11 @@ function subscribe(req, res, next) {
         //user unsubscribed but not exiperd
         if (module && module.unsubscribed && (new Date() < new Date(module.expiredAt))) {
             module.subscribedAt = new Date();
-            module.expiredAt = (new Date(module.expiredAt) +  2629746000); // month
+            module.expiredAt = (new Date(module.expiredAt).getTime() +  2629746000); // month
             module.unsubscribed = false;
-
             return module.save()
-              .then(subscribedModule => onSuccess(subscribedModule, res))
-              .catch(err => onError(err, next));
+                .then(subscribedModule => onSuccess(subscribedModule, res))
+                .catch(err => onError(err, next));
         }
 
         let subscribeModule = new ModulesSubscribe({
