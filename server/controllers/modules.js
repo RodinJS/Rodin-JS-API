@@ -59,6 +59,7 @@ function getMyModules(req, res, next) {
                         });
                         let moduleInfo = _.find(subscribedModules, (subscribedModule) => subscribedModule.moduleId.toString() === module._id.toString());
                         module.unsubscribed = moduleInfo.unsubscribed;
+                        module.expiredAt = moduleInfo.expiredAt;
                     }
 
                     return module;
@@ -118,9 +119,21 @@ function update(req, res, next) {
 function subscribe(req, res, next) {
     ModulesSubscribe.findOne({ moduleId: req.module._id, owner: req.user.username })
       .then(module => {
-        if (module) {
-            const err = new APIError(`Module already purchased`, httpStatus.BAD_REQUEST, true);
+
+        if (module && !module.unsubscribed) {
+            const err = new APIError(`Module already subscribed`, httpStatus.BAD_REQUEST, true);
             return next(err);
+        }
+
+        //user unsubscribed but not exiperd
+        if (module && module.unsubscribed && (new Date() < new Date(module.expiredAt))) {
+            module.subscribedAt = new Date();
+            module.expiredAt = (new Date(module.expiredAt) +  2629746000); // month
+            module.unsubscribed = false;
+
+            return module.save()
+              .then(subscribedModule => onSuccess(subscribedModule, res))
+              .catch(err => onError(err, next));
         }
 
         let subscribeModule = new ModulesSubscribe({
@@ -138,8 +151,11 @@ function subscribe(req, res, next) {
 
 function unsubscribe(req, res, next) {
 
-    //ModulesSubscribe.findOneAndUpdate({ moduleId: req.module._id, owner: req.user.username }, { $set: { unsubscribed: true } }, { new: true })
-    ModulesSubscribe.findOneAndRemove({ moduleId: req.module._id, owner: req.user.username })
+    ModulesSubscribe.findOneAndUpdate({
+        moduleId: req.module._id,
+        owner: req.user.username,
+    }, { $set: { unsubscribed: true, unsubscrbedDate: new Date() } }, { new: true })
+    //ModulesSubscribe.findOneAndRemove({ moduleId: req.module._id, owner: req.user.username })
       .then(unsubscribed => onSuccess(unsubscribed, res))
       .catch(err => onError(err, next));
 
@@ -158,10 +174,6 @@ function checkIsSubscribed(req, res, next) {
 }
 
 function assignToProject(req, res, next) {
-    /*if (_.isUndefined(req.body.allowedHosts) || _.isEmpty(req.body.allowedHosts)) {
-        const err = new APIError('Provide allowed hosts', 400, true);
-        return next(err);
-    }*/
 
     if (_.isUndefined(req.body.projectId)) {
         const err = new APIError('Provide project id', 400, true);
@@ -202,4 +214,14 @@ function onError(e, next) {
     return next(err);
 }
 
-export default { list, getById, create, subscribe, assignToProject, checkIsSubscribed, getMyModules, update, unsubscribe };
+export default {
+    list,
+    getById,
+    create,
+    subscribe,
+    assignToProject,
+    checkIsSubscribed,
+    getMyModules,
+    update,
+    unsubscribe,
+};
