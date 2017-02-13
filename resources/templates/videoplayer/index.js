@@ -25,8 +25,8 @@ scene.setCameraProperty("far", 350);
 scene.setCameraProperty("fov", 70);
 
 let player = new MaterialPlayer({
-    HD: "http://vr.i2vr.io/uploads/videos/streaming/118_HD.mp4",
-    SD: "http://vr.i2vr.io/uploads/videos/streaming/118_SD.mp4",
+    HD: "video/test_HD.mp4",
+    SD: "video/test_SD.mp4",
     default: "HD"
 });
 
