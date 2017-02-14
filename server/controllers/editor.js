@@ -449,7 +449,8 @@ function uploadFiles(req, res, next) {
 function startUpload(folderPath, req, action, res, next) {
     const PromisifiedFS = Promise.promisifyAll(fs);
     var promises = req.files.map((file) => {
-        return PromisifiedFS.writeFileAsync(folderPath + '/' + file.originalname, new Buffer(file.buffer));
+        PromisifiedFS.writeFileAsync(folderPath + '/' + file.originalname, new Buffer(file.buffer));
+        return fs.chmodSync(folderPath + '/' + file.originalname, 0o755);
     });
 
     if (action === 'directory') {
