@@ -9,6 +9,10 @@
 		'rodin/physics': 'npm:physics'		
 	};	
 
+	var meta = {
+		'build/index.js': { authorization: true }
+	};
+
 	var packages = {
 		'dist': { main: 'index.js', defaultExtension: 'js' },
 		'rodin/core': { main: 'index.js', defaultExtension: 'js' },
@@ -17,19 +21,19 @@
 
 	var moduleNames = [
 		'core/error',
-        'core/time',
-        'core/scene',
-        'core/sculpt',
-        'core/messenger',
-        'core/eventEmitter',
-        'core/utils',
-        'core/set',
-        'core/initializer',
-        'core/constants',
-        'core/rodinEvent',
-        'core/raycaster',
-        'core/controllers',
-        'core/animation'
+		'core/time',
+		'core/scene',
+		'core/sculpt',
+		'core/messenger',
+		'core/eventEmitter',
+		'core/utils',
+		'core/set',
+		'core/initializer',
+		'core/constants',
+		'core/rodinEvent',
+		'core/raycaster',
+		'core/controllers',
+		'core/animation'
 	];
 
 	function packIndex(moduleName) {
@@ -41,7 +45,8 @@
 	var config = {
 		paths: paths,
 		map: map,
-		packages: packages
+		packages: packages,
+		meta: meta
 	};
 
 	System.config(config);
