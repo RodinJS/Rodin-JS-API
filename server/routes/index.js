@@ -10,6 +10,7 @@ import notificationsRoute from './notifications';
 import gitRoute from './git';
 import domainsRoute from './domains';
 import modulesRoute from './modules';
+import pagesRoute from './pages';
 import RodinSanitizer from '../helpers/sanitizer';
 
 import _ from 'lodash';
@@ -60,6 +61,10 @@ const apiRoutes = {
     modules: {
         route: '/modules',
         module: [RodinSanitizer.makeSanitize, modulesRoute],
+    },
+    pages: {
+        route: '/pages',
+        module: [pagesRoute],
     },
 };
 /** GET /health-check - Check service health */

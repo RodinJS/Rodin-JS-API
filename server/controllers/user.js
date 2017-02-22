@@ -12,6 +12,11 @@ import _ from 'lodash';
 import mandrill from '../helpers/mandrill';
 import notifications from './notifications';
 import config from '../../config/env';
+
+import sendgrid from 'sendgrid';
+const sendGridHelper = sendgrid.helper;
+const sg = sendgrid('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');
+
 /**
  * Load user and append to req.
  */
@@ -182,7 +187,7 @@ function resetPassword(req, res, next) {
 
         req.mailSettings = {
             to: email,
-            from: 'team@rodin.space',
+            from: 'team@rodin.io',
             fromName: 'Rodin team',
             templateName: 'rodin_forget',
             subject: 'Password reset request',
@@ -306,7 +311,7 @@ function create(req, res, next) {
 
             req.mailSettings = {
                 to: savedUser.email,
-                from: 'team@rodin.space',
+                from: 'team@rodin.io',
                 fromName: 'Rodin team',
                 templateName: 'rodin_signup',
                 subject: 'Welcome to Rodin platform',
@@ -468,7 +473,7 @@ function validateInvitationCode(req, res, next) {
         //return next();
     }
 
-    if (req.body.invitationCode !== '2B5H7B') {
+    if (req.body.invitationCode !== 'o4h58a3P') {
         const err = new APIError('Invitation code is wrong', httpStatus.BAD_REQUEST, true);
         return next(err);
     }
@@ -556,6 +561,70 @@ function finalize(req, res, next) {
     });
 }
 
+function subscribe(req, res, next) {
+
+    if (_.isUndefined(req.body.email)) {
+        const err = new APIError('Please provide email', 400, true);
+        return next(err);
+    }
+
+    const getList = sg.emptyRequest({
+        mehtod: 'GET',
+        path: '/v3/contactdb/recipients',
+    });
+
+    const setSubscriber = sg.emptyRequest({
+        method: 'POST',
+        path: '/v3/contactdb/recipients',
+        body: [req.body],
+    });
+
+    sg.API(getList)
+      .then(response => {
+        const recipients = response.body.recipients;
+
+        if (_.find(recipients, (recipient)=> recipient.email === req.body.email)) {
+            const err = new APIError('Email exist', 400, true);
+            return next(err);
+        }
+
+        sg.API(setSubscriber)
+          .then(response => {
+
+            if (response.body.error_count > 0) {
+                const err = new APIError('Something went wrong!', 400, true);
+                return next(err);
+            }
+
+            req.mailSettings = {
+                to: req.body.email,
+                from: 'team@rodin.io',
+                fromName: 'Rodin team',
+                templateName: 'rodin_subsribe',
+                subject: 'Thank you for your interest in Rodin Platform',
+            };
+            mandrill.sendMail(req, res, () => {
+
+            });
+
+            return res.status(200).json({
+                success: true,
+                data: 'Subscribed',
+            });
+        })
+          .catch(error => {
+            const err = new APIError('Something went wrong!', 400, true);
+            return next(err);
+        });
+
+    })
+      .catch(error => {
+        const err = new APIError('Something went wrong!', 400, true);
+        return next(err);
+    });
+
+}
+
 export default {
     load,
     get,
@@ -572,4 +641,5 @@ export default {
     changePassword,
     finalize,
     unsyncSocial,
+    subscribe,
 };

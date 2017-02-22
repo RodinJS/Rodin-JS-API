@@ -312,6 +312,9 @@ router.route('/:username')
 router.route('/confirmUsername')
   .post(check.ifTokenValid, userCtrl.confirmUsername, authCtrl.finalizeUser);
 
+router.route('/subscribe')
+  .post(userCtrl.subscribe);
+
 
 /** Load user when API with username route parameter is hit */
 // router.param('username', userCtrl.load);

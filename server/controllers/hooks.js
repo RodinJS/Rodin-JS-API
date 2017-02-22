@@ -60,7 +60,7 @@ function build(req, res, next) {
 
             req.mailSettings = {
                 to: user.email,
-                from: 'team@rodin.space',
+                from: 'team@rodin.io',
                 fromName: 'Rodin team',
                 templateName: 'rodin_build',
                 subject: `${project.displayName} ${req.params.device} build complete`,

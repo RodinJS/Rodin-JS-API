@@ -439,7 +439,7 @@ function publishProject(req, res, next) {
             //Send Mail
             req.mailSettings = {
               to: req.user.email,
-              from: 'team@rodin.space',
+              from: 'team@rodin.io',
               fromName: 'Rodin team',
               templateName: 'rodin_publish',
               subject: `${req.project.displayName} published`,
