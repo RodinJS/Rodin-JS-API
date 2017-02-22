@@ -584,7 +584,7 @@ function subscribe(req, res, next) {
         const recipients = response.body.recipients;
 
         if (_.find(recipients, (recipient)=> recipient.email === req.body.email)) {
-            const err = new APIError('Email exist', 400, true);
+            const err = new APIError('You are already subscribed.', 400, true);
             return next(err);
         }
 
