@@ -18,6 +18,7 @@ import _ from 'lodash';
 
 const getStatus = (project, device, cb) => {
   console.log(JSON.stringify(project, null, 3));
+  console.log(`${config[device].urls.getStatus}/${project.build[device].buildId}`);
   request.get(
     {
       url: `${config[device].urls.getStatus}/${project.build[device].buildId}`,

@@ -40,11 +40,11 @@ export default {
     },
     ios: {
         urls: {
-            build: 'http://63.135.170.41:10000/api/v1/project',
-            cancel: 'http://63.135.170.41:10000/api/v1/project',
-            get: 'http://63.135.170.41:10000/api/v1/project',
-            download: 'http://63.135.170.41:10000/api/v1/bin',
-            getStatus: 'http://63.135.170.41:10000/api/v1/status',
+            build: 'http://63.135.170.41:10001/api/v1/project',
+            cancel: 'http://63.135.170.41:10001/api/v1/project',
+            get: 'http://63.135.170.41:10001/api/v1/project',
+            download: 'http://63.135.170.41:10001/api/v1/bin',
+            getStatus: 'http://63.135.170.41:10001/api/v1/status',
         },
         appId: '2e659ea81e645f84',
         appSecret: 'af7cffae-17ce-25b2-8b76-849df75a',
