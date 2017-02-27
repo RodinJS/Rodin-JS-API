@@ -369,7 +369,27 @@ function logout(req, res) {
  * @returns {*}
  */
 function generateInvitationCode(req, res, next) {
-  if (!req.body.email) {
+
+
+  const totalCodes = req.body.codeCount || 1000;
+
+
+  let bulk = InvitationCode.collection.initializeUnorderedBulkOp();
+  for (let i = 0; i < totalCodes; i++) {
+    //console.log('code', commonHelpers.generateCode(7));
+    bulk.insert({invitationCode:commonHelpers.generateCode(7)});
+  }
+
+  bulk.execute((err)=> {
+    console.log(err);
+    if (err) {
+      const err = new APIError('Something wrong', httpStatus.BAD_REQUEST, true);
+      return next(err);
+    }
+
+    return res.status(200).json({success: true, data:totalCodes+' inserted'});
+  });
+ /* if (!req.body.email) {
     const err = new APIError('Please provide email address', httpStatus.BAD_REQUEST, true);
     return next(err);
   }
@@ -382,7 +402,7 @@ function generateInvitationCode(req, res, next) {
       return next(err);
     }
     res.status(200).json({success: true, invitationCode: code});
-  })
+  })*/
 
 }
 

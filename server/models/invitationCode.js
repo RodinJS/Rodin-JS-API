@@ -8,14 +8,15 @@ import APIError from '../helpers/APIError';
  */
 const invitationCodeSchema = new mongoose.Schema({
 
-    email: {
+/*    email: {
         type: String,
-        required: true,
+        //required: true,
         unique: true,
-    },
+    },*/
     invitationCode: {
         type: String,
         required: true,
+        unique: true,
     },
     creationDate: {
         type: Date,

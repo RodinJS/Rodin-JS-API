@@ -371,12 +371,22 @@ function update(req, res, next) {
 
 function unsyncSocial(req, res, next) {
     let field = {};
-    switch (req.params.socialName){
-    case 'facebook' : field.$unset = { facebook: 1 }; break;
-    case 'github' : field.$unset = { github: 1 }; break;
-    case 'google' : field.$unset = { google: 1 }; break;
-    case 'steam' : field.$unset = { steamId: 1 }; break;
-    case 'oculus' : field.$unset = { oculusId: 1 }; break;
+    switch (req.params.socialName) {
+    case 'facebook' :
+        field.$unset = { facebook: 1 };
+    break;
+    case 'github' :
+        field.$unset = { github: 1 };
+    break;
+    case 'google' :
+        field.$unset = { google: 1 };
+    break;
+    case 'steam' :
+        field.$unset = { steamId: 1 };
+    break;
+    case 'oculus' :
+        field.$unset = { oculusId: 1 };
+    break;
 }
     if (!field.$unset) {
         const err = new APIError('Provilde right Social ', 400);
@@ -473,46 +483,29 @@ function validateInvitationCode(req, res, next) {
         //return next();
     }
 
-    if (req.body.invitationCode !== 'o4h58a3P') {
-        const err = new APIError('Invitation code is wrong', httpStatus.BAD_REQUEST, true);
+    /*  if (req.body.invitationCode !== 'o4h58a3P') {
+     const err = new APIError('Invitation code is wrong', httpStatus.BAD_REQUEST, true);
+     return next(err);
+     }
+
+     next();*/
+    InvitationCode.get(req.body.invitationCode)
+      .then((invitationCode) => {
+
+        if (invitationCode) {
+            InvitationCode.delete(invitationCode.invitationCode);
+            return next();
+        }
+
+        const err = new APIError('Invitation code error', httpStatus.BAD_REQUEST, true);
         return next(err);
-    }
 
-    next();
-    /* InvitationCode.get(req.body.invitationCode)
-     .then((invitationCode) => {
+    })
+      .catch((e) => {
 
-     if (invitationCode) {
-
-     invitationCode = invitationCode.toObject();
-     let dateDiff = dateDiffInDays(invitationCode.creationDate, new Date());
-     if (invitationCode.email == req.body.email && dateDiff < 7) {
-     return next();
-     }
-     else {
-     delete req.body.invitationCode;
-
-     if (dateDiff > 7)
-     InvitationCode.delete(invitationCode.invitationCode);
-
-     return next();
-     }
-     }
-     else {
-     delete req.body.invitationCode;
-     return next();
-     }
-     });
-
-
-     // a and b are javascript Date objects
-     function dateDiffInDays(a, b) {
-     let MS_PER_DAY = 1000 * 60 * 60 * 24;
-     // Discard the time and time-zone information.
-     let utc1 = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
-     let utc2 = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate());
-     return Math.floor((utc2 - utc1) / MS_PER_DAY);
-     }*/
+        const err = new APIError('Invitation code error', httpStatus.BAD_REQUEST, true);
+        return next(err);
+    });
 
 }
 
@@ -583,7 +576,7 @@ function subscribe(req, res, next) {
       .then(response => {
         const recipients = response.body.recipients;
 
-        if (_.find(recipients, (recipient)=> recipient.email === req.body.email)) {
+        if (_.find(recipients, (recipient) => recipient.email === req.body.email)) {
             const err = new APIError('You are already subscribed.', 400, true);
             return next(err);
         }
@@ -613,12 +606,15 @@ function subscribe(req, res, next) {
             });
         })
           .catch(error => {
-            const err = new APIError('Something went wrong!', 400, true);
+            //console.log('error', error);
+            const err = new APIError('You are already subscribed.', 400, true);
+            //const err = new APIError('Something went wrong!', 400, true);
             return next(err);
         });
 
     })
       .catch(error => {
+        //console.log('error2', error);
         const err = new APIError('Something went wrong!', 400, true);
         return next(err);
     });

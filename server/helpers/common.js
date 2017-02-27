@@ -1,4 +1,5 @@
 import fs from 'fs';
+import _ from 'lodash';
 
 function getUserNameFromEmail(email) {
     const reMatch = /^([^@]*)@/;
@@ -9,12 +10,14 @@ function getUserNameFromEmail(email) {
 function generateCode(codeLength) {
     codeLength = codeLength || 5;
     let text = '';
-    let possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+    let possible = _.shuffle(characters.split('')).join('');
 
     for (let i = 0; i < codeLength; i++)
       text += possible.charAt(Math.floor(Math.random() * possible.length));
 
-    return text;
+    return _.shuffle(text.split('')).join('');
 }
 
 function getDefTemplatesObject() {

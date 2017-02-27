@@ -169,7 +169,7 @@ router.route('/invitationCode')
     /**
      *
      */
-	.post(authCtrl.generateInvitationCode)
+	.post(check.ifAdmin, authCtrl.generateInvitationCode)
     /**
      *
      */
