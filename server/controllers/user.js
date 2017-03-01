@@ -245,7 +245,7 @@ function create(req, res, next) {
     User.get(req.body.username)
       .then(user => {
         if (user) {
-            const err = new APIError('User exists', 311);
+            const err = new APIError('User already exists', 311);
             return next(err);
         }
 
@@ -295,8 +295,8 @@ function create(req, res, next) {
                 fs.mkdirSync(historyDir); //creating root dir for history
             }
 
-            //if (req.body.invitationCode)
-            //InvitationCode.delete(req.body.invitationCode);
+            if (req.body.invitationCode)
+              InvitationCode.delete(req.body.invitationCode);
 
             if (req.preSignUpData)
               PreSignUp.delete(req.preSignUpData.code);
@@ -347,7 +347,7 @@ function create(req, res, next) {
             });
         })
           .error((e) => {
-            const err = new APIError('Something went wrong!', httpStatus.SOMETHING_WENT_WRONG, true);
+            const err = new APIError('User already exists!', httpStatus.SOMETHING_WENT_WRONG, true);
             return next(err);
         });
     })
@@ -493,7 +493,6 @@ function validateInvitationCode(req, res, next) {
       .then((invitationCode) => {
 
         if (invitationCode) {
-            InvitationCode.delete(invitationCode.invitationCode);
             return next();
         }
 
