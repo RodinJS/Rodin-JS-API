@@ -66,4 +66,4 @@ Pages.statics = {
 
 };
 
-export default mongoose.model('ContentPages', Pages);
+export default mongoose.model('cms_pages', Pages);
