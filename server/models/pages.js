@@ -33,7 +33,7 @@ const Pages = new mongoose.Schema({
 Pages.statics = {
 
     get(pageURL) {
-        return this.findOne({ slug: pageURL, state: 'published' }).execAsync()
+        return this.findOne({ slug: pageURL, $or: [{ state: 'published' }, { state: 'draft' }] }).execAsync()
             .then((page) => {
             if (page) {
                 return page;
@@ -42,7 +42,8 @@ Pages.statics = {
             const err = new APIError('No such page exists!----', httpStatus.NOT_FOUND, true);
             return Promise.reject(err);
         })
-            .catch((e) => {
+          .catch((e) => {
+            console.log(e);
             const err = new APIError('No such page exists!', httpStatus.NOT_FOUND, true);
             return Promise.reject(err);
         });
