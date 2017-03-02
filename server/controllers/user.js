@@ -593,7 +593,7 @@ function subscribe(req, res, next) {
                 from: 'taron@rodin.io',
                 fromName: 'Rodin team',
                 templateName: 'rodin_subsribe',
-                subject: 'Thank you for your interest in Rodin Platform',
+                subject: 'Welcome to Rodin',
             };
             mandrill.sendMail(req, res, () => {
 
