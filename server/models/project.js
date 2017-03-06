@@ -256,7 +256,7 @@ ProjectSchema.pre('save', function (next) {
             project.root = specialName;
         }
 
-        project.constructor.count({ root: project.root }, (err, count) => {
+        project.constructor.count({ root: project.root, owner: project.owner }, (err, count) => {
             if (err) {
                 return callback(err);
             } else if (count > 0) {
