@@ -34,6 +34,7 @@
     'core/raycaster',
     'core/controllers',
     'core/animation',
+    'core/video',
     'core/button',
     'core/gamePad',
     'core/utils',
