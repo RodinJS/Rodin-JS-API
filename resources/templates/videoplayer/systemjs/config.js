@@ -1,7 +1,7 @@
 (function (global) {
 
 	var paths = {
-		'npm:': 'https://cdn.rodin.io/tmp/'
+		'npm:': 'https://cdn.rodin.io/v0.0.4/'
 	};
 
 	var map = {
