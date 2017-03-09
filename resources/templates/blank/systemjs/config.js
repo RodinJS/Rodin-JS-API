@@ -47,11 +47,11 @@
     paths: paths,
     map: map,
     packages: packages,
-        meta: {
-            '*': {
-                authorization: true
-            }
+    meta: {
+        '*': {
+            authorization: true
         }
+    }
   };
 
   System.config(config);
