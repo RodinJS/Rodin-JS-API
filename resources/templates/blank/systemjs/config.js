@@ -1,16 +1,12 @@
 (function (global) {
 
   var paths = {
-    'npm:': 'https://cdn.rodin.io/v0.0.3/'
+    'npm:': 'https://cdn.rodin.io/v0.0.4/'
   };
 
   var map = {
     'rodin/core': 'npm:core',
     'rodin/physics': 'npm:physics'
-  };
-
-  var meta = {
-    'build/index.js': { authorization: true }
   };
 
   var packages = {
@@ -51,7 +47,11 @@
     paths: paths,
     map: map,
     packages: packages,
-    meta: meta
+        meta: {
+            '*': {
+                authorization: true
+            }
+        }
   };
 
   System.config(config);

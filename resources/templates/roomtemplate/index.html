@@ -44,18 +44,21 @@ body {
 
 		System.config({
 			map: {
-		        glsl: 'https://cdn.rodin.io/v0.0.1/systemjs/glsl.js'  // path to glsl.js file
+				glsl: 'https://cdn.rodin.io/v0.0.1/systemjs/glsl.js'  // path to glsl.js file
 			},
 			meta: {
-		        'https://cdn.rodin.io/v0.0.1/*.glsl': {   // for all glsl files on your project
+				'https://cdn.rodin.io/v0.0.1/*.glsl': {   // for all glsl files on your project
 					loader: 'glsl'
+				},
+				'*': {
+					authorization: true
 				}
 			},
 			packages: {
-		        "https://cdn.rodin.io/v0.0.1": {  // path to your project root
+				"https://cdn.rodin.io/v0.0.1": {  // path to your project root
 					"defaultJSExtensions": true
-		        }
-		    }
+				}
+			}
 		});
 
 		System.import('build/index.js');
