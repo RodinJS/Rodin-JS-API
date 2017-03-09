@@ -1,842 +1,830 @@
-'use strict';
+import * as RODIN from 'rodin/core';
 
-import {THREE} from 'https://cdn.rodin.space/vendor/three/THREE.GLOBAL.js';
-import * as RODIN from 'https://cdn.rodin.space/rodinjs/RODIN.js';
-import {SceneManager} from 'https://cdn.rodin.space/rodinjs/scene/SceneManager.js';
-import {RodinEvent} from 'https://cdn.rodin.space/rodinjs/RodinEvent.js';
-import {Sculpt} from 'https://cdn.rodin.space/rodinjs/sculpt/Sculpt.js';
-import {timeout} from 'https://cdn.rodin.space/rodinjs/utils/timeout.js';
-import {Interval} from 'https://cdn.rodin.space/rodinjs/utils/interval.js';
-import {TWEEN} from 'https://cdn.rodin.space/rodinjs/Tween.js';
-import {Element} from 'https://cdn.rodin.space/rodinjs/sculpt/elements/Element.js';
-import {Text} from 'https://cdn.rodin.space/rodinjs/sculpt/elements/Text.js';
-import {Animation} from 'https://cdn.rodin.space/rodinjs/animation/Animation.js';
-
-let bufferAnimation = new Animation("bufferAnimation", {
-    rotation: {
-        x: 0,
-        y: {
-            from: -Math.PI/2,
-            to: Math.PI/2,
-        },
-        z: 0
-    }
+let bufferAnimation = new RODIN.AnimationClip("bufferAnimation", {
+  rotation: {
+    x: 0,
+    y: {
+      from: -Math.PI / 2,
+      to: Math.PI / 2,
+    },
+    z: 0
+  }
 });
 bufferAnimation.loop(true);
 bufferAnimation.duration(1000);
 
-let hoverAnimation = new Animation("hoverAnimation", {
-    scale: {
-        x: 1.1,
-        y: 1.1,
-        z: 1.1
-    }
+let hoverAnimation = new RODIN.AnimationClip("hoverAnimation", {
+  scale: {
+    x: 1.1,
+    y: 1.1,
+    z: 1.1
+  }
 });
 hoverAnimation.duration(200);
 
-let hoverOutAnimation = new Animation("hoverOutAnimation", {
-    scale: {
-        x: 1,
-        y: 1,
-        z: 1
-    }
+let hoverOutAnimation = new RODIN.AnimationClip("hoverOutAnimation", {
+  scale: {
+    x: 1,
+    y: 1,
+    z: 1
+  }
 });
 hoverOutAnimation.duration(200);
 
-let scaleOutAnimation = new Animation("scaleOutAnimation", {
-    scale: {
-        x: 0.01,
-        y: 0.01,
-        z: 0.01
-    }
+let scaleOutAnimation = new RODIN.AnimationClip("scaleOutAnimation", {
+  scale: {
+    x: 0.01,
+    y: 0.01,
+    z: 0.01
+  }
 });
 scaleOutAnimation.duration(150);
 
-let scaleInAnimation = new Animation("scaleInAnimation", {
-    scale: {
-        x: {from: 0.01, to: 1},
-        y: {from: 0.01, to: 1},
-        z: {from: 0.01, to: 1}
-    }
+let scaleInAnimation = new RODIN.AnimationClip("scaleInAnimation", {
+  scale: {
+    x: {from: 0.01, to: 1},
+    y: {from: 0.01, to: 1},
+    z: {from: 0.01, to: 1}
+  }
 });
 scaleInAnimation.duration(150);
 
-export class VPcontrolPanel extends Sculpt {
+const secondsToH_MM_SS = (length, separator = ":") => {
+  length = Math.round(length);
+  let hours = Math.floor(length / 3600);
+  length %= 3600;
+  let minutes = Math.floor(length / 60);
+  if (minutes < 10 && hours != 0) {
+    minutes = "0" + minutes;
+  }
+  let seconds = length % 60;
 
-    constructor({ player, title = "Untitled Video", cover = null, distance = 1, width = 1.5, controllers }) {
+  if (seconds < 10) {
+    seconds = "0" + seconds;
+  }
+  return ((hours != 0 ? hours + separator : "") + minutes + separator + seconds);
+};
 
-        super(0);
-        this.object = new THREE.Object3D();
-        this.panel = new THREE.Object3D();
-        this.player = player;
-        this.cover = cover;
-        this.width = width;
-        this.elementsPending = 0;
-        this.timeBarButton = null;
-        this.coverEl = null;
-        this.title = title;
-        this.controllers = controllers;
-        this.createTitle();
-        this.createPlayPauseButtons();
-        this.createTimeLine();
-        this.createTimeBar();
-        this.createAudioToggle();
-        this.createHDToggle();
-        this.createBackGround(distance, width);
-        this.panel.position.z = -distance;
-        this.scene = SceneManager.get();
-        let target = new THREE.Object3D();
-        target.position.z = -1;
-        let camera = this.scene.camera;
-        camera.add(target);
+export class VPcontrolPanel extends RODIN.Sculpt {
 
-        this.object.add(this.panel);
+  constructor({player, title = "Untitled Video", cover = null, distance = 1.5, width = 1.5}) {
 
-        this.createBufferingLogo(distance);
-        this.cover && this.createCover(distance, width);
+    super(new THREE.Object3D());
+    this.panel = new RODIN.Sculpt();
+    this.player = player;
+    this.cover = cover;
+    this.width = width;
+    this.elementsPending = 0;
+    this.timeBarButton = null;
+    this.coverEl = null;
+    this.title = title;
 
-        this.hideControls = (now) => {
-            secsToFade -= now ? secsToFade: 1;
-            if(secsToFade == 0){
-                this.object.visible = false;
-            }
-        };
+    this.panelCenter = new RODIN.Sculpt();
 
-        let doShow = true;
-        let secsToFade = 3;
+    this.panel.parent = this.panelCenter;
+    this.panel.position.set(0, 0, -distance);
+    this.panelCenter.parent = this;
+    this.panelCenter.position.set(0, 0, 0);
 
-        this.fadeTimeOut = setInterval(this.hideControls, 1000);
+    this.createTitle();
+    this.createPlayPauseButtons();
+    this.createTimeLine();
+    this.createTimeBar();
+    this.createAudioToggle();
+    this.createHDToggle();
+    this.createBackGround(distance, width);
+    this.createBufferingLogo(distance);
+    this.cover && this.createCover(distance, width);
+    this.hoverOutTime = Infinity;
+    this.hasCloseAction = false;
+
+    this.hoverAction = (evt) => {
+      this.hoverOutTime = Infinity;
+    }
+    this.hoverOutAction = (evt) => {
+      this.hoverOutTime = RODIN.Time.now;
+    }
+
+    this.player.onBufferStart = () => {
+      this.bufferEl.visible = true;
+      console.log("buffering START");
+    };
+
+    this.player.onBufferEnd = () => {
+      this.bufferEl.visible = false;
+      console.log("buffering STOP");
+    };
+
+    RODIN.Scene.active.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, (evt) => {
+      this.buttonDownTime = RODIN.Time.now;
+    });
+
+    RODIN.Scene.active.on(RODIN.CONST.GAMEPAD_BUTTON_UP, (evt) => {
+      if(this.buttonDownTime && RODIN.Time.now - this.buttonDownTime >= 250) return;
+      this.toggleControls();
+    });
+    RODIN.Scene.active.preRender(() => {
+      if(RODIN.Time.now - this.hoverOutTime > 3000 && !this.hasCloseAction) {
+        this.hideControls();
+        this.hasCloseAction = true;
+      }
+    });
+  }
+
+  hideControls() {
+    this.panel.parent = null;
+  }
+
+  showControls() {
+    this.panel.parent = this.panelCenter;
+    let vector = RODIN.Scene.activeCamera.getWorldDirection();
+    let newRot = Math.atan(vector.x / vector.z) + (vector.z < 0 ? Math.PI : 0) + Math.PI;
+    if (Math.abs(this.rotation.y - newRot) >= Math.PI / 3) {
+      this.panelCenter.rotation.y = newRot;
+    }
+    this.hasCloseAction = false;
+    this.hoverOutTime = RODIN.Time.now;
+  }
+
+  toggleControls() {
+    if (this.panel.parent == this.panelCenter) {
+      this.hideControls();
+    }
+    else {
+      this.showControls();
+    }
+  }
+
+  readyCheck() {
+    if (!this.elementsPending) {
+      this.emitAsync(RODIN.CONST.READY, new RODIN.RodinEvent(this));
+    }
+  }
+
+  createBackGround(distance, width) {
+    let r = Math.sqrt(distance * distance + width * width / 4) * 2;
+
+    let sphere = new RODIN.Sculpt(new THREE.Mesh(
+      new THREE.SphereBufferGeometry(r, 12, 12),
+      new THREE.MeshBasicMaterial({
+        color: 0x000000,
+        transparent: true,
+        opacity: 0.3,
+        //wireframe:true,
+        side: THREE.BackSide
+      })
+    ));
+
+    sphere._threeObject.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0, 0, -r));
+    sphere.parent = this.panel;
+    sphere.position.set(0, 0, r);
+  }
 
 
-        for(let ci = 0; ci < this.controllers.length; ci++){
+  createCover(distance, width) {
+    let r = Math.sqrt(distance * distance + width * width / 4) * 3;
 
-            let controller = this.controllers[ci];
+    let coverMesh = new THREE.Mesh(
+      new THREE.SphereBufferGeometry(r, 720, 4),
+      new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        map: new THREE.TextureLoader().load(this.cover),
+        side: THREE.DoubleSide
+      })
+    );
 
-            controller.onKeyDown = (keyCode) => {
-                doShow = true;
-                this.showTimeOut =  setTimeout(() => {
-                    doShow = false;
-                }, 200);
-                if(this.object.visible && (!controller.intersected || controller.intersected.length == 0)){
-                    this.object.visible = false;
-                    doShow = false;
-                    this.hideControls(true);
+    coverMesh.scale.set(-1, 1, 1);
 
-                }
-            };
-
-            controller.onKeyUp = (keyCode) => {
-                if(doShow){
-                    this.scene.scene.updateMatrixWorld();
-                    let vector = new THREE.Vector3();
-                    vector.setFromMatrixPosition(target.matrixWorld);
-                    if (vector.x != 0 || vector.z != 0) {
-                        let newRot = Math.atan(vector.x / vector.z) + (vector.z < 0 ? Math.PI : 0) + Math.PI;
-                        if(!this.object.visible || Math.abs(this.object.rotation.y - newRot) >= Math.PI/3){
-                            this.object.rotation.y = newRot;
-                        }
-
-                    }
-                    this.object.visible = true;
-                    secsToFade = 3;
-                }
-            };
+    this.coverEl = new RODIN.Sculpt(coverMesh);
+    this.coverEl.on(RODIN.CONST.READY, (evt) => {
+      this.coverEl.parent = this;
+    });
+  }
 
 
-            controller.gamepadHover = (intersect) => {
-                secsToFade = 3;
-            };
+  createTitle() {
+    let titleParams = {
+      text: this.title,
+      color: 0xffffff,
+      fontFamily: "Arial",
+      fontSize: this.width * 0.04,
+      ppm: 1000
+    };
+    let titleButton = new RODIN.Text(titleParams);
+    this.elementsPending++;
 
-            controller.gamepadHoverOut = (intersect) => {
-                secsToFade = 3;
-            };
+    titleButton.on(RODIN.CONST.READY, (evt) => {
+      titleButton.parent = this.panel;
+      titleButton.position.set(0, this.width / 4, 0);
+      this.elementsPending--;
+      this.readyCheck();
+    });
+  }
+
+  createPlayPauseButtons() {
+    let playParams = {name: "play", width: this.width / 5, height: this.width / 5};
+
+    playParams.background = {
+      color: 0x666666,
+      opacity: 0.3
+    };
+
+    playParams.border = {
+      radius: this.width / 10
+    };
+
+    playParams.image = {
+      url: "img/play.png",
+      width: this.width / 15,
+      height: this.width / 15,
+      position: {h: 54, v: 50}
+    };
+
+    let playButton = new RODIN.Element(playParams);
+    this.playButton = playButton;
+    this.elementsPending++;
+
+    playButton.on(RODIN.CONST.READY, (evt) => {
+      playButton.parent = this.panel;
+      playButton.position.set(0, 0, 0);
+      playButton.animation.add(hoverAnimation, hoverOutAnimation, scaleOutAnimation, scaleInAnimation);
+      this.elementsPending--;
+      this.readyCheck();
+    });
+
+    playButton.on(RODIN.CONST.GAMEPAD_HOVER, (evt) => {
+      this.hoverAction(evt);
+      !evt.target.animation.isPlaying("scaleOutAnimation") && evt.target.animation.start("hoverAnimation");
+    });
+
+    playButton.on(RODIN.CONST.GAMEPAD_HOVER_OUT, (evt) => {
+      this.hoverOutAction(evt);
+      !evt.target.animation.isPlaying("scaleOutAnimation") && evt.target.animation.start("hoverOutAnimation");
+    });
+
+    playButton.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, (evt) => {
+      evt.stopPropagation();
+      if (this.visible) {
+        evt.target.animation.start("scaleOutAnimation");
+      }
+    });
+
+    playButton.on(RODIN.CONST.ANIMATION_COMPLETE, (evt) => {
+      if (evt.animation === "scaleOutAnimation") {
+        playButton.parent = null;
+        pauseButton.parent = this.panel;
+        pauseButton.animation.start("scaleInAnimation");
+        if (this.cover && this.coverEl) {
+          this.coverEl.visible = false;
         }
+        this.player.play();
+      }
+    });
 
 
+    let pauseParams = {name: "pause", width: this.width / 5, height: this.width / 5};
 
-        this.player.onBufferStart = () => {
-            this.scene.camera.add(this.bufferEl.object3D);
-        };
-        this.player.onBufferEnd = () => {
-            this.scene.camera.remove(this.bufferEl.object3D);
-        };
-    }
+    pauseParams.background = {
+      color: 0x666666,
+      opacity: 0.3
+    };
 
-    readyCheck() {
-        if (!this.elementsPending) {
-            super.init(this.object);
-            timeout(() => {
-                this.emit("ready", new RodinEvent(this));
-            }, 0);
+    pauseParams.border = {
+      radius: this.width / 10
+    };
+
+    pauseParams.image = {
+      url: "img/pause.png",
+      width: this.width * 0.04,
+      height: this.width * 0.06,
+      position: {h: 50, v: 50}
+    };
+
+    let pauseButton = new RODIN.Element(pauseParams);
+    this.pauseButton = pauseButton;
+    this.elementsPending++;
+
+    pauseButton.on(RODIN.CONST.READY, (evt) => {
+      pauseButton.parent = this.panel;
+      pauseButton.position.set(0, 0, 0);
+      pauseButton.parent = null;
+      evt.target.animation.add(hoverAnimation, hoverOutAnimation, scaleOutAnimation, scaleInAnimation);
+      this.elementsPending--;
+      this.readyCheck();
+    });
+
+    pauseButton.on(RODIN.CONST.GAMEPAD_HOVER, (evt) => {
+      this.hoverAction(evt);
+      !evt.target.animation.isPlaying("scaleOutAnimation") && evt.target.animation.start("hoverAnimation");
+    });
+
+    pauseButton.on(RODIN.CONST.GAMEPAD_HOVER_OUT, (evt) => {
+      this.hoverOutAction(evt);
+      !evt.target.animation.isPlaying("scaleOutAnimation") && evt.target.animation.start("hoverOutAnimation");
+    });
+
+    pauseButton.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, (evt) => {
+      evt.stopPropagation();
+      if (this.visible) {
+        evt.target.animation.start("scaleOutAnimation");
+      }
+    });
+
+    pauseButton.on(RODIN.CONST.ANIMATION_COMPLETE, (evt) => {
+      if (evt.animation === "scaleOutAnimation") {
+        pauseButton.parent = null;
+        playButton.parent = this.panel;
+        playButton.animation.start("scaleInAnimation");
+        this.player.pause();
+      }
+    });
+  }
+
+
+  createBufferingLogo(distance) {
+    const bufferingParams = {name: "buffering", width: this.width / 6, height: this.width / 6};
+
+    bufferingParams.background = {
+      color: 0x666666,
+      opacity: 0.3
+    };
+
+    bufferingParams.border = {
+      radius: this.width / 12,
+      width: this.width / 500,
+      color: 0xffffff
+    };
+
+    bufferingParams.image = {
+      url: "./img/rodin.png",
+      width: this.width / 30,
+      height: this.width / 25,
+      position: {h: 54, v: 35}
+    };
+    bufferingParams.label = {
+      text: "loading",
+      fontSize: this.width / 37.5,
+      color: 0xffffff,
+      position: {
+        h: 50,
+        v: 65
+      }
+    };
+
+    this.bufferEl = new RODIN.Element(bufferingParams);
+    this.elementsPending++;
+
+    this.bufferEl.on(RODIN.CONST.READY, (evt) => {
+      RODIN.Scene.activeCamera.add(this.bufferEl._threeObject);
+      this.bufferEl.position.set(0, 0, -distance + bufferingParams.width / 2);
+      this.bufferEl.visible = false;
+      this.bufferEl.animation.add(bufferAnimation);
+      this.bufferEl.animation.start("bufferAnimation");
+      this.elementsPending--;
+      this.readyCheck();
+    });
+  }
+
+
+  createTimeLine() {
+    const color = 0xff9a2b;
+
+    const timeLineBGParams = {
+      name: "timeLineBG",
+      width: this.width,
+      height: this.width / 50,
+      background: {
+        color: 0xaaaaaa,
+        opacity: 0.5
+      }
+    };
+
+    const timeLineParams = {
+      name: "timeLine",
+      width: this.width,
+      height: this.width / 50,
+      background: {
+        color: color
+      },
+      transparent: false
+    };
+
+    const caretParams = {
+      name: "caret",
+      width: this.width * 0.024,
+      height: this.width * 0.024,
+      border: {
+        radius: this.width * 0.012
+      },
+      background: {
+        color: 0xffffff
+      },
+      transparent: false
+    };
+
+    const pointerParams = {
+      name: "pointer",
+      width: this.width * 0.046,
+      height: this.width * 0.046,
+      border: {
+        width: this.width / 500,
+        color: 0xffffff,
+        radius: this.width * 0.023
+      },
+      label: {
+        text: "I",
+        fontSize: this.width / 37.5,
+        color: 0xff0000,
+        position: {
+          h: 50,
+          v: 55
         }
-    }
-
-    createBackGround(distance, width) {
-        let r = Math.sqrt(distance * distance + width * width / 4) * 2;
-
-        let sphere = new THREE.Mesh(
-            new THREE.SphereBufferGeometry(r, 12, 12),
-            new THREE.MeshBasicMaterial({
-                color: 0x000000,
-                transparent: true,
-                opacity: 0.3,
-                //wireframe:true,
-                side: THREE.BackSide
-            })
-        );
-        sphere.geometry.applyMatrix(new THREE.Matrix4().makeTranslation( 0, 0, -distance));
-        sphere.position.z = distance;
-        this.object.add(sphere);
-    }
-
-
-    createCover(distance, width) {
-        let r = Math.sqrt(distance * distance + width * width / 4) * 3;
-
-        this.coverEl = new THREE.Mesh(
-            new THREE.SphereBufferGeometry(r, 720, 4),
-            new THREE.MeshBasicMaterial({
-                color: 0xffffff,
-                map: new THREE.TextureLoader().load(this.cover),
-                side: THREE.DoubleSide
-            })
-        );
-        this.coverEl.scale.set(-1, 1, 1);
-        this.scene.add(this.coverEl);
-    }
-
-
-    createTitle() {
-        let titleParams = {
-            text: this.title,
-            color: 0xffffff,
-            fontFamily: "Arial",
-            fontSize: this.width * 0.04,
-            ppm: 1000
-        };
-        let titleButton = new Text(titleParams);
-        this.elementsPending++;
-
-        titleButton.on('ready', (evt) => {
-            let object = evt.target.object3D;
-            object.position.y = this.width / 4;
-            this.panel.add(object);
-            this.elementsPending--;
-            this.readyCheck();
-        });
-
-
-    }
-
-
-
-
-
-
-    createBufferingLogo(distance) {
-        let bufferingParams = {name: "buffering", width: this.width / 6, height: this.width / 6};
-
-        bufferingParams.background = {
-            color: 0x666666,
-            opacity: 0.3
-        };
-
-        bufferingParams.border = {
-            radius: this.width / 12,
-            width: this.width / 500,
-            color: 0xffffff
-        };
-
-        bufferingParams.image = {
-            url: "./img/rodin.png",
-            width: this.width / 30,
-            height: this.width / 25,
-            position: {h: 54, v: 35}
-        };
-        bufferingParams.label = {
-            text: "loading",
-                fontSize: this.width / 37.5,
-                color: 0xffffff,
-                position: {
-                h: 50,
-                v: 65
-            }
-        };
-
-        this.bufferEl = new Element(bufferingParams);
-        this.elementsPending++;
-
-        this.bufferEl.on('ready', (evt) => {
-            let object = evt.target.object3D;
-            object.position.z = -distance + bufferingParams.width/2;
-            evt.target.animator.add(bufferAnimation);
-            evt.target.animator.start("bufferAnimation");
-            this.elementsPending--;
-            this.readyCheck();
-        });
-    }
-
-
-
-
-
-    createPlayPauseButtons() {
-        let playParams = {name: "play", width: this.width / 5, height: this.width / 5};
-
-        playParams.background = {
-            color: 0x666666,
-            opacity: 0.3
-        };
-
-        playParams.border = {
-            radius: this.width / 10
-        };
-
-        playParams.image = {
-            url: "./img/play.png",
-            width: this.width / 15,
-            height: this.width / 15,
-            position: {h: 54, v: 50}
-        };
-
-        let playButton = new Element(playParams);
-        this.elementsPending++;
-
-        playButton.on('ready', (evt) => {
-            let object = evt.target.object3D;
-            this.panel.add(object);
-            RODIN.Raycastables.push(object);
-            evt.target.animator.add(hoverAnimation, hoverOutAnimation, scaleOutAnimation, scaleInAnimation);
-            this.elementsPending--;
-            this.readyCheck();
-        });
-
-        playButton.on(RODIN.CONSTANTS.EVENT_NAMES.CONTROLLER_HOVER, (evt) => {
-            !evt.target.animator.isPlaying("scaleOutAnimation") && evt.target.animator.start("hoverAnimation");
-        });
-
-        playButton.on(RODIN.CONSTANTS.EVENT_NAMES.CONTROLLER_HOVER_OUT, (evt) => {
-            !evt.target.animator.isPlaying("scaleOutAnimation") && evt.target.animator.start("hoverOutAnimation");
-        });
-
-        playButton.on(RODIN.CONSTANTS.EVENT_NAMES.CONTROLLER_KEY_DOWN, (evt) => {
-            if(this.object.visible){
-                evt.target.animator.start("scaleOutAnimation");
-            }
-        });
-
-        playButton.on(RODIN.CONSTANTS.EVENT_NAMES.ANIMATION_COMPLETE, (evt) => {
-            if (evt.animation === "scaleOutAnimation") {
-                this.panel.remove(evt.target.object3D);
-                this.panel.add(pauseButton.object3D);
-                pauseButton.animator.start("scaleInAnimation");
-                this.player.play();
-                this.hideControls(true);
-                if(this.cover && this.coverEl) {
-                    this.scene.scene.remove(this.coverEl);
-                }
-            }
-        });
-
-
-        let pauseParams = {name: "pause", width: this.width / 5, height: this.width / 5};
-
-        pauseParams.background = {
-            color: 0x666666,
-            opacity: 0.3
-        };
-
-        pauseParams.border = {
-            radius: this.width / 10
-        };
-
-        pauseParams.image = {
-            url: "./img/pause.png",
-            width: this.width * 0.04,
-            height: this.width * 0.06,
-            position: {h: 50, v: 50}
-        };
-
-        let pauseButton = new Element(pauseParams);
-        this.elementsPending++;
-
-        pauseButton.on('ready', (evt) => {
-            let object = evt.target.object3D;
-            RODIN.Raycastables.push(object);
-            evt.target.animator.add(hoverAnimation, hoverOutAnimation, scaleOutAnimation, scaleInAnimation);
-            this.elementsPending--;
-            this.readyCheck();
-        });
-
-        pauseButton.on(RODIN.CONSTANTS.EVENT_NAMES.CONTROLLER_HOVER, (evt) => {
-            !evt.target.animator.isPlaying("scaleOutAnimation") && evt.target.animator.start("hoverAnimation");
-        });
-
-        pauseButton.on(RODIN.CONSTANTS.EVENT_NAMES.CONTROLLER_HOVER_OUT, (evt) => {
-            !evt.target.animator.isPlaying("scaleOutAnimation") && evt.target.animator.start("hoverOutAnimation");
-        });
-
-        pauseButton.on(RODIN.CONSTANTS.EVENT_NAMES.CONTROLLER_KEY_DOWN, (evt) => {
-            if(this.object.visible){
-                evt.target.animator.start("scaleOutAnimation");
-            }
-        });
-
-        pauseButton.on(RODIN.CONSTANTS.EVENT_NAMES.ANIMATION_COMPLETE, (evt) => {
-            if (evt.animation === "scaleOutAnimation") {
-                this.panel.remove(evt.target.object3D);
-                this.panel.add(playButton.object3D);
-                playButton.animator.start("scaleInAnimation");
-                this.player.pause();
-            }
-        });
-    }
-
-    createTimeLine() {
-        let color = 0xff9a2b;
-
-        let timeLineBGParams = {
-            name: "timeLineBG",
-            width: this.width,
-            height: this.width / 50,
-            background: {
-                color: 0xaaaaaa,
-                opacity: 0.5
-            }
-        };
-
-        let timeLineParams = {
-            name: "timeLine",
-            width: this.width,
-            height: this.width / 50,
-            background: {
-                color: color
-            },
-            transparent: false
-        };
-
-        let caretParams = {
-            name: "caret",
-            width: this.width * 0.024,
-            height: this.width * 0.024,
-            border: {
-                radius: this.width * 0.012
-            },
-            background: {
-                color: 0xffffff
-            },
-            transparent: false
-        };
-
-        let pointerParams = {
-            name: "pointer",
-            width: this.width * 0.046,
-            height: this.width * 0.046,
-            border: {
-                width: this.width / 500,
-                color: 0xffffff,
-                radius: this.width * 0.023
-            },
-            label: {
-                text: "I",
-                fontSize: this.width / 37.5,
-                color: 0xff0000,
-                position: {
-                    h: 50,
-                    v: 55
-                }
-            }
-        };
-
-
-        let pointerTimeParams = {
-            name: "pointerTimeParams",
-            text: "0:00",
-            color: 0xffffff,
-            fontFamily: "Arial",
-            fontSize: this.width / 37.5,
-            ppm: 1000
-        }
-
-
-        let timeLineBG = new Element(timeLineBGParams);
-        this.elementsPending++;
-
-        timeLineBG.on('ready', (evt) => {
-            evt.target.forceHover = true;
-            let object = evt.target.object3D;
-            object.position.y = -this.width / 3.75;
-            this.panel.add(object);
-            this.elementsPending--;
-            RODIN.Raycastables.push(object);
-            this.readyCheck();
-        });
-
-        timeLineBG.on(RODIN.CONSTANTS.EVENT_NAMES.CONTROLLER_HOVER, (evt) => {
-            if (pointer.object3D) {
-                pointer.object3D.visible = true;
-                pointer.object3D.position.x = evt.uv.x - this.width / 2;
-            }
-            if (pointerTime.object3D) {
-                let time = Math.secondsToH_MM_SS(this.player.getLength() * evt.uv.x / this.width);
-                pointerTime.object3D.position.x = evt.uv.x - this.width / 2;
-                if (time === pointerTime.lastTime && pointerTime.object3D.visible) return;
-                pointerTimeParams.text = time;
-                pointerTime.reDraw(pointerTimeParams);
-                pointerTime.object3D.visible = true;
-                pointerTime.lastTime = time;
-            }
-        });
-
-        timeLineBG.on(RODIN.CONSTANTS.EVENT_NAMES.CONTROLLER_HOVER_OUT, (evt) => {
-            if (pointer.object3D) {
-                pointer.object3D.visible = false;
-            }
-            if (pointerTime.object3D) {
-                pointerTime.object3D.visible = false;
-            }
-        });
-
-        timeLineBG.on(RODIN.CONSTANTS.EVENT_NAMES.CONTROLLER_KEY_DOWN, (evt) => {
-            this.player.jumpTo(evt.uv.x / this.width);
-        });
-
-        let timeLine = new Element(timeLineParams);
-        this.elementsPending++;
-
-        timeLine.on('ready', (evt) => {
-            let object = evt.target.object3D;
-            object.position.y = -this.width / 3.75;
-            object.position.z = 0.0001;
-            object.scale.set(0.0001, 1, 1);
-            this.panel.add(object);
-            this.elementsPending--;
-            this.readyCheck();
-        });
-
-
-        timeLine.on("update", (evt) => {
-            let time = this.player.getTime();
-            time = time ? time : 0.0001;
-            let duration = this.player.getLength();
-            if (!duration) return;
-            let scale = time / duration;
-            let object = evt.target.object3D;
-            object.scale.set(scale, 1, 1);
-            object.position.x = (scale - 1) * this.width / 2;
-        });
-
-
-        let caret = new Element(caretParams);
-        this.elementsPending++;
-
-        caret.on('ready', (evt) => {
-            let object = evt.target.object3D;
-            object.position.y = -this.width / 3.75;
-            object.position.z = 0.0002;
-            object.position.x = -this.width / 2;
-            this.panel.add(object);
-            this.elementsPending--;
-            this.readyCheck();
-        });
-
-        caret.on('update', (evt) => {
-            if (timeLine.object3D) {
-                let object = evt.target.object3D;
-                object.position.x = timeLine.object3D.scale.x * this.width - this.width / 2;
-            }
-        });
-
-
-        let pointer = new Element(pointerParams);
-        this.elementsPending++;
-
-        pointer.on('ready', (evt) => {
-            let object = evt.target.object3D;
-            object.position.y = -this.width / 3.75;
-            object.position.z = 0.0004;
-            object.material.depthWrite = false;
-            object.position.x = -this.width / 2;
-            object.visible = false;
-            this.panel.add(object);
-            this.elementsPending--;
-            this.readyCheck();
-        });
-
-        let pointerTime = new Text(pointerTimeParams);
-        this.elementsPending++;
-
-        pointerTime.on('ready', (evt) => {
-            let object = evt.target.object3D;
-            object.position.y = -this.width * 0.21;
-            object.position.z = 0.0004;
-            object.position.x = 0;
-            object.visible = false;
-            this.panel.add(object);
-            this.elementsPending--;
-            this.readyCheck();
-        });
-
-
-    }
-
-    createTimeBar() {
-        let timeBarParams = {
-            text: "0:00/0:00",
-            color: 0xffffff,
-            fontFamily: "Arial",
-            fontSize: this.width / 30,
-            ppm: 1000
-        };
-        this.timeBarButton = new Text(timeBarParams);
-        this.elementsPending++;
-        this.timeBarButton.on('ready', (evt) => {
-            let object = evt.target.object3D;
-            object.position.y = -this.width / 3;
-            object.position.x = -this.width / 2;
-
-            this.panel.add(object);
-            this.elementsPending--;
-            this.readyCheck();
-        });
-        this.timeBarButton.on('update', (evt) => {
-            let time = Math.secondsToH_MM_SS(this.player.getTime());
-            let total = Math.secondsToH_MM_SS(this.player.getLength());
-            if (time === evt.target.lastTime) return;
-            timeBarParams.text = time + "/" + total;
-            evt.target.reDraw(timeBarParams);
-
-            if (!isNaN(this.player.getLength())) {
-                evt.target.lastTime = time;
-            }
-
-            evt.target.object3D.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(evt.target.object3D.geometry.parameters.width / 2, 0, 0));
-        });
-    }
-
-    createAudioToggle() {
-        let muteParams = {name: "mute", width: this.width * 0.04, height: this.width * 0.04, ppm: 1000};
-
-        muteParams.image = {
-            url: "./img/audioON.png",
-            width: this.width * 0.04,
-            height: this.width * 0.04,
-            position: {h: 50, v: 50}
-        };
-
-        let muteButton = new Element(muteParams);
-        this.elementsPending++;
-
-        muteButton.on('ready', (evt) => {
-            let object = evt.target.object3D;
-            object.position.y = -this.width / 3.02;
-            object.position.x = -this.width / 2;
-            this.panel.add(object);
-            RODIN.Raycastables.push(object);
-            evt.target.animator.add(hoverAnimation, hoverOutAnimation);
-            this.elementsPending--;
-            this.readyCheck();
-        });
-        muteButton.on('update', (evt) => {
-            if (this.timeBarButton) {
-                let object = evt.target.object3D;
-                object.position.x = this.timeBarButton.object3D.position.x + this.timeBarButton.object3D.scale.x * this.timeBarButton.object3D.geometry.parameters.width + this.width / 30;
-            }
-        });
-
-        muteButton.on(RODIN.CONSTANTS.EVENT_NAMES.CONTROLLER_HOVER, (evt) => {
-            evt.target.animator.start("hoverAnimation");
-        });
-
-        muteButton.on(RODIN.CONSTANTS.EVENT_NAMES.CONTROLLER_HOVER_OUT, (evt) => {
-            evt.target.animator.start("hoverOutAnimation");
-        });
-
-        muteButton.on(RODIN.CONSTANTS.EVENT_NAMES.CONTROLLER_KEY_DOWN, (evt) => {
-            this.player.mute(true);
-            let object = evt.target.object3D;
-            this.panel.remove(object);
-            this.panel.add(unmuteButton.object3D);
-        });
-
-        let unmuteParams = {name: "unmute", width: this.width * 0.04, height: this.width * 0.04, ppm: 1000};
-
-        unmuteParams.image = {
-            url: "./img/audioOFF.png",
-            width: this.width * 0.04,
-            height: this.width * 0.04,
-            opacity: 0.6,
-            position: {h: 50, v: 50}
-        };
-
-        let unmuteButton = new Element(unmuteParams);
-        this.elementsPending++;
-
-        unmuteButton.on('ready', (evt) => {
-            let object = evt.target.object3D;
-            object.position.y = -this.width / 3.02;
-            object.position.x = -this.width / 2;
-            RODIN.Raycastables.push(object);
-            evt.target.animator.add(hoverAnimation, hoverOutAnimation);
-            this.elementsPending--;
-            this.readyCheck();
-        });
-        unmuteButton.on('update', (evt) => {
-            if (this.timeBarButton) {
-                let object = evt.target.object3D;
-                object.position.x = this.timeBarButton.object3D.position.x + this.timeBarButton.object3D.scale.x * this.timeBarButton.object3D.geometry.parameters.width + this.width / 30;
-            }
-        });
-
-        unmuteButton.on(RODIN.CONSTANTS.EVENT_NAMES.CONTROLLER_HOVER, (evt) => {
-            evt.target.animator.start("hoverAnimation");
-        });
-
-        unmuteButton.on(RODIN.CONSTANTS.EVENT_NAMES.CONTROLLER_HOVER_OUT, (evt) => {
-            evt.target.animator.start("hoverOutAnimation");
-        });
-
-        unmuteButton.on(RODIN.CONSTANTS.EVENT_NAMES.CONTROLLER_KEY_DOWN, (evt) => {
-            this.player.mute(false);
-            let object = evt.target.object3D;
-            this.panel.remove(object);
-            this.panel.add(muteButton.object3D);
-        });
-
-    }
-
-    createHDToggle() {
-        let HDParams = {
-            text: "HD",
-            color: 0xffffff,
-            fontFamily: "Arial",
-            fontSize: this.width / 30,
-            ppm: 1000
-        };
-        let HDButton = new Text(HDParams);
-
-        this.elementsPending++;
-
-        HDButton.on('ready', (evt) => {
-            let object = evt.target.object3D;
-            object.position.y = -this.width / 3.02;
-            object.position.x = this.width * 0.48;
-            this.panel.add(object);
-            RODIN.Raycastables.push(object);
-            evt.target.animator.add(hoverAnimation, hoverOutAnimation);
-            this.elementsPending--;
-            this.readyCheck();
-        });
-
-        HDButton.on(RODIN.CONSTANTS.EVENT_NAMES.CONTROLLER_HOVER, (evt) => {
-            evt.target.animator.start("hoverAnimation");
-        });
-
-        HDButton.on(RODIN.CONSTANTS.EVENT_NAMES.CONTROLLER_HOVER_OUT, (evt) => {
-            evt.target.animator.start("hoverOutAnimation");
-        });
-
-        HDButton.on(RODIN.CONSTANTS.EVENT_NAMES.CONTROLLER_KEY_DOWN, (evt) => {
-
-            let playAfter = this.player.isPlaying();
-            this.player.switchTo("SD");
-
-            let object = evt.target.object3D;
-            this.panel.remove(object);
-            this.panel.add(SDButton.object3D);
-
-            if (playAfter) {
-                this.player.play();
-            }
-        });
-
-
-        let SDParams = {
-            text: "SD",
-            color: 0xffffff,
-            fontFamily: "Arial",
-            fontSize: this.width / 30,
-            ppm: 1000
-        };
-        let SDButton = new Text(SDParams);
-
-        this.elementsPending++;
-
-        SDButton.on('ready', (evt) => {
-            let object = evt.target.object3D;
-            object.position.y = -this.width / 3.02;
-            object.position.x = this.width * 0.48;
-            RODIN.Raycastables.push(object);
-            evt.target.animator.add(hoverAnimation, hoverOutAnimation);
-            this.elementsPending--;
-            this.readyCheck();
-        });
-
-        SDButton.on(RODIN.CONSTANTS.EVENT_NAMES.CONTROLLER_HOVER, (evt) => {
-            evt.target.animator.start("hoverAnimation");
-        });
-
-        SDButton.on(RODIN.CONSTANTS.EVENT_NAMES.CONTROLLER_HOVER_OUT, (evt) => {
-            evt.target.animator.start("hoverOutAnimation");
-        });
-
-        SDButton.on(RODIN.CONSTANTS.EVENT_NAMES.CONTROLLER_KEY_DOWN, (evt) => {
-
-            let playAfter = this.player.isPlaying();
-            this.player.switchTo("HD");
-
-            let object = evt.target.object3D;
-            this.panel.remove(object);
-            this.panel.add(HDButton.object3D);
-
-            if (playAfter) {
-                this.player.play();
-            }
-        });
-
-
-        let LDParams = {
-            text: "LD",
-            color: 0xffffff,
-            fontFamily: "Arial",
-            fontSize: this.width / 30,
-            ppm: 1000
-        };
-        let LDButton = new Text(LDParams);
-
-        this.elementsPending++;
-
-        LDButton.on('ready', (evt) => {
-            let object = evt.target.object3D;
-            object.position.y = -this.width / 3.02;
-            object.position.x = this.width * 0.48;
-            RODIN.Raycastables.push(object);
-            evt.target.animator.add(hoverAnimation, hoverOutAnimation);
-            this.elementsPending--;
-            this.readyCheck();
-        });
-
-        LDButton.on(RODIN.CONSTANTS.EVENT_NAMES.CONTROLLER_HOVER, (evt) => {
-            evt.target.animator.start("hoverAnimation");
-        });
-
-        LDButton.on(RODIN.CONSTANTS.EVENT_NAMES.CONTROLLER_HOVER_OUT, (evt) => {
-            evt.target.animator.start("hoverOutAnimation");
-        });
-
-        LDButton.on(RODIN.CONSTANTS.EVENT_NAMES.CONTROLLER_KEY_DOWN, (evt) => {
-
-            let playAfter = this.player.isPlaying();
-            this.player.switchTo("HD");
-
-            let object = evt.target.object3D;
-            this.panel.remove(object);
-            this.panel.add(HDButton.object3D);
-
-            if (playAfter) {
-                this.player.play();
-            }
-        });
-
-    }
+      }
+    };
+
+    const pointerTimeParams = {
+      name: "pointerTimeParams",
+      text: "0:00",
+      color: 0xffffff,
+      fontFamily: "Arial",
+      fontSize: this.width / 37.5,
+      ppm: 1000
+    };
+
+    let timeLineBG = new RODIN.Element(timeLineBGParams);
+    this.elementsPending++;
+
+
+    timeLineBG.on(RODIN.CONST.READY, (evt) => {
+      timeLineBG.parent = this.panel;
+      timeLineBG.position.set(0, -this.width / 3.75, 0);
+      this.elementsPending--;
+      this.readyCheck();
+    });
+
+
+    timeLineBG.on(RODIN.CONST.GAMEPAD_MOVE, (evt) => {
+      this.hoverAction(evt);
+      if (pointer.isReady) {
+        pointer.visible = true;
+        pointer.position.x = evt.uv.x - this.width / 2;
+      }
+
+      if (pointerTime.isReady) {
+        let time = secondsToH_MM_SS(this.player.getLength() * evt.uv.x / this.width);
+        pointerTime.position.x = evt.uv.x - this.width / 2;
+        if (time === pointerTime.lastTime && pointerTime.visible) return;
+        pointerTimeParams.text = time;
+        pointerTime.reDraw(pointerTimeParams);
+        pointerTime.visible = true;
+        pointerTime.lastTime = time;
+      }
+    });
+
+    timeLineBG.on(RODIN.CONST.GAMEPAD_HOVER_OUT, (evt) => {
+      this.hoverOutAction(evt);
+      if (pointer.isReady) {
+        pointer.visible = false;
+      }
+      if (pointerTime.isReady) {
+        pointerTime.visible = false;
+      }
+    });
+
+    timeLineBG.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, (evt) => {
+      evt.stopPropagation();
+      this.player.jumpTo(evt.uv.x / this.width);
+    });
+
+    let timeLine = new RODIN.Element(timeLineParams);
+    this.elementsPending++;
+
+    timeLine.on(RODIN.CONST.READY, () => {
+      timeLine.parent = this.panel;
+      timeLine.position.set(0, -this.width / 3.75, 0.0001);
+      timeLine.scale.set(0.0001, 1, 1);
+      this.elementsPending--;
+      this.readyCheck();
+    });
+
+    this.timeLine = timeLine;
+    timeLine.on(RODIN.CONST.UPDATE, (evt) => {
+      let time = this.player.getTime();
+      time = time ? time : 0.0001;
+      let duration = this.player.getLength();
+      if (!duration) return;
+      let scale = time / duration;
+      timeLine.scale.set(scale, 1, 1);
+      timeLine.position.x = (scale - 1) * this.width / 2;
+    });
+
+
+    let caret = new RODIN.Element(caretParams);
+    this.elementsPending++;
+
+    caret.on(RODIN.CONST.READY, (evt) => {
+      caret.parent = this.panel;
+      caret.position.y = -this.width / 3.75;
+      caret.position.z = 0.0002;
+      caret.position.x = -this.width / 2;
+      this.elementsPending--;
+      this.readyCheck();
+    });
+
+    caret.on('update', (evt) => {
+      if (timeLine.isReady) {
+        caret.position.x = timeLine.scale.x * this.width - this.width / 2;
+      }
+    });
+
+
+    let pointer = new RODIN.Element(pointerParams);
+    this.elementsPending++;
+
+    pointer.on(RODIN.CONST.READY, (evt) => {
+      pointer.parent = this.panel;
+      pointer.position.y = -this.width / 3.75;
+      pointer.position.z = 0.0004;
+      pointer._threeObject.material.depthWrite = false;
+      pointer.position.x = -this.width / 2;
+      pointer.visible = false;
+      this.elementsPending--;
+      this.readyCheck();
+    });
+
+    let pointerTime = new RODIN.Text(pointerTimeParams);
+    this.elementsPending++;
+
+    pointerTime.on(RODIN.CONST.READY, (evt) => {
+      pointerTime.parent = this.panel;
+      pointerTime.position.y = -this.width * 0.21;
+      pointerTime.position.z = 0.0004;
+      pointerTime.position.x = 0;
+      pointerTime.visible = false;
+      this.elementsPending--;
+      this.readyCheck();
+    });
+
+    this.caret = caret;
+    this.pointer = pointer;
+    this.pointerTime = pointerTime;
+  }
+
+  createTimeBar() {
+    let timeBarParams = {
+      text: "0:00/0:00",
+      color: 0xffffff,
+      fontFamily: "Arial",
+      fontSize: this.width / 30,
+      ppm: 1000
+    };
+    this.timeBarButton = new RODIN.Text(timeBarParams);
+    this.elementsPending++;
+    this.timeBarButton.on(RODIN.CONST.READY, (evt) => {
+      this.timeBarButton.parent = this.panel;
+      this.timeBarButton.position.set(-this.width / 2, -this.width / 3, 0);
+      this.elementsPending--;
+      this.readyCheck();
+    });
+
+    this.timeBarButton.on('update', (evt) => {
+      let time = secondsToH_MM_SS(this.player.getTime());
+      let total = secondsToH_MM_SS(this.player.getLength());
+      if (time === evt.target.lastTime) return;
+      timeBarParams.text = time + "/" + total;
+      evt.target.reDraw(timeBarParams);
+
+      if (!isNaN(this.player.getLength())) {
+        evt.target.lastTime = time;
+      }
+
+      evt.target._threeObject.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(evt.target._threeObject.geometry.parameters.width / 2, 0, 0));
+    });
+  }
+
+
+  createAudioToggle() {
+    let muteParams = {name: "mute", width: this.width * 0.04, height: this.width * 0.04, ppm: 1000};
+
+    muteParams.image = {
+      url: "./img/audioON.png",
+      width: this.width * 0.04,
+      height: this.width * 0.04,
+      position: {h: 50, v: 50}
+    };
+
+    let muteButton = new RODIN.Element(muteParams);
+    this.elementsPending++;
+
+    muteButton.on(RODIN.CONST.READY, (evt) => {
+      muteButton.parent = this.panel;
+      muteButton.position.set(-this.width / 2, -this.width / 3.02, 0);
+      evt.target.animation.add(hoverAnimation, hoverOutAnimation);
+      this.elementsPending--;
+      this.readyCheck();
+    });
+
+    muteButton.on('update', (evt) => {
+      if (this.timeBarButton) {
+        muteButton.position.x = this.timeBarButton.position.x + this.timeBarButton.scale.x * this.timeBarButton._threeObject.geometry.parameters.width + this.width / 30;
+      }
+    });
+
+    muteButton.on(RODIN.CONST.GAMEPAD_HOVER, (evt) => {
+      this.hoverAction(evt);
+      evt.target.animation.start("hoverAnimation");
+    });
+
+    muteButton.on(RODIN.CONST.GAMEPAD_HOVER_OUT, (evt) => {
+      this.hoverOutAction(evt);
+      evt.target.animation.start("hoverOutAnimation");
+    });
+
+    muteButton.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, (evt) => {
+      evt.stopPropagation();
+      this.player.mute(true);
+      muteButton.parent = null;
+      unmuteButton.parent = this.panel;
+      unmuteButton.position.set(-this.width / 2, -this.width / 3.02, 0);
+    });
+
+    let unmuteParams = {name: "unmute", width: this.width * 0.04, height: this.width * 0.04, ppm: 1000};
+
+    unmuteParams.image = {
+      url: "./img/audioOFF.png",
+      width: this.width * 0.04,
+      height: this.width * 0.04,
+      opacity: 0.6,
+      position: {h: 50, v: 50}
+    };
+
+    let unmuteButton = new RODIN.Element(unmuteParams);
+    this.elementsPending++;
+
+    unmuteButton.on(RODIN.CONST.READY, (evt) => {
+      unmuteButton.position.set(-this.width / 2, -this.width / 3.02, 0);
+      evt.target.animation.add(hoverAnimation, hoverOutAnimation);
+      this.elementsPending--;
+      this.readyCheck();
+    });
+
+    unmuteButton.on('update', (evt) => {
+      if (this.timeBarButton) {
+        unmuteButton.position.x = this.timeBarButton.position.x + this.timeBarButton.scale.x * this.timeBarButton._threeObject.geometry.parameters.width + this.width / 30;
+      }
+    });
+
+    unmuteButton.on(RODIN.CONST.GAMEPAD_HOVER, (evt) => {
+      this.hoverAction(evt);
+      evt.target.animation.start("hoverAnimation");
+    });
+
+    unmuteButton.on(RODIN.CONST.GAMEPAD_HOVER_OUT, (evt) => {
+      this.hoverOutAction(evt);
+      evt.target.animation.start("hoverOutAnimation");
+    });
+
+    unmuteButton.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, (evt) => {
+      evt.stopPropagation();
+      this.player.mute(false);
+      unmuteButton.parent = null;
+      muteButton.parent = this.panel;
+      muteButton.position.set(-this.width / 2, -this.width / 3.02, 0);
+    });
+
+  }
+
+  createHDToggle() {
+    let HDParams = {
+      text: "HD",
+      color: 0xffffff,
+      fontFamily: "Arial",
+      fontSize: this.width / 30,
+      ppm: 1000
+    };
+    let HDButton = new RODIN.Text(HDParams);
+
+    this.elementsPending++;
+
+    HDButton.on(RODIN.CONST.READY, (evt) => {
+      HDButton.parent = this.panel;
+      HDButton.position.set(this.width * 0.48, -this.width / 3.02, 0);
+      evt.target.animation.add(hoverAnimation, hoverOutAnimation);
+      this.elementsPending--;
+      this.readyCheck();
+    });
+
+    HDButton.on(RODIN.CONST.GAMEPAD_HOVER, (evt) => {
+      this.hoverAction(evt);
+      evt.target.animation.start("hoverAnimation");
+    });
+
+    HDButton.on(RODIN.CONST.GAMEPAD_HOVER_OUT, (evt) => {
+      this.hoverOutAction(evt);
+      evt.target.animation.start("hoverOutAnimation");
+    });
+
+    HDButton.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, (evt) => {
+      evt.stopPropagation();
+
+      let playAfter = this.player.isPlaying();
+      this.player.switchTo("SD");
+
+      HDButton.parent = null;
+      SDButton.parent = this.panel;
+      SDButton.position.set(this.width * 0.48, -this.width / 3.02, 0);
+
+      if (playAfter) {
+        this.player.play();
+      }
+    });
+
+
+    let SDParams = {
+      text: "SD",
+      color: 0xffffff,
+      fontFamily: "Arial",
+      fontSize: this.width / 30,
+      ppm: 1000
+    };
+    let SDButton = new RODIN.Text(SDParams);
+
+    this.elementsPending++;
+
+    SDButton.on(RODIN.CONST.READY, (evt) => {
+      SDButton.position.set(this.width * 0.48, -this.width / 3.02, 0);
+      evt.target.animation.add(hoverAnimation, hoverOutAnimation);
+      this.elementsPending--;
+      this.readyCheck();
+    });
+
+    SDButton.on(RODIN.CONST.GAMEPAD_HOVER, (evt) => {
+      this.hoverAction(evt);
+      evt.target.animation.start("hoverAnimation");
+    });
+
+    SDButton.on(RODIN.CONST.GAMEPAD_HOVER_OUT, (evt) => {
+      this.hoverOutAction(evt);
+      evt.target.animation.start("hoverOutAnimation");
+    });
+
+    SDButton.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, (evt) => {
+      evt.stopPropagation();
+
+      let playAfter = this.player.isPlaying();
+      this.player.switchTo("HD");
+
+      SDButton.parent = null;
+      HDButton.parent = this.panel;
+      HDButton.position.set(this.width * 0.48, -this.width / 3.02, 0);
+
+      if (playAfter) {
+        this.player.play();
+      }
+    });
+
+
+    let LDParams = {
+      text: "LD",
+      color: 0xffffff,
+      fontFamily: "Arial",
+      fontSize: this.width / 30,
+      ppm: 1000
+    };
+    let LDButton = new RODIN.Text(LDParams);
+
+    this.elementsPending++;
+
+    LDButton.on(RODIN.CONST.READY, (evt) => {
+      LDButton.position.set(this.width * 0.48, -this.width / 3.02, 0);
+      evt.target.animation.add(hoverAnimation, hoverOutAnimation);
+      this.elementsPending--;
+      this.readyCheck();
+    });
+
+    LDButton.on(RODIN.CONST.GAMEPAD_HOVER, (evt) => {
+      this.hoverAction(evt);
+      evt.target.animation.start("hoverAnimation");
+    });
+
+    LDButton.on(RODIN.CONST.GAMEPAD_HOVER_OUT, (evt) => {
+      this.hoverOutAction(evt);
+      evt.target.animation.start("hoverOutAnimation");
+    });
+
+    LDButton.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, (evt) => {
+      evt.stopPropagation();
+
+      let playAfter = this.player.isPlaying();
+      this.player.switchTo("HD");
+
+      LDButton.parent = null;
+      HDButton.parent = this.panel;
+      HDButton.position.set(this.width * 0.48, -this.width / 3.02, 0);
+
+      if (playAfter) {
+        this.player.play();
+      }
+    });
+  }
 }

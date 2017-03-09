@@ -4,8 +4,8 @@ RODIN.start();
 const elements = [];
 const types = [RODIN.Sphere, RODIN.Box];
 const mainContainer = new RODIN.Sculpt();
-mainContainer.on('ready', () => {
-  RODIN.Scene.add(mainContainer);
+mainContainer.on(RODIN.CONST.READY, (evt) => {
+  RODIN.Scene.add(evt.target);
 });
 
 let draggedObjectOriginalPosition = new THREE.Vector3();
@@ -17,14 +17,13 @@ let plane = new THREE.Plane();
 
 const mouseToWorld = () => {
   if (!mouseGamepad) return null;
-
   const intersection = new THREE.Vector3();
   mouseGamepad.raycaster.ray.intersectPlane(plane, intersection);
   return intersection;
 };
 
 
-const buttonReady = function(evt){
+const buttonReady = function (evt) {
   const obj = evt.target;
   obj.position.x = Math.random() * 20 - 10;
   obj.position.y = Math.random() * 20 - 10;
@@ -32,7 +31,7 @@ const buttonReady = function(evt){
   obj.parent = mainContainer;
 };
 
-const buttonDown = function(evt){
+const buttonDown = function (evt) {
   const obj = evt.target;
   if (evt.gamepad.navigatorGamePadId === 'mouse') {
     navigator.mouseGamePad.stopPropagationOnMouseMove = true;
@@ -47,7 +46,7 @@ const buttonDown = function(evt){
   } else if (evt.gamepad.navigatorGamePadId === 'cardboard') {
     //not ready yet, working on this :) sorry...
     return;
-  }else {
+  } else {
     if (obj.oldParent) return;
     obj.oldParent = obj.parent;
     console.log(evt.gamepad);
@@ -55,7 +54,7 @@ const buttonDown = function(evt){
   }
 };
 
-const buttonUp = function(evt){
+const buttonUp = function (evt) {
   const obj = evt.target;
   if (evt.gamepad.navigatorGamePadId === 'mouse') {
     navigator.mouseGamePad.stopPropagationOnMouseMove = false;
@@ -66,7 +65,15 @@ const buttonUp = function(evt){
   }
 };
 
-const update = function(evt){
+const hover = function (evt) {
+  evt.target.scale.set(1.1, 1.1, 1.1);
+};
+
+const hoverOut = function (evt) {
+  evt.target.scale.set(1, 1, 1);
+};
+
+const update = function (evt) {
   const obj = evt.target;
   if (!obj.dragging) return;
   const mousePos = mouseToWorld();
@@ -80,8 +87,10 @@ const update = function(evt){
 
 
 for (let i = 0; i < 40; i++) {
-  elements.push(new types[parseInt(Math.random()+0.5)](.7, .7, .7, new THREE.MeshNormalMaterial()));
-  elements[i].on(RODIN.CONST.READY,  buttonReady);
+  elements.push(new types[parseInt(Math.random() + 0.5)](.7, .7, .7, new THREE.MeshNormalMaterial()));
+  elements[i].on(RODIN.CONST.READY, buttonReady);
+  elements[i].on(RODIN.CONST.GAMEPAD_HOVER, hover);
+  elements[i].on(RODIN.CONST.GAMEPAD_HOVER_OUT, hoverOut);
   elements[i].on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, buttonDown);
   elements[i].on(RODIN.CONST.GAMEPAD_BUTTON_UP, buttonUp);
   elements[i].on(RODIN.CONST.UPDATE, update);
