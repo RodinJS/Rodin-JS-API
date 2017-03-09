@@ -1,62 +1,131 @@
-﻿import {THREE} from 'https://cdn.rodin.space/vendor/three/THREE.GLOBAL.js';
-import * as RODIN from 'https://cdn.rodin.space/rodinjs/RODIN.js';
-import {SceneManager} from 'https://cdn.rodin.space/rodinjs/scene/SceneManager.js';
-import {MouseController} from 'https://cdn.rodin.space/rodinjs/controllers/MouseController.js';
-import {CardboardController} from 'https://cdn.rodin.space/rodinjs/controllers/CardboardController.js';
-import {OculusController} from 'https://cdn.rodin.space/rodinjs/controllers/OculusController.js';
-import {MaterialPlayer} from 'https://cdn.rodin.space/rodinjs/video/MaterialPlayer.js';
-import {VPcontrolPanel} from './VPcontrolPanel.js';
-import 'https://cdn.rodin.space/rodinjs/utils/Math.js';
+ import * as RODIN from 'rodin/core';
+ import {VPcontrolPanel} from './VPcontrolPanel.js';
+ RODIN.start();
+
+ let player = new RODIN.MaterialPlayer({
+ HD: "https://cdn.rodin.io/resources/video/PedraBonita1k.mp4",
+ SD: "https://cdn.rodin.io/resources/video/PedraBonita1k.mp4",
+ default: "HD"
+ });
+
+ let material = new THREE.MeshBasicMaterial({
+ map: player.getTexture()
+ });
 
 
-let scene = SceneManager.get();
-let camera = scene.camera;
-let controls = scene.controls;
-let renderer = scene.renderer;
-let mouseController = new MouseController();
-let oculusController = new OculusController();
-let cardboardController = new CardboardController();
+ let sphere = new RODIN.Sculpt(new THREE.Mesh(new THREE.SphereBufferGeometry(90, 720, 4), material));
+ sphere.scale.set(1, 1, -1);
+ sphere.rotation.y = Math.PI/2;
+ RODIN.Scene.add(sphere);
 
-SceneManager.addController(mouseController);
-SceneManager.addController(oculusController);
-SceneManager.addController(cardboardController);
+ RODIN.Scene.preRender(function () {
+ player.update(RODIN.Time.delta);
+ });
 
-scene.setCameraProperty("far", 350);
-scene.setCameraProperty("fov", 70);
+ let controlPanel = new VPcontrolPanel({
+ player : player,
+ title: "A sample 360° video",
+ cover: "img/rodin.jpg",
+ distance: 2,
+ width: 3
+ });
 
-let player = new MaterialPlayer({
-    HD: "video/rodin4k.mp4",
-    SD: "video/rodin2k.mp4",
-    default: "HD"
+ controlPanel.on(RODIN.CONST.READY, (evt) => {
+ RODIN.Scene.add(evt.target);
+ evt.target.position.y = 1.6;
+ if(evt.target.coverEl){
+ evt.target.coverEl.rotation.y = -Math.PI/2;
+ }
+
+ console.log(evt.target.panel.globalPosition);
+ });
+/*
+import * as RODIN from 'rodin/core';
+RODIN.start();
+
+const elements = [];
+const types = [RODIN.Sphere, RODIN.Box];
+const mainContainer = new RODIN.Sculpt();
+mainContainer.on('ready', () => {
+    RODIN.Scene.add(mainContainer);
 });
 
-let material = new THREE.MeshBasicMaterial({
-    map: player.getTexture()
-});
+let draggedObjectOriginalPosition = new THREE.Vector3();
+let mouseOriginalPosition = new THREE.Vector3();
+let mouseGamepad = null;
+let plane = new THREE.Plane();
 
 
-let sphere = new THREE.Mesh(new THREE.SphereBufferGeometry(300, 720, 4), material);
-sphere.scale.set(1, 1, -1);
-sphere.rotation.y = Math.PI/2;
-scene.add(sphere);
 
-scene.preRender(function () {
-    player.update(RODIN.Time.deltaTime());
-});
+const mouseToWorld = () => {
+    if (!mouseGamepad) return null;
 
-let controlPanel = new VPcontrolPanel({
-    player : player,
-    title: "A sample 360° video",
-    cover: "img/rodin.jpg",
-    distance: 3,
-    width: 3,
-    controllers: [mouseController, oculusController, cardboardController]
-});
+    const intersection = new THREE.Vector3();
+    mouseGamepad.raycaster.ray.intersectPlane(plane, intersection);
+    return intersection;
+};
 
-controlPanel.on('ready', (evt) => {
-    scene.add(evt.target.object3D);
-    evt.target.object3D.position.y = controls.userHeight;
-    if(evt.target.coverEl){
-        evt.target.coverEl.rotation.y = -Math.PI/2;
+
+const buttonReady = function(evt){
+    const obj = evt.target;
+    obj.position.x = Math.random() * 20 - 10;
+    obj.position.y = Math.random() * 20 - 10;
+    obj.position.z = Math.random() * 20 - 10;
+    obj.parent = mainContainer;
+};
+
+const buttonDown = function(evt){
+    const obj = evt.target;
+    if (evt.gamepad.navigatorGamePadId === 'mouse') {
+        navigator.mouseGamePad.stopPropagationOnMouseMove = true;
+        mouseGamepad = evt.gamepad;
+        plane.setFromNormalAndCoplanarPoint(
+            RODIN.Scene.activeCamera.getWorldDirection(),
+            obj.position);
+        mouseOriginalPosition = mouseToWorld();
+        draggedObjectOriginalPosition = obj.position.clone();
+        obj.dragging = true;
+        evt.stopPropagation();
+    } else if (evt.gamepad.navigatorGamePadId === 'cardboard') {
+        //not ready yet, working on this :) sorry...
+        return;
+    }else {
+        if (obj.oldParent) return;
+        obj.oldParent = obj.parent;
+        console.log(evt.gamepad);
+        obj.parent = evt.gamepad.sculpt;
     }
-});
+};
+
+const buttonUp = function(evt){
+    const obj = evt.target;
+    if (evt.gamepad.navigatorGamePadId === 'mouse') {
+        navigator.mouseGamePad.stopPropagationOnMouseMove = false;
+        obj.dragging = false;
+    } else if (obj.oldParent) {
+        obj.parent = obj.oldParent;
+        delete obj.oldParent;
+    }
+};
+
+const update = function(evt){
+    const obj = evt.target;
+    if (!obj.dragging) return;
+    const mousePos = mouseToWorld();
+
+    obj.position = new THREE.Vector3(
+        draggedObjectOriginalPosition.x - mouseOriginalPosition.x + mousePos.x,
+        draggedObjectOriginalPosition.y - mouseOriginalPosition.y + mousePos.y,
+        draggedObjectOriginalPosition.z - mouseOriginalPosition.z + mousePos.z
+    );
+};
+
+
+for (let i = 0; i < 40; i++) {
+    elements.push(new types[parseInt(Math.random()+0.5)](.7, .7, .7, new THREE.MeshNormalMaterial()));
+    elements[i].on(RODIN.CONST.READY,  buttonReady);
+    elements[i].on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, buttonDown);
+    elements[i].on(RODIN.CONST.GAMEPAD_BUTTON_UP, buttonUp);
+    elements[i].on(RODIN.CONST.UPDATE, update);
+}
+*/
