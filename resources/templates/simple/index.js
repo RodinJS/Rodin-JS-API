@@ -1,27 +1,35 @@
 import * as RODIN from 'rodin/core';
 RODIN.start();
 
-const randomFloatIn = (min, max) => Math.random() * (max - min) + min;
-let mouseController = new RODIN.MouseController();
+RODIN.Scene.add(new RODIN.Sculpt(new THREE.AmbientLight()));
 
-for (let i = 0; i < 1000; i++) {
- let cube = new RODIN.Sculpt(new THREE.Mesh(new THREE.BoxGeometry(0.015, 0.015, 0.015), new THREE.MeshNormalMaterial()));
+let hoverAnimation = new RODIN.AnimationClip("hoverAnim", {scale: {x: 1.2, y: 1.2, z: 1.2}});
+hoverAnimation.duration(100);
 
- cube.on(RODIN.CONST.READY, (evt) => {
-   evt.target.raycastable = true;
-   evt.target.position.set(randomFloatIn(-0.75,0.75),1.6 - randomFloatIn(-1.5,1.5), randomFloatIn(-0.75,0.75));
-   RODIN.Scene.add(evt.target);
- });
+let hoverOutAnimation = new RODIN.AnimationClip("hoverOutAnim", {scale: {x: 1, y: 1, z: 1}});
+hoverOutAnimation.duration(100);
 
- cube.on(RODIN.CONST.UPDATE, (evt) => {
-   evt.target.rotation.y += RODIN.Time.delta / 500;
- });
+for (let i = 0; i < 40; i++) {
+  let box = new RODIN.Box(.2, .2, .2, new THREE.MeshNormalMaterial({wireframe: true, color: 0x996633}));
+  box.animation.add(hoverAnimation, hoverOutAnimation);
+  box.on(RODIN.CONST.READY, onReady);
+  box.on(RODIN.CONST.GAMEPAD_HOVER, hover);
+  box.on(RODIN.CONST.GAMEPAD_HOVER_OUT, hoverOut);
+}
 
- cube.on(RODIN.CONST.CONTROLLER_HOVER, (evt) => {
-   evt.target.scale.set(2, 2, 2);
- });
-
- cube.on(RODIN.CONST.CONTROLLER_HOVER_OUT, (evt) => {
-   evt.target.scale.set(1, 1, 1);
- });
+function onReady(evt) {
+  evt.target.position.set(Math.random() * 4 - 2, Math.random() * 4 - 0.4, Math.random() * 4 - 2);
+  RODIN.Scene.add(evt.target);
+}
+function hover(evt) {
+  if (evt.target.animation.isPlaying('hoverOutAnim')) {
+    evt.target.animation.stop('hoverOutAnim', false);
+  }
+  evt.target.animation.start('hoverAnim');
+}
+function hoverOut(evt) {
+  if (evt.target.animation.isPlaying('hoverAnim')) {
+    evt.target.animation.stop('hoverAnim', false);
+  }
+  evt.target.animation.start('hoverOutAnim');
 }
