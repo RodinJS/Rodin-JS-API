@@ -63,6 +63,47 @@ function getFaq(req, res, next) {
 
 }
 
+function getKnwolegeCategories(req, res, next) {
+    const colletionID = _.find(HelpDeskDocsCollections, (collection) => collection.slug === 'knowlagebase').id;
+    const allowFields = ['articleCount', 'name', 'id', 'slug', 'visibility'];
+    hsdocs.categories.getAllByCollection({ id: colletionID })
+      .then((response)=> {
+        const categories = _.map(response.categories.items, (category)=> _.pick(category, allowFields));
+        return onSuccess(categories, res);
+    })
+      .catch((err) => onError(err, next));
+
+}
+
+function getKnwolegeCategoryArticles(req, res, next) {
+    if (_.isUndefined(req.params.categoryId)) {
+        const err = new APIError(`Provide category id`, httpStatus.BAD_REQUEST, true);
+        return next(err);
+    }
+
+    const allowFields = ['slug', 'status', 'name', 'popularity', 'viewCount', 'createdAt', 'updatedAt', 'id'];
+
+    hsdocs.articles.getAllByCategory({ id: req.params.categoryId })
+      .then((response)=> {
+        const articles = _.map(response.articles.items, (article)=> _.pick(article, allowFields));
+        return onSuccess(articles, res);
+    })
+      .catch((err) => onError(err, next));
+}
+
+function getKnwolegeArticle(req, res, next) {
+    if (_.isUndefined(req.params.articleId)) {
+        const err = new APIError(`Provide category id`, httpStatus.BAD_REQUEST, true);
+        return next(err);
+    }
+
+    const allowedFields = ['id', 'slug', 'status', 'name', 'text', 'popularity', 'viewCount'];
+
+    hsdocs.articles.get({ id: req.params.articleId })
+      .then((response)=> onSuccess(_.pick(response.article, allowedFields), res))
+      .catch((err) => onError(err, next));
+}
+
 function onSuccess(data, res) {
     return res.status(200).json({ success: true, data: data });
 }
@@ -77,4 +118,7 @@ export default {
     list,
     getByUrl,
     getFaq,
+    getKnwolegeCategories,
+    getKnwolegeCategoryArticles,
+    getKnwolegeArticle,
 };
