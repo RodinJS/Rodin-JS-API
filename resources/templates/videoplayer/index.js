@@ -24,7 +24,7 @@
 
  let controlPanel = new VPcontrolPanel({
     player : player,
-    title: "A sample 360° video",
+    title: "Pedra Bonita 360° video",
     cover: "img/rodin.jpg",
     distance: 2,
     width: 3
@@ -33,9 +33,8 @@
 controlPanel.on(RODIN.CONST.READY, (evt) => {
     RODIN.Scene.add(evt.target);
     evt.target.position.y = 1.6;
-
     if(evt.target.coverEl) {
         evt.target.coverEl.rotation.y = -Math.PI/2;
     }
-    // console.log(evt.target.panel.globalPosition);
+
 });
