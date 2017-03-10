@@ -13,4 +13,7 @@ router.route('/')
 router.route('/:url')
   .get(pagesCtrl.getByUrl);
 
+router.route('/support/faq')
+  .get(pagesCtrl.getFaq)
+
 export default router;
