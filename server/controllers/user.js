@@ -245,7 +245,7 @@ function create(req, res, next) {
     User.get(req.body.username)
       .then(user => {
         if (user) {
-            const err = new APIError('User already exists', 311);
+            const err = new APIError('Username or Email already exists.', 311);
             return next(err);
         }
 
@@ -347,7 +347,7 @@ function create(req, res, next) {
             });
         })
           .error((e) => {
-            const err = new APIError('User already exists!', httpStatus.SOMETHING_WENT_WRONG, true);
+            const err = new APIError('Username or Email already exists.', httpStatus.SOMETHING_WENT_WRONG, true);
             return next(err);
         });
     })
