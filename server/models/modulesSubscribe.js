@@ -54,6 +54,22 @@ subscribedModules.statics = {
         });
     },
 
+    getByOwnerAndModuleId(owner, moduleId) {
+        return this.findOne({ owner: owner, moduleId: mongoose.Types.ObjectId(moduleId) }).execAsync()
+          .then((modules) => {
+            if (modules) {
+                return modules;
+            } else {
+                const err = new APIError('User dont have subscribed modules!----', httpStatus.NOT_FOUND, true);
+                return Promise.reject(err);
+            }
+        })
+          .catch((e) => {
+            const err = new APIError('User dont have subscribed modules!', httpStatus.NOT_FOUND, true);
+            return Promise.reject(err);
+        });
+    },
+
     getByOwner(owner) {
         return this.find({ owner: owner })
           .then((modules) => {
