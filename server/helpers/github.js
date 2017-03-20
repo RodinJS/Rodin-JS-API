@@ -138,26 +138,26 @@ function theirs(username, id, projectRoot) {
                     Project.getOne(id, username)
                       .then(project => {
                         let repo_url = gitPathGenerator(token, project.github.https);
-                        shell.exec(`git pull ${repo_url}`, projectRoot, (err) => {
+                        shell.exec(`git pull origin rodin_editor`, projectRoot, (err) => {
                             console.log('git pull error: ', err);
                             if(err){
                                 shell.series([
                                   'git reset -- ./',
                                   'git checkout -- ./',
-                                  `git pull ${repo_url}`,
+                                  `git pull origin rodin_editor`,
                                 ], projectRoot, (err) => {
                                     if(err) {
                                         console.log('git pull/checkout error: ', err);
                                         reject(err);
                                     } else {
                                         resolve({
-                                            message: `GitHub repo successfuly synced`,
+                                            message: `--GitHub repo successfuly synced`,
                                         }); 
                                     }
                                 });
                             } else {
                                 resolve({
-                                    message: `GitHub repo successfuly synced`,
+                                    message: `++GitHub repo successfuly synced`,
                                 });
                             }
                         });
