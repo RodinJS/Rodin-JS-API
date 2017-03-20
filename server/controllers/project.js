@@ -94,7 +94,7 @@ function get(req, res, next) {
  */
 function create(req, res, next) {
   if (req.projectsCount.total >= req.user.allowProjectsCount) {
-    const err = new APIError(`Maximum projects count exceeded, allowend project count ${req.user.allowProjectsCount}`, 400, true);
+    const err = new APIError(`Maximum projects count exceeded, allowed project count ${req.user.allowProjectsCount}`, 400, true);
     return next(err);
   }
 
