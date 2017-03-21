@@ -3,6 +3,7 @@ import Promise from 'bluebird';
 import APIError from '../helpers/APIError';
 import httpStatus from '../helpers/httpStatus';
 import Pages from '../models/pages';
+import Landing from '../models/landing';
 import HelpScoutDocs from 'helpscout-docs';
 import Q from 'q';
 import helpscout from 'helpscout';
@@ -40,6 +41,12 @@ function getByUrl(req, res, next) {
     if (_.isUndefined(req.params.url)) {
         const err = new APIError(`Provide URL`, httpStatus.BAD_REQUEST, true);
         return next(err);
+    }
+
+    if(req.params.url === 'landing'){
+      return Landing.get()
+        .then(page => onSuccess(page, res))
+        .catch(err => onError(err, next));
     }
 
     const pageURL = req.params.url;
