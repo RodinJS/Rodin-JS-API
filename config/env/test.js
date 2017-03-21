@@ -1,7 +1,7 @@
 export default {
     env: 'test',
     jwtSecret: '4DNSrMPuX3Y3McBu96wd2GzGheDX4ft8gDqLEQVWHnXQfcaGFtM2ZBgyNYzPN87F',
-    db: 'mongodb://mongo:27017/rodin-js-api-test',
+    db: 'mongodb://mongodb:27017/rodin-js-api-test',
     port: 5000,
     socketPort: 6000,
     socketURL: 'http://localhost:6000',
