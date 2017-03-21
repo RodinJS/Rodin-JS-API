@@ -71,6 +71,17 @@ export default {
         appId: '8fb0e4c6fdac3847',
         appSecret: '86bae61d-ddfe-9fbe-e4cd-904fced2',
     },
+    vive: {
+      urls: {
+        build: 'http://45.55.92.49:10003/api/v1/project',
+        cancel: 'http://45.55.92.49:10003/api/v1/project',
+        get: 'http://45.55.92.49:10003/api/v1/project',
+        download: 'http://45.55.92.49:10003/api/v1/bin',
+        getStatus: 'http://45.55.92.49:10003/api/v1/status',
+      },
+      appId: '1f07df95852ba6b1',
+      appSecret: '6d221d4d-aad7-7b94-1542-de2f31b4',
+    },
     payments: {
         tokens: {
             stripe: {

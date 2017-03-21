@@ -29,9 +29,9 @@ const getStatus = (project, device, cb) => {
     },
     (err, httpResponse, body) => {
 
-      //console.log("1", err);
-      //console.log("2", httpResponse);
-      //console.log("3", body);
+     // console.log("1", err);
+     // console.log("2", httpResponse);
+     // console.log("3", body);
 
       if (err || httpResponse.statusCode !== 200) {
         project.build[device].built = false;
