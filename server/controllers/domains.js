@@ -48,6 +48,8 @@ const disabledDomains = _.reduce(domainName, (acc, domain, key) => {
     return acc;
 }, []);
 
+console.log(disabledDomains);
+
 function add(req, res, next) {
     if (_.isUndefined(req.body.id)) {
         const err = new APIError('Project id does not provided!', httpStatus.NO_PROJECT_ID, true);
@@ -61,7 +63,7 @@ function add(req, res, next) {
 
     const domain = help.cleanUrl(req.body.domain);
 
-    if (_.indexOf(disabledDomains, domain.replace(/^www./, '')) > 0) {
+    if (_.indexOf(disabledDomains, domain.replace(/^www./, '')) >= 0) {
         const err = new APIError('Domain is reserved.', httpStatus.BAD_REQUEST, true);
         return next(err);
     }
@@ -173,7 +175,7 @@ function finalize(req, res, next) {
         return res.status(200).json({
             success: true,
             data: {
-                message: `${domain} ${req.method == 'DELETE' ? 'domain name unlinked successfuly!' : 'domain name added to project successfuly!'}`,
+                message: `${domain} ${req.method == 'DELETE' ? 'domain name unlinked successfully!' : 'domain name added to project successfuly!'}`,
             },
         });
     });
