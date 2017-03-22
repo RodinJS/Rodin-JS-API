@@ -9,6 +9,8 @@ import config from '../../config/env';
 import User from '../models/user';
 import Project from '../models/project';
 import shell from './shell';
+import utils from './commonjs';
+
 
 function gitPathGenerator(token, clone_url) {
     let position = clone_url.indexOf('github');
@@ -45,7 +47,7 @@ function createRepo(username, repoName) {
                     });
 
                     github.repos.create({
-                        name: repoName,
+                        name: `${repoName}_RO-${utils.generateCode(5)}`,
                     }, (err, result) => {
                         if (err) {
                             const e = new APIError(`Repo with name ${repoName} alredy exist!`, httpStatus.REPO_NAME_EXIST, true);
@@ -152,7 +154,7 @@ function theirs(username, id, projectRoot) {
                                     } else {
                                         resolve({
                                             message: `--GitHub repo successfuly synced`,
-                                        }); 
+                                        });
                                     }
                                 });
                             } else {
