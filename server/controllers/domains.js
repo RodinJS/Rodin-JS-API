@@ -48,8 +48,6 @@ const disabledDomains = _.reduce(domainName, (acc, domain, key) => {
     return acc;
 }, []);
 
-console.log(disabledDomains);
-
 function add(req, res, next) {
     if (_.isUndefined(req.body.id)) {
         const err = new APIError('Project id does not provided!', httpStatus.NO_PROJECT_ID, true);
