@@ -9,7 +9,7 @@ import config from '../../config/env';
 import User from '../models/user';
 import Project from '../models/project';
 import shell from './shell';
-import utils from './commonjs';
+import utils from './common';
 
 
 function gitPathGenerator(token, clone_url) {
