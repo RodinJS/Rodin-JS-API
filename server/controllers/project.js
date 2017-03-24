@@ -38,7 +38,7 @@ const getStatus = (project, device, cb) => {
 
         //Send error to user if build has failed
         let error = false;
-        if (httpResponse.statusCode === 311){
+        if (httpResponse && httpResponse.statusCode === 311){
           error = true;
         }
 
