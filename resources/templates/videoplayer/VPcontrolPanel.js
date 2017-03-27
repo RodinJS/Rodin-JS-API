@@ -198,6 +198,7 @@ export class VPcontrolPanel extends RODIN.Sculpt {
         this.coverEl = new RODIN.Sculpt(coverMesh);
         this.coverEl.on(RODIN.CONST.READY, (evt) => {
             this.coverEl.parent = this;
+            evt.target.position.set(0,0,0);
         });
     }
 
