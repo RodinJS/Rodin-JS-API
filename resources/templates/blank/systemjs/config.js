@@ -16,25 +16,29 @@
   };
 
   var moduleNames = [
-    'core/error',
-    'core/time',
-    'core/scene',
-    'core/sculpt',
-    'core/sculpt/elements',
-    'core/messenger',
-    'core/eventEmitter',
-    'core/set',
-    'core/initializer',
-    'core/constants',
-    'core/rodinEvent',
-    'core/raycaster',
-    'core/controllers',
-    'core/animation',
-    'core/video',
-    'core/button',
-    'core/gamePad',
-    'core/utils',
-    'core/utils/threeWrappers'
+        'core/error',
+        'core/time',
+        'core/scene',
+        'core/sculpt',
+        'core/sculpt/elements',
+        'core/messenger',
+        'core/eventEmitter',
+        'core/set',
+        'core/initializer',
+        'core/constants',
+        'core/rodinEvent',
+        'core/raycaster',
+        'core/controllers',
+        'core/animation',
+        'core/video',
+        'core/button',
+        'core/gamePad',
+        'core/utils',
+        'core/utils/math',
+        'core/utils/threeWrappers',
+        'core/loader',
+        'core/plugin',
+        'core/particleSystem'
   ];
 
   function packIndex(moduleName) {
