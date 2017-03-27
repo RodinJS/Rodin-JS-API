@@ -61,7 +61,7 @@
     "helpscout-docs": "^0.2.3",
     "http-status": "^0.2.0",
     "joi": "10.0.0",
-    "jsonwebtoken": "7.1.9",
+    "jsonwebtoken": "7.2.0",
     "line-by-line": "^0.1.5",
     "mandrill-api": "^1.0.45",
     "method-override": "^2.3.5",
