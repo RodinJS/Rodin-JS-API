@@ -449,8 +449,14 @@ function uploadFiles(req, res, next) {
 function startUpload(folderPath, req, action, res, next) {
     const PromisifiedFS = Promise.promisifyAll(fs);
     var promises = req.files.map((file) => {
-        PromisifiedFS.writeFileAsync(folderPath + '/' + file.originalname, new Buffer(file.buffer));
-        return fs.chmodSync(folderPath + '/' + file.originalname, 0o755);
+        const filePath = `${folderPath}/${file.originalname}`;
+        const writeFile = PromisifiedFS.writeFileAsync(filePath, new Buffer(file.buffer));
+        if(fs.existsSync(filePath)){
+          return PromisifiedFS.chmodAsync(filePath, 0o755);
+        }
+        else{
+          return writeFile;
+        }
     });
 
     if (action === 'directory') {
@@ -477,6 +483,7 @@ function startUpload(folderPath, req, action, res, next) {
                 }
             });
         }).catch((error) => {
+            console.log(error);
             const err = new APIError('Upload error', httpStatus.BAD_REQUEST, true);
             return next(err);
         });
@@ -485,6 +492,7 @@ function startUpload(folderPath, req, action, res, next) {
             updateProjectDate(req);
             res.status(200).send({ success: true, data: 'Files successfuly uploaded!' });
         }).catch((error) => {
+            console.log('---', error);
             const err = new APIError('Upload error', httpStatus.BAD_REQUEST, true);
             return next(err);
         });

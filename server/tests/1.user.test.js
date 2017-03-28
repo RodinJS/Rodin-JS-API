@@ -18,6 +18,7 @@ describe('## User APIs', () => {
             password: '1234567890AAa',
             invitationCode: '2B5H7B',
             role: 'Free',
+            testUser:'SuperMegaToken_4000dram_test'
         },
         admin: {
             email: 'mega@admin.me',

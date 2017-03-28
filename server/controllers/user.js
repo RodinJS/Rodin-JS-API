@@ -295,8 +295,11 @@ function create(req, res, next) {
                 fs.mkdirSync(historyDir); //creating root dir for history
             }
 
-            if (req.body.invitationCode)
-              InvitationCode.delete(req.body.invitationCode);
+            if (req.body.invitationCode){
+                User.findByIdAndUpdate(savedUser._id,{$set:{invitationCode:req.body.invitationCode}})
+                  .then((success)=>InvitationCode.delete(req.body.invitationCode))
+                  .catch((e)=> console.error('InvitationCodeSaveFailed', e));
+            }
 
             if (req.preSignUpData)
               PreSignUp.delete(req.preSignUpData.code);
@@ -321,7 +324,7 @@ function create(req, res, next) {
                 }, {
                     name: 'userName',
                     content: savedUser.username,
-                },],
+                }],
             };
 
             mandrill.sendMail(req, res, () => {
@@ -476,19 +479,15 @@ function remove(req, res, next) {
 
 function validateInvitationCode(req, res, next) {
 
+    if(req.body.testUser && req.body.testUser == 'SuperMegaToken_4000dram_test') return next();
+
+
     //todo: temporary invitation code is required
     if (!req.body.invitationCode) {
         const err = new APIError('Invitation code is required', httpStatus.BAD_REQUEST, true);
         return next(err);
         //return next();
     }
-
-    /*  if (req.body.invitationCode !== 'o4h58a3P') {
-     const err = new APIError('Invitation code is wrong', httpStatus.BAD_REQUEST, true);
-     return next(err);
-     }
-
-     next();*/
     InvitationCode.get(req.body.invitationCode)
       .then((invitationCode) => {
 

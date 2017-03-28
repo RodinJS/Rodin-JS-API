@@ -29,16 +29,16 @@ const getStatus = (project, device, cb) => {
     },
     (err, httpResponse, body) => {
 
-      //console.log("1", err);
-      //console.log("2", httpResponse);
-      //console.log("3", body);
+     // console.log("1", err);
+     // console.log("2", httpResponse);
+     // console.log("3", body);
 
       if (err || httpResponse.statusCode !== 200) {
         project.build[device].built = false;
 
         //Send error to user if build has failed
         let error = false;
-        if (httpResponse.statusCode === 311){
+        if (httpResponse && httpResponse.statusCode === 311){
           error = true;
         }
 
@@ -103,7 +103,7 @@ function create(req, res, next) {
     .then(projectExist => {
       //console.log('exist', projectExist);
       if (projectExist) {
-        const message = 'Project exist';
+        const message = 'Project exists';
         const errorCode = httpStatus.PROJECT_EXIST;
         const err = new APIError(message, errorCode, true);
         return next(err);
@@ -120,13 +120,6 @@ function create(req, res, next) {
       });
 
       project.saveAsync()
-        .catch((e) => {
-          //console.log(e);
-          const message = e.code === 11000 ? 'Project exist' : httpStatus[400];
-          const errorCode = e.code === 11000 ? httpStatus.PROJECT_EXIST : httpStatus.BAD_REQUEST;
-          const err = new APIError(message, errorCode, true);
-          return next(err);
-        })
         .then((savedProject) => {
 
           if (!savedProject) return;
@@ -226,6 +219,13 @@ function create(req, res, next) {
                 return next(err);
               });
           }
+        })
+        .catch((e) => {
+          //console.log(e);
+          const message = e.code === 11000 ? 'Project url exists' : httpStatus[400];
+          const errorCode = e.code === 11000 ? httpStatus.PROJECT_EXIST : httpStatus.BAD_REQUEST;
+          const err = new APIError(message, errorCode, true);
+          return next(err);
         })
     })
     .catch(e => {
