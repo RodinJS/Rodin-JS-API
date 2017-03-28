@@ -158,6 +158,9 @@ const UserSchema = new mongoose.Schema({
         customerId: String,
         subscriptionId: String,
     },
+    invitationCode:{
+      type:String
+    }
 });
 
 // Pre-save of user to database, hash password if password is modified or new

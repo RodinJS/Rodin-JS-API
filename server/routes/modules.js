@@ -23,4 +23,7 @@ router.route('/subscribe')
 router.route('/assign')
   .post(check.ifTokenValid, modulesCtrl.checkIsSubscribed, modulesCtrl.getById,  modulesCtrl.assignToProject);
 
+router.route('/hook/validate')
+  .get(modulesCtrl.checkHookToken, modulesCtrl.validateModule);
+
 export default router;

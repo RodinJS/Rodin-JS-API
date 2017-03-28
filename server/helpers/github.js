@@ -9,6 +9,8 @@ import config from '../../config/env';
 import User from '../models/user';
 import Project from '../models/project';
 import shell from './shell';
+import utils from './common';
+
 
 function gitPathGenerator(token, clone_url) {
     let position = clone_url.indexOf('github');
@@ -45,7 +47,7 @@ function createRepo(username, repoName) {
                     });
 
                     github.repos.create({
-                        name: repoName,
+                        name: `${repoName}_RO-${utils.generateCode(5)}`,
                     }, (err, result) => {
                         if (err) {
                             const e = new APIError(`Repo with name ${repoName} alredy exist!`, httpStatus.REPO_NAME_EXIST, true);
@@ -138,19 +140,28 @@ function theirs(username, id, projectRoot) {
                     Project.getOne(id, username)
                       .then(project => {
                         let repo_url = gitPathGenerator(token, project.github.https);
-                        shell.exec(`git pull ${repo_url}`, projectRoot, (err) => {
+                        shell.exec(`git pull origin rodin_editor`, projectRoot, (err) => {
                             console.log('git pull error: ', err);
-                            shell.series([
-                              'git reset -- ./',
-                              'git checkout -- ./',
-                              `git pull ${repo_url}`,
-                            ], projectRoot, (err) => {
-                                console.log('git pull/checkout error: ', err);
-                                reject(err);
-                            });
-                            resolve({
-                                message: `GitHub repo successfuly synced`,
-                            });
+                            if(err){
+                                shell.series([
+                                  'git reset -- ./',
+                                  'git checkout -- ./',
+                                  `git pull origin rodin_editor`,
+                                ], projectRoot, (err) => {
+                                    if(err) {
+                                        console.log('git pull/checkout error: ', err);
+                                        reject(err);
+                                    } else {
+                                        resolve({
+                                            message: `--GitHub repo successfuly synced`,
+                                        });
+                                    }
+                                });
+                            } else {
+                                resolve({
+                                    message: `++GitHub repo successfuly synced`,
+                                });
+                            }
                         });
                     }).catch(e => {
                         const err = new APIError(`Project with ${id} id does not exist!`, httpStatus.BAD_REQUEST, true);

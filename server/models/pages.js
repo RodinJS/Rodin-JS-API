@@ -50,7 +50,7 @@ Pages.statics = {
     },
 
     getPagesList() {
-        return this.find({ state: 'published' }).select({ title: 1, slug: 1 })
+        return this.find().select({ title: 1, slug: 1, state: 1, putOnFooter: 1 })
           .then((pages) => {
             if (pages) {
                 return pages;

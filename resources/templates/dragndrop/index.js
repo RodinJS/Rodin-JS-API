@@ -4,8 +4,8 @@ RODIN.start();
 const elements = [];
 const types = [RODIN.Sphere, RODIN.Box];
 const mainContainer = new RODIN.Sculpt();
-mainContainer.on('ready', () => {
-  RODIN.Scene.add(mainContainer);
+mainContainer.on(RODIN.CONST.READY, (evt) => {
+  RODIN.Scene.add(evt.target);
 });
 
 let draggedObjectOriginalPosition = new THREE.Vector3();
@@ -17,7 +17,6 @@ let plane = new THREE.Plane();
 
 const mouseToWorld = () => {
   if (!mouseGamepad) return null;
-
   const intersection = new THREE.Vector3();
   mouseGamepad.raycaster.ray.intersectPlane(plane, intersection);
   return intersection;
@@ -66,6 +65,14 @@ const buttonUp = function(evt){
   }
 };
 
+const hover = function (evt) {
+  evt.target.scale.set(1.1, 1.1, 1.1);
+};
+
+const hoverOut = function (evt) {
+  evt.target.scale.set(1, 1, 1);
+};
+
 const update = function(evt){
   const obj = evt.target;
   if (!obj.dragging) return;
@@ -82,6 +89,8 @@ const update = function(evt){
 for (let i = 0; i < 40; i++) {
   elements.push(new types[parseInt(Math.random()+0.5)](.7, .7, .7, new THREE.MeshNormalMaterial()));
   elements[i].on(RODIN.CONST.READY,  buttonReady);
+  elements[i].on(RODIN.CONST.GAMEPAD_HOVER, hover);
+  elements[i].on(RODIN.CONST.GAMEPAD_HOVER_OUT, hoverOut);
   elements[i].on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, buttonDown);
   elements[i].on(RODIN.CONST.GAMEPAD_BUTTON_UP, buttonUp);
   elements[i].on(RODIN.CONST.UPDATE, update);
