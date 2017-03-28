@@ -4,7 +4,9 @@ import httpStatus from '../helpers/httpStatus';
 import Modules from '../models/modules';
 import ModulesAssign from '../models/assignedModules';
 import ModulesSubscribe from '../models/modulesSubscribe';
+import Project from '../models/project';
 import config from '../../config/env';
+const HookSecretKey = 'K7rd6FzEZwzcc6dQr3cv9kz4tTTZzAc9hdXYJpukvEnxmbdB42V4b6HePs5ZDTYLW_4000dram_module';
 
 function list(req, res, next) {
     const limit = parseInt(req.query.limit) || 50;
@@ -203,14 +205,88 @@ function generateScript(req) {
     return `<script src="${config.modules.socketService.URL}/${req.module.url}?projectId=${projectID}&host=${config.modules.socketService.URL}"></script>`;
 }
 
+function validateModule(req, res, next) {
+    ModulesAssign.get(req.query.projectId)
+      .then(module => {
+        if (!module)  return onError('M_N_A_C_P', next, 'Module not assigned to current project');
+
+        module = module.toObject();
+
+        ModulesSubscribe.getByOwnerAndModuleId(module.owner, module.moduleId)
+          .then(subscribed=> {
+
+            if (!subscribed) return onError('M_N_P', next, 'Module not purchased');
+
+            subscribed = subscribed.toObject();
+            if (new Date(subscribed.expiredAt) <= new Date())  return onError('S_E', next, 'Subscription expired');
+
+            Project.get(req.query.projectId)
+              .then(project=> {
+                if (!project) return onError('M_N_S_F_H', next, 'Module not support following host');
+
+                const allowedHosts = ['rodin.space', 'rodin.io', 'rodin.design', 'localhost'];
+                project = project.toObject();
+
+                if (project.domain)
+                  allowedHosts.push(project.domain);
+
+                const hostname = _extractDomain(req);
+                if (!hostname || _.indexOf(allowedHosts, hostname) < 0) return onError('M_N_S_F_H', next, 'Module not support following host');
+
+                req.module = module;
+                return onSuccess({ success: true }, res);
+
+            })
+              .catch((err) =>  onError(err, next, 'Module not support following host'));
+
+        });
+
+    }).catch((err) =>  onError(err, next, 'Module not purchased'));
+}
+
+function checkHookToken(req, res, next) {
+    const token = req.headers['x-access-token'];
+
+    if (token !== HookSecretKey) {
+        const err = new APIError('Hook key invalid!', httpStatus.UNAUTHORIZED, true);
+        return next(err);
+    }
+
+    next();
+}
+
 function onSuccess(data, res) {
     return res.status(200).json({ success: true, data: data });
 }
 
-function onError(e, next) {
+function onError(e, next, message) {
     console.log(e);
-    const err = new APIError(`Bad request`, httpStatus.BAD_REQUEST, true);
+    const err = new APIError(message || `Bad request`, httpStatus.BAD_REQUEST, true);
     return next(err);
+}
+
+/**
+ *
+ * @param req
+ * @returns {*}
+ * @private
+ */
+function _extractDomain(req) {
+    const url = req.headers.referer;
+    let domain = '';
+    if (!url) {
+        return false;
+    }
+
+    if (url.indexOf('://') > -1)
+      domain = url.split('/')[2];
+    else
+      domain = url.split('/')[0];
+
+    //find & remove port number
+    domain = domain.split(':')[0];
+
+    return domain;
 }
 
 export default {
@@ -223,4 +299,6 @@ export default {
     getMyModules,
     update,
     unsubscribe,
+    validateModule,
+    checkHookToken,
 };
