@@ -45,7 +45,7 @@
     "compression": "^1.6.1",
     "cookie-parser": "^1.4.1",
     "cors": "^2.7.1",
-    "debug": "^2.2.0",
+    "debug": "^2.4.0",
     "dir-to-json": "0.0.3",
     "express": "4.14.0",
     "express-jwt": "5.1.0",
