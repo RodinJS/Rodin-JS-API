@@ -30,20 +30,18 @@ function readSizeRecursive(dir, done) {
     });
 }
 
-function sum(array){
-    return array.reduce((pv, cv) => pv+cv, 0);
+function sum(array) {
+    return array.reduce((pv, cv) => pv + cv, 0);
 }
 
-
-function getUserStroageSize(req, res, next){
-    if(!req.query.usedStorage) return next();
+function getUserStroageSize(req, res, next) {
+    //if(!req.query.usedStorage) return next();
 
     let rootDir = 'projects/' + req.user.username;
-    readSizeRecursive(rootDir, (err, size)=>{
+    readSizeRecursive(rootDir, (err, size)=> {
         req.usedStorage = err ? 0 : size;
         next();
     });
 }
 
-
-export default{readSizeRecursive, getUserStroageSize}
+export default{ readSizeRecursive, getUserStroageSize };

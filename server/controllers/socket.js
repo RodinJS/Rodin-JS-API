@@ -13,12 +13,12 @@ function connect(req, res, next) {
             appId: config.socket.appId,
             appSecret: config.socket.appSecret,
             info: {
-                "name": "Neo"
-            }
+                name: 'Neo',
+            },
         },
-        json: true // Automatically stringifies the body to JSON 
+        json: true, // Automatically stringifies the body to JSON
     };
-     
+
     request(options)
         .then(function (response) {
             res.status(200).json(response);

@@ -152,7 +152,7 @@ router.route('/search')
  *
  *
  */
-router.route("/upload")
+router.route('/upload')
     .post(upload.array('file'), check.ifTokenValid, check.project, check.validateStorage, editorCtrl.isUnitTest, editorCtrl.uploadFiles);
 
 router.route('/:id')

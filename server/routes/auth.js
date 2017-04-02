@@ -1,17 +1,12 @@
+// jscs:disable validateIndentation
 import express from 'express';
 import validate from 'express-validation';
-import expressJwt from 'express-jwt';
 import paramValidation from '../../config/param-validation';
 import authCtrl from '../controllers/auth';
+import userCapacity from '../helpers/directorySize';
+import projectCtrl from '../controllers/project';
 import check from '../controllers/check';
-import config from '../../config/env';
-
-
-import passport from '../../config/passport';
-
 const router = express.Router();	// eslint-disable-line new-cap
-
-// const requireAuth = passport.authenticate('jwt', { session: false }); // eslint-disable-line
 
 /**
  * @api {post} /api/auth/login Login
@@ -60,7 +55,10 @@ const router = express.Router();	// eslint-disable-line new-cap
  *      }
  */
 router.route('/login')
-	.post(validate(paramValidation.login), authCtrl.login, authCtrl.finalizeUser);
+	.post(validate(paramValidation.login), authCtrl.login, userCapacity.getUserStroageSize, projectCtrl.getProjectsCount, authCtrl.finalizeUser);
+
+router.route('/login/admin')
+  .post(validate(paramValidation.login), authCtrl.login, check.checkAdminPermission, authCtrl.finalizeUser);
 
 /**
  * @api {post} /api/auth/verify Verify token
@@ -97,9 +95,6 @@ router.route('/login')
 router.route('/verify')
 	.post(authCtrl.verify);
 
-
-
-
 /**
  * @api {post} /api/auth/verify/email Verify if email exists
  * @apiName VerifyIfEmailExists
@@ -132,8 +127,6 @@ router.route('/verify')
  *          "isOperational": true
  *      }
  */
-// router.route('/verify/email')
-// 	.post(check.ifEmailExists);
 
 /**
  * @api {post} /api/auth/logout Logout
@@ -160,8 +153,6 @@ router.route('/verify')
 router.route('/logout')
 	.post(authCtrl.logout);
 
-
-
 router.route('/social/:socialName')
 	.post(authCtrl.socialAuth, authCtrl.finalizeUser);
 
@@ -171,8 +162,6 @@ router.route('/social/:socialName')
 router.route('/steam/callback')
 	.get(passport.authenticate('steam', {failureRedirect: '/login'}));*/
 
-
-
 /**
  *
  */
@@ -180,7 +169,7 @@ router.route('/invitationCode')
     /**
      *
      */
-	.post(authCtrl.generateInvitationCode)
+	.post(check.ifAdmin, authCtrl.generateInvitationCode)
     /**
      *
      */

@@ -23,5 +23,5 @@ module.exports.expand = (url) => {
         })
         .catch((err) => {
             console.error(err.message);
-        });    
+        });
 };

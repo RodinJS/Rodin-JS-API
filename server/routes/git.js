@@ -3,7 +3,6 @@ import gitCtrl from '../controllers/git';
 import check from '../controllers/check';
 import authCtrl from '../controllers/auth';
 
-
 const router = express.Router();
 
 router.route('/')

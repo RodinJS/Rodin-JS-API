@@ -8,7 +8,7 @@ import utils from '../helpers/common';
 
 class fileContentSearch {
 
-    constructor(rootPath, searchWord, caseSensetive, isRegex, loopLimit) {
+    constructor(rootPath, searchWord, caseSensetive, isRegex, loopLimit, projectName) {
         caseSensetive = caseSensetive && caseSensetive.toLowerCase() === 'true' ? true : false;
         this.searchWord = searchWord;
         this.rootFolder = rootPath;
@@ -16,6 +16,7 @@ class fileContentSearch {
         this.readedLinesLength = 0;
         this.regexParams = caseSensetive ? 'i' : 'g';
         this.isRegex = isRegex || false;
+        this.projectName = projectName;
         this.foundedFiles = {};
     }
 
@@ -25,6 +26,7 @@ class fileContentSearch {
             if (err) {
                 cb(err, null);
             }
+
             cb(false, _this.foundedFiles);
         });
     }
@@ -39,7 +41,6 @@ class fileContentSearch {
                 if (!file) return done(null, results);
 
                 let lastCharacter = dir.slice(-1) == '/' ? '' : '/';
-
 
                 file = dir + lastCharacter + file;
                 fs.stat(file, (err, stat) => {
@@ -66,7 +67,7 @@ class fileContentSearch {
 
     searchInsideFile(file, cb) {
 
-        let lineNr = 0, _this = this;
+        let lineNr = 0;
         let lineReader = new LineByLineReader(file);
 
         lineReader
@@ -74,26 +75,25 @@ class fileContentSearch {
                 cb(false);
             })
             .on('line',  (line)=> {
-               let searchWord = _this.searchWord.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
-               let re = new RegExp(searchWord, _this.regexParams);
-
+                let searchWord = this.searchWord.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
+                let re = new RegExp(searchWord, this.regexParams);
 
                 let match = re.exec(line);
                 if (match) {
-                    let splitFilePath = file.split("/");
-                    let relativePath = splitFilePath.splice(2, splitFilePath.length).join('/');
+                    let relativePath = file.substr(file.indexOf(this.projectName));
 
-                    if (!_this.foundedFiles[relativePath])
-                        _this.foundedFiles[relativePath] = [];
+                    if (!this.foundedFiles[relativePath])
+                      this.foundedFiles[relativePath] = [];
 
-                    _this.foundedFiles[relativePath].push({
+                    this.foundedFiles[relativePath].push({
                         fileName: relativePath,
                         line: lineNr,
                         column: match.index,
-                        text: match.input.replace(/^\s\s*/, '').replace(/\s\s*$/, '')
+                        text: match.input.replace(/^\s\s*/, '').replace(/\s\s*$/, ''),
                     });
                 }
-                _this.readedLinesLength++;
+
+                this.readedLinesLength++;
             })
             .on('end',  () => {
                 cb(true);

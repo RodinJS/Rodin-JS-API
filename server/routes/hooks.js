@@ -10,5 +10,4 @@ const router = express.Router();
 router.route('/build/:id/:device')
   .post(hooksCtrl.validateKey, hooksCtrl.build);
 
-
 export default router;

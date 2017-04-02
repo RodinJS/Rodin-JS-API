@@ -1,3 +1,4 @@
+// jscs:disable
 import User from '../models/user';
 import PreSignUp from '../models/preSignUp';
 import InvitationCode from '../models/invitationCode';
@@ -8,6 +9,7 @@ import Utils from '../helpers/common';
 import mandrill from '../helpers/mandrill';
 import fs from 'fs';
 import _    from 'lodash';
+import utils from '../helpers/common';
 
 
 import commonHelpers from '../helpers/common';
@@ -63,17 +65,32 @@ function finalizeUser(req, res, next) {
       expiresIn: "7d"
     });
 
+  let data = {
+    email: user.email,
+    username: user.username,
+    role: user.role,
+    profile: user.profile,
+    usernameConfirmed: req.user.usernameConfirmed,
+    creationDate:user.createdAt,
+    github:user.github ? user.github.email : false,
+    facebook:user.facebook ? user.facebook.email : false,
+    google:user.google ? user.google.email : false,
+    steam:user.steamId,
+    oculus:user.oculusId,
+  };
+
+
+  //concat projects count
+  data.projects = req.projectsCount;
+
+  //concat usedStorage
+  data.usedStorage = utils.byteToMb(req.usedStorage);
+
   return res.status(200).json({
     "success": true,
     "data": {
       token,
-      user: {
-        email: user.email,
-        username: user.username,
-        role: user.role,
-        profile: user.profile,
-        usernameConfirmed: req.user.usernameConfirmed
-      }
+      user: data
     }
   });
 }
@@ -90,11 +107,11 @@ function socialAuth(req, res, next) {
   let queryMethod = {};
 
   if (req.params.socialName === 'facebook') {
-    queryMethod = {$or: [{facebookId: req.body.id}, {email: req.body.email}]};
+    queryMethod = {$or: [{'facebook.id': req.body.id}, {email: req.body.email}]};
   }
 
   else if (req.params.socialName === 'google') {
-    queryMethod = {$or: [{googleId: req.body.id}, {email: req.body.email}]};
+    queryMethod = {$or: [{'google.id': req.body.id}, {email: req.body.email}]};
   }
 
   else if (req.params.socialName === 'steam') {
@@ -142,11 +159,17 @@ function socialAuth(req, res, next) {
         };
 
         if (req.params.socialName == 'facebook') {
-          userObject.facebookId = req.body.id;
+          userObject.facebook = {
+            id:req.body.id,
+            email:req.body.socialEmail
+          };
         }
 
         else if (req.params.socialName === 'google') {
-          userObject.googleId = req.body.id;
+          userObject.google = {
+            id:req.body.id,
+            email:req.body.socialEmail
+          }
         }
 
         else if (req.params.socialName === 'steam') {
@@ -160,7 +183,8 @@ function socialAuth(req, res, next) {
         else if (req.params.socialName === 'github') {
           userObject.github = {
             id: req.body.id,
-            token: req.gitAccessToken
+            token: req.gitAccessToken,
+            email:req.body.socialEmail
           }
         }
 
@@ -177,9 +201,9 @@ function socialAuth(req, res, next) {
             //setup project folder for confirmed User
             if (userObject.usernameConfirmed) {
 
-              let rootDir = config.stuff_path + '/projects/' + savedUser.username;
-              let publicDir = config.stuff_path + '/public/' + savedUser.username;
-              let publishDir = config.stuff_path + '/publish/' + savedUser.username;
+              let rootDir = config.stuff_path + 'projects/' + savedUser.username;
+              let publicDir = config.stuff_path + 'public/' + savedUser.username;
+              let publishDir = config.stuff_path + 'publish/' + savedUser.username;
 
               if (!fs.existsSync(rootDir)) {
                 fs.mkdirSync(rootDir); //creating root dir for project
@@ -198,7 +222,7 @@ function socialAuth(req, res, next) {
 
             req.mailSettings = {
               to: savedUser.email,
-              from: 'team@rodin.space',
+              from: 'team@rodin.io',
               fromName: 'Rodin team',
               templateName: 'rodin_signup',
               subject: 'Welcome to Rodin platform',
@@ -238,11 +262,11 @@ function socialAuth(req, res, next) {
         let userUpdate = false;
 
         if (req.params.socialName === 'facebook' && !user.facebookId) {
-          userUpdate = {$set: {facebookId: req.body.id}}
+          userUpdate = {$set: {'facebook.id': req.body.id, 'facebook.email':req.body.socialEmail}}
         }
 
         else if (req.params.socialName === 'google' && !user.googleId) {
-          userUpdate = {$set: {googleId: req.body.id}}
+          userUpdate = {$set: {'google.id': req.body.id, 'google.email':req.body.socialEmail}}
         }
 
         else if (req.params.socialName === 'steam' && !user.steamId) {
@@ -255,7 +279,7 @@ function socialAuth(req, res, next) {
 
         else if (req.params.socialName === 'github') {
           if(req.body.sync){
-            userUpdate = {$set: {'github.token': req.body.token, 'github.id':req.body.id}}
+            userUpdate = {$set: {'github.token': req.body.token, 'github.id':req.body.id, 'github.email':req.body.socialEmail}}
           }
           else{
             userUpdate = {$set: {'github.token': req.gitAccessToken}}
@@ -264,11 +288,22 @@ function socialAuth(req, res, next) {
 
         if (userUpdate) {
 
-          return User.updateAsync({username: user.username}, userUpdate)
-            .then(() => {
+          return User.findOneAndUpdate({username: user.username}, userUpdate, {new:true})
+            .then(updatedUser => {
 
               if(req.body.sync){
-                return res.status(200).json({success:true, data:user});
+                updatedUser =  updatedUser.toObject();
+                updatedUser = _.omit(updatedUser, ['password', 'stripe']);
+
+
+                updatedUser.github = updatedUser.github ? updatedUser.github.email : false;
+                updatedUser.facebook = updatedUser.facebook ? updatedUser.facebook.email : false;
+                updatedUser.google = updatedUser.google ? updatedUser.google.email : false;
+                updatedUser.steam = !!updatedUser.steamId;
+                updatedUser.oculus =!!updatedUser.oculusId;
+
+
+                return res.status(200).json({success:true, data:updatedUser});
               }
 
               req.user = user;
@@ -284,7 +319,7 @@ function socialAuth(req, res, next) {
               return next();
 
             })
-            .error((e) => {
+            .catch((e) => {
               const err = new APIError('Something wrong!', httpStatus.BAD_REQUEST, true);
               return next(err);
             });
@@ -334,7 +369,27 @@ function logout(req, res) {
  * @returns {*}
  */
 function generateInvitationCode(req, res, next) {
-  if (!req.body.email) {
+
+
+  const totalCodes = req.body.codeCount || 1000;
+
+
+  let bulk = InvitationCode.collection.initializeUnorderedBulkOp();
+  for (let i = 0; i < totalCodes; i++) {
+    //console.log('code', commonHelpers.generateCode(7));
+    bulk.insert({invitationCode:commonHelpers.generateCode(7)});
+  }
+
+  bulk.execute((err)=> {
+    console.log(err);
+    if (err) {
+      const err = new APIError('Something wrong', httpStatus.BAD_REQUEST, true);
+      return next(err);
+    }
+
+    return res.status(200).json({success: true, data:totalCodes+' inserted'});
+  });
+ /* if (!req.body.email) {
     const err = new APIError('Please provide email address', httpStatus.BAD_REQUEST, true);
     return next(err);
   }
@@ -347,7 +402,7 @@ function generateInvitationCode(req, res, next) {
       return next(err);
     }
     res.status(200).json({success: true, invitationCode: code});
-  })
+  })*/
 
 }
 

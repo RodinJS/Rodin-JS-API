@@ -8,60 +8,72 @@ import paymentsRoutes from './payments';
 import hooksRoutes from './hooks';
 import notificationsRoute from './notifications';
 import gitRoute from './git';
-import expressSanitized from 'express-sanitize-escape';
+import domainsRoute from './domains';
+import modulesRoute from './modules';
+import pagesRoute from './pages';
+import RodinSanitizer from '../helpers/sanitizer';
+
 import _ from 'lodash';
 
 const router = express.Router();	// eslint-disable-line new-cap
+
 const apiRoutes = {
-  user: {
-    route: '/user',
-    module: userRoutes,
-  },
-  project: {
-    route: '/project',
-    module: projectRoutes
-  },
-  auth: {
-    route: '/auth',
-    module: authRoutes
-  },
-  editor: {
-    route: '/editor',
-    module: editorRoutes
-  },
-  ios: {
-    route: '/ios',
-    module: iosRoutes
-  },
-  payments: {
-    route: '/payments',
-    module: paymentsRoutes
-  },
-  hooks: {
-    route: '/hooks',
-    module: hooksRoutes
-  },
-  notifications: {
-    route: '/notifications',
-    module: notificationsRoute
-  },
-  git: {
-    route: '/git',
-    module: gitRoute
-  }
-
+    user: {
+        route: '/user',
+        module: [RodinSanitizer.makeSanitize, userRoutes],
+    },
+    project: {
+        route: '/project',
+        module: [RodinSanitizer.makeSanitize, projectRoutes],
+    },
+    auth: {
+        route: '/auth',
+        module: [RodinSanitizer.makeSanitize, authRoutes],
+    },
+    editor: {
+        route: '/editor',
+        module: [editorRoutes],
+    },
+    ios: {
+        route: '/ios',
+        module: [RodinSanitizer.makeSanitize, iosRoutes],
+    },
+    payments: {
+        route: '/payments',
+        module: [RodinSanitizer.makeSanitize, paymentsRoutes],
+    },
+    hooks: {
+        route: '/hooks',
+        module: [RodinSanitizer.makeSanitize, hooksRoutes],
+    },
+    notifications: {
+        route: '/notifications',
+        module: [RodinSanitizer.makeSanitize, notificationsRoute],
+    },
+    git: {
+        route: '/git',
+        module: [RodinSanitizer.makeSanitize, gitRoute],
+    },
+    domains: {
+        route: '/domains',
+        module: [RodinSanitizer.makeSanitize, domainsRoute],
+    },
+    modules: {
+        route: '/modules',
+        module: [RodinSanitizer.makeSanitize, modulesRoute],
+    },
+    pages: {
+        route: '/pages',
+        module: [pagesRoute],
+    },
 };
-
-
-expressSanitized.sanitizeParams(router, Object.keys(apiRoutes));
-
 /** GET /health-check - Check service health */
 router.get('/health-check', (req, res) =>
   res.send('OK')
 );
 
 _.each(apiRoutes, (route, key) => {
-  router.use(route.route, route.module);
+    router.use(route.route, route.module);
 });
 
 export default router;

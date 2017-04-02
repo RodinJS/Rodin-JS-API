@@ -1,4 +1,4 @@
-import {execSync} from 'child_process';
+// jscs:disable
 import fs from 'fs';
 import path from 'path';
 import Project from '../models/project';
@@ -15,31 +15,40 @@ import mandrill from '../helpers/mandrill';
 import userCapacity from '../helpers/directorySize';
 import transpiler from '../helpers/transpiler';
 import _ from 'lodash';
-import git from '../helpers/github';
 
 const getStatus = (project, device, cb) => {
   console.log(JSON.stringify(project, null, 3));
+  console.log(`${config[device].urls.getStatus}/${project.build[device].buildId}`);
   request.get(
     {
       url: `${config[device].urls.getStatus}/${project.build[device].buildId}`,
       headers: {
         'app-id': config[device].appId,
-        'app-secret': config[device].appSecret
-      }
+        'app-secret': config[device].appSecret,
+      },
     },
     (err, httpResponse, body) => {
-      // console.log("1", err);
-      // console.log("2", httpResponse);
-      console.log("3", body);
+
+      //console.log("1", err);
+      //console.log("2", httpResponse);
+      //console.log("3", body);
+
       if (err || httpResponse.statusCode !== 200) {
         project.build[device].built = false;
-        return project.save(err => cb(err, project));
+
+        //Send error to user if build has failed
+        let error = false;
+        if (httpResponse.statusCode === 311){
+          error = true;
+        }
+
+        return project.save(err => cb(error, project));
       }
 
       project.build[device].built = JSON.parse(body).data.buildStatus;
       return project.save(err => cb(err, project));
     }
-  )
+  );
 };
 
 /**
@@ -50,24 +59,24 @@ function get(req, res, next) {
   Project.getOne(req.params.id, req.user.username)
     .then((project) => {
       if (project) {
-
         if (req.query.device) {
           return getStatus(project, req.query.device, (err, project) => {
-            res.status(200).json({
+            if(err){
+              const err = new APIError('Something went wrong', httpStatus.BAD_REQUEST, true);
+              return next(err);
+            }
+            return res.status(200).json({
               success: true,
               data: project
             });
-          })
+          });
         }
 
         req.project = project.toObject();
         return next();
-
       }
-      else {
-        const err = new APIError('Project is empty', httpStatus.NOT_FOUND, true);
-        return next(err);
-      }
+      const err = new APIError('Project is empty', httpStatus.NOT_FOUND, true);
+      return next(err);
     })
     .catch((e) => {
       const err = new APIError('Project not found', httpStatus.NOT_FOUND, true);
@@ -84,14 +93,15 @@ function get(req, res, next) {
  * @returns {Project}
  */
 function create(req, res, next) {
-  if(req.projectsCount.total >= req.user.allowProjectsCount){
-    const err = new APIError(`Maximum projects count exceeded, allowend project count ${req.user.allowProjectsCount}`, 400, true);
+  if (req.projectsCount.total >= req.user.allowProjectsCount) {
+    const err = new APIError(`Maximum projects count exceeded, allowed project count ${req.user.allowProjectsCount}`, 400, true);
     return next(err);
   }
 
 
   Project.getByName(req.body.name, req.user.username)
     .then(projectExist => {
+      //console.log('exist', projectExist);
       if (projectExist) {
         const message = 'Project exist';
         const errorCode = httpStatus.PROJECT_EXIST;
@@ -104,13 +114,14 @@ function create(req, res, next) {
         tags: req.body.tags,
         root: req.body.name,
         owner: req.user.username,
+        displayName: req.body.displayName,
         description: req.body.description,
         isNew: true
       });
 
       project.saveAsync()
         .catch((e) => {
-          console.log("-------1--------", e);
+          //console.log(e);
           const message = e.code === 11000 ? 'Project exist' : httpStatus[400];
           const errorCode = e.code === 11000 ? httpStatus.PROJECT_EXIST : httpStatus.BAD_REQUEST;
           const err = new APIError(message, errorCode, true);
@@ -123,9 +134,9 @@ function create(req, res, next) {
 
           let project = savedProject.toObject();
 
-          let rootDir = config.stuff_path + '/projects/' + req.user.username + '/' + project.root;
+          let rootDir = config.stuff_path + 'projects/' + req.user.username + '/' + project.root;
 
-          let historyDir = config.stuff_path + '/history/' + req.user.username + '/' + project.root;
+          let historyDir = config.stuff_path + 'history/' + req.user.username + '/' + project.root;
 
           if (!fs.existsSync(historyDir)) {
             fs.mkdirSync(historyDir); //creating root dir for project
@@ -201,7 +212,6 @@ function create(req, res, next) {
                       });
                     })
                     .catch((e) => {
-                      console.log("-------2--------");
                       const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
                       return next(err);
                     });
@@ -210,32 +220,6 @@ function create(req, res, next) {
                   const err = new APIError('User not found!', 310);
                   return next(err);
                 }
-
-                User.get(req.user.username)
-                  .then(user => {
-                    if (user) {
-                      User.updateAsync({username: req.user.username}, {
-                        $push: {
-                          "projects": savedProject._id
-                        }
-                      })
-                        .then(updatedUser => {
-                          return res.status(201).json({
-                            "success": true,
-                            "data": savedProject.outcome()
-                          });
-                        })
-                        .catch((e) => {
-                          console.log("-------3--------");
-                          const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
-                          return next(err);
-                        });
-                    } else {
-                      const err = new APIError('User not found!', 310);
-                      return next(err);
-                    }
-
-                  });
               })
               .error((e) => {
                 const err = new APIError("Something went wrong!", 312, true);
@@ -245,7 +229,6 @@ function create(req, res, next) {
         })
     })
     .catch(e => {
-      console.log("-------4--------");
       const err = new APIError("Bad request", 400, true);
       return next(err);
     })
@@ -279,7 +262,9 @@ function update(req, res, next) {
  * @returns {Project[]}
  */
 function list(req, res, next) {
-  const {limit = 50, skip = 0} = req.query;
+  const limit = parseInt(req.query.limit) || 50;
+  const skip = parseInt(req.query.skip) || 0;
+
   Project.list({limit, skip}, req.user.username, req.query._queryString).then((projects) => {
     res.status(200).json({
       success: true,
@@ -305,11 +290,13 @@ function remove(req, res, next) {
           .then((deletedProject) => {
             if (deletedProject.result.ok === 1) {
 
-              const rootDir = config.stuff_path + '/projects/' + req.user.username + '/' + req.project.root;
+              const rootDir = config.stuff_path + 'projects/' + req.user.username + '/' + req.project.root;
 
-              const publishDir = config.stuff_path + '/public/' + req.user.username + '/' + req.project.root;
+              const publishDir = config.stuff_path + 'public/' + req.user.username + '/' + req.project.root;
 
-              const publicDir = config.stuff_path + '/publish/' + req.user.username + '/' + req.project.root;
+              const publicDir = config.stuff_path + 'publish/' + req.user.username + '/' + req.project.root;
+
+              const historyDir = config.stuff_path + 'history/' + req.user.username + '/' + req.project.root;
 
               if (fs.existsSync(rootDir)) {
                 utils.deleteFolderRecursive(rootDir);
@@ -321,6 +308,10 @@ function remove(req, res, next) {
 
               if (fs.existsSync(publicDir)) {
                 utils.deleteFolderRecursive(publicDir);
+              }
+
+              if (fs.existsSync(historyDir)) {
+                utils.deleteFolderRecursive(historyDir);
               }
 
 
@@ -374,9 +365,8 @@ function makePublic(req, res, next) {
     .then(updatedProject => {
       if (updatedProject.nModified === 1) {
         if (status === 'true') {
-          const srcDir = `${config.stuff_path}/projects/${username}/${help.cleanUrl(req.project.root)}`;
-          const publicDir = `${config.stuff_path}/public/${username}/${help.cleanUrl(req.project.root)}`;
-
+          const srcDir = `${config.stuff_path}projects/${username}/${help.cleanUrl(req.project.root)}`;
+          const publicDir = `${config.stuff_path}public/${username}/${help.cleanUrl(req.project.root)}`;
           fsExtra.ensureSymlinkSync(srcDir, publicDir);
 
           return res.status(200).json({
@@ -386,7 +376,7 @@ function makePublic(req, res, next) {
 
         }
         else {
-          const publicDir = `${config.stuff_path}/public/${username}/${help.cleanUrl(req.project.root)}`;
+          const publicDir = `${config.stuff_path}public/${username}/${help.cleanUrl(req.project.root)}`;
 
           if (fs.existsSync(publicDir)) {
             fs.unlinkSync(publicDir);
@@ -422,7 +412,6 @@ function makePublic(req, res, next) {
  * Publish user project
  */
 function publishProject(req, res, next) {
-
   let projectFolder = help.generateFilePath(req, '');
   let publishFolder = help.generateFilePath(req, '', 'publish');
   if (fs.existsSync(projectFolder)) {
@@ -440,33 +429,33 @@ function publishProject(req, res, next) {
       //Todo implement published public mechanizm
       let publishedPublic = req.body.publishedPublic || true;
 
-      Project.updateAsync({_id: req.params.id, owner: req.user.username}, {
+      Project.findOneAndUpdate({_id: req.params.id, owner: req.user.username}, {
         $set: {
           publishDate: new Date(),
           publishedPublic: publishedPublic
         }
-      })
-        .then(result => {
-          if (result.nModified === 1) {
+      }, {new: true})
+        .then(project => {
+          if (project) {
             //Send Mail
             req.mailSettings = {
               to: req.user.email,
-              from: 'team@rodin.space',
+              from: 'team@rodin.io',
               fromName: 'Rodin team',
               templateName: 'rodin_publish',
-              subject: `${req.project.name} published`,
+              subject: `${req.project.displayName} published`,
               handleBars: [{
                 name: 'userName',
                 content: req.user.username
               }, {
                 name: 'publishUrl',
-                content: `${config.clientURL}/publish/${req.user.username}/${req.project.name}`
+                content: `${config.clientURL}/${req.user.username}/${req.project.name}`
               }]
             };
             mandrill.sendMail(req, res, (response) => {
               //console.log(response);
             });
-            return res.status(200).json({success: true, data: 'Project published'})
+            return res.status(200).json({success: true, data: project})
 
           }
           else {
@@ -504,8 +493,8 @@ function getPublishedHistory(req, res, next) {
   res.status(200).json({success: true, data: backUps});
 }
 
-function rollBack(req, res, next){
-  if(_.isUndefined(req.body.date)){
+function rollBack(req, res, next) {
+  if (_.isUndefined(req.body.date)) {
     const err = new APIError('Select version date', httpStatus.BAD_REQUEST, true);
     return next(err);
   }
@@ -519,7 +508,9 @@ function rollBack(req, res, next){
     return next(err);
   }
 
-  fsExtra.removeSync(publishFolder);
+  if (fs.existsSync(publishFolder)) {
+    fsExtra.removeSync(publishFolder);
+  }
 
   fsExtra.copy(projectBackupFolder, publishFolder, (err) => {
     if (err) {
@@ -539,11 +530,12 @@ function rollBack(req, res, next){
  * @param next
  */
 function rePublishProject(req, res, next) {
+  const projectFolder = help.generateFilePath(req, '');
   const publishFolder = help.generateFilePath(req, '', 'publish');
   const historyFolder = help.generateFilePath(req, '', 'history');
   const projectBackupFolder = `${historyFolder}/${Date.now()}`;
 
-  let backUps = fs.readdirSync(historyFolder).filter( (file) => {
+  let backUps = fs.readdirSync(historyFolder).filter((file) => {
     return fs.statSync(path.join(historyFolder, file)).isDirectory();
   });
 
@@ -552,12 +544,25 @@ function rePublishProject(req, res, next) {
     utils.deleteFolderRecursive(`${historyFolder}/${oldestBackup}`);
   }
 
-  fsExtra.copy(publishFolder, projectBackupFolder,  (err) => {
+  fsExtra.copy(publishFolder, projectBackupFolder, (err) => {
     if (err) {
       const err = new APIError('Publishing error', httpStatus.BAD_REQUEST, true);
       return next(err);
     }
-    res.status(200).json({success: true, data: {}});
+
+    if (fs.existsSync(publishFolder)) {
+      fsExtra.removeSync(publishFolder);
+    }
+
+    fsExtra.copy(projectFolder, publishFolder,  (err) => {
+      if (err) {
+        const err = new APIError('Publishing error', httpStatus.BAD_REQUEST, true);
+        return next(err);
+      }
+      res.status(200).json({success: true, data: {}});
+    });
+
+
   });
 
 
@@ -572,19 +577,21 @@ function rePublishProject(req, res, next) {
  */
 function unPublishProject(req, res, next) {
 
-  let publishFolder = help.generateFilePath(req, '', 'publish');
+  const publishFolder = help.generateFilePath(req, '', 'publish');
+  const historyFolder = help.generateFilePath(req, '', 'history');
 
   if (fs.existsSync(publishFolder)) {
     fsExtra.removeSync(publishFolder);
-    Project.updateAsync({_id: req.params.id, owner: req.user.username}, {
+    fsExtra.emptyDirSync(historyFolder);
+    Project.findOneAndUpdate({_id: req.params.id, owner: req.user.username}, {
       $unset: {
         publishDate: 1,
         publishedPublic: 1
       }
-    })
-      .then(result => {
-        if (result.nModified === 1) {
-          return res.status(200).json({success: true, data: 'Project unpublished'})
+    }, {new: true})
+      .then(project => {
+        if (project) {
+          return res.status(200).json({success: true, data: project})
         }
         else {
           const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
@@ -620,7 +627,7 @@ function getPublishedProjects(req, res, next) {
     .then(publishedProject => {
       return res.status(200).json({
         success: true, data: _.map(publishedProject, (project) => {
-          return _.pick(project, ['name', 'owner', 'id', 'thumbnail', 'description', 'root'])
+          return _.pick(project, ['name', 'owner', 'id', 'thumbnail', 'description', 'root', 'displayName'])
         })
       });
     })
@@ -649,7 +656,7 @@ function getPublishedProject(req, res, next) {
     .then(publishedProject => {
       return res.status(200).json({
         success: true,
-        data: _.pick(publishedProject, ['name', 'owner', 'id', 'thumbnail', 'description', 'root'])
+        data: _.pick(publishedProject, ['name', 'owner', 'id', 'thumbnail', 'description', 'root', 'displayName'])
       });
     })
     .catch((error) => {
@@ -666,7 +673,7 @@ function getPublishedProject(req, res, next) {
  * @returns {*}
  */
 function getProjectsCount(req, res, next) {
-  if (!req.query.projectsCount && req.baseUrl !== '/api/project') return next();
+  //if (!req.query.projectsCount && req.baseUrl !== '/api/project') return next();
   let query = {
     $match: {
       owner: req.user.username
@@ -689,7 +696,7 @@ function getProjectsCount(req, res, next) {
           req.projectsCount.published = project.count;
 
       });
-      req.projectsCount.total =  (req.projectsCount.unpublished + req.projectsCount.published);
+      req.projectsCount.total = ((req.projectsCount.unpublished || 0) + (req.projectsCount.published || 0));
       next();
     })
     .catch((e) => {
@@ -738,7 +745,7 @@ function getTemplatesList(req, res, next) {
 
 function getProjectSize(req, res, next) {
   if (!req.query.projectSize) return next();
-  let rootDir = config.stuff_path + '/projects/' + req.user.username + '/' + req.project.root;
+  let rootDir = config.stuff_path + 'projects/' + req.user.username + '/' + req.project.root;
 
   userCapacity.readSizeRecursive(rootDir, (err, size) => {
     size = err ? 0 : size;
@@ -769,7 +776,7 @@ function finalize(req, res, next) {
   return res.status(200).json({success: true, data: req.project});
 }
 
-export default {
+export default {// jscs:ignore
   get,
   create,
   update,

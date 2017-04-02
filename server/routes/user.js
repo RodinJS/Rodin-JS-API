@@ -87,7 +87,7 @@ router.route('/')
 	 *          }
 	 *      }
  */
-  .get(check.ifAdmin, userCtrl.list)
+  .get(check.checkAdminPermission, userCtrl.list)
 
   /**
    * @api {post} /api/user Create new user
@@ -170,6 +170,9 @@ router.route('/me')
  * @apiParam (200) {Boolean} usedStorage   User used storage
  */
   .get(check.ifTokenValid, userCapacity.getUserStroageSize, projectCtrl.getProjectsCount, userCtrl.me);
+
+router.route('/unsync/:username/:socialName')
+  .get(check.ifTokenValid, userCtrl.unsyncSocial);
 
 router.route('/:username')
 /**
@@ -306,9 +309,11 @@ router.route('/:username')
    */
   .delete(check.ifTokenValid, userCtrl.remove);
 
-
 router.route('/confirmUsername')
   .post(check.ifTokenValid, userCtrl.confirmUsername, authCtrl.finalizeUser);
+
+router.route('/subscribe')
+  .post(userCtrl.subscribe);
 
 
 /** Load user when API with username route parameter is hit */
