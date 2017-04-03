@@ -96,7 +96,7 @@ export default {
         },
     },
     mandrill: 'ouOYaHWxlDaabLYVjrG1BA',
-    stuff_path: '',
+    stuff_path: '/Applications/XAMPP/xamppfiles/htdocs/Rodin-JS-API/',
     nginx_template_path: 'resources/nginx/',
     nginx_dest_path: 'resources/domain_name/',
 };
