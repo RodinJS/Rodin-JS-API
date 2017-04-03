@@ -103,7 +103,7 @@ function create(req, res, next) {
     .then(projectExist => {
       //console.log('exist', projectExist);
       if (projectExist) {
-        const message = 'Project exists';
+        const message = 'Project url exists';
         const errorCode = httpStatus.PROJECT_EXIST;
         const err = new APIError(message, errorCode, true);
         return next(err);

@@ -1,8 +1,8 @@
 import Promise from 'bluebird';
 import GitHubApi from 'github';
 import request from 'request-promise';
-import { exec } from 'child_process';
-import { spawn } from 'child_process';
+import {exec} from 'child_process';
+import {spawn} from 'child_process';
 import APIError from './APIError';
 import httpStatus from './httpStatus';
 import config from '../../config/env';
@@ -10,238 +10,305 @@ import User from '../models/user';
 import Project from '../models/project';
 import shell from './shell';
 import utils from './common';
+import help from './editor';
 
+
+function _createRepo(repoName, token, project) {
+  return new Promise((resolve, reject) => {
+    let github = new GitHubApi({
+      debug: true,
+      protocol: 'https',
+      host: 'api.github.com',
+      pathPrefix: '',
+      headers: {
+        'user-agent': 'Rodin-JS-API',
+      },
+      Promise: require('bluebird'),
+      followRedirects: false, // default: true; there's currently an issue with non-get redirects, so allow ability to disable follow-redirects
+      timeout: 5000,
+    });
+    github.authenticate({
+      type: 'token',
+      token: token,
+    });
+
+    github.repos.create({name: `${repoName}_RO-${utils.generateCode(5)}`}, (err, result) => {
+      if (err) {
+        const e = new APIError(`Repo with name ${repoName} alredy exist!`, httpStatus.REPO_NAME_EXIST, true);
+        return reject(e);
+      }
+
+      resolve({
+        success: true,
+        data: result,
+        token: token,
+        project: project || {}
+      });
+
+    });
+
+  });
+}
+
+function _createBranch(username, project, branchName, token) {
+  return new Promise((resolve, reject) => {
+    const cloneUrl = project.github.https;
+    const position = cloneUrl.indexOf('github');
+    const repoUrl = [cloneUrl.slice(0, position), token, '@', cloneUrl.slice(position)].join('');
+    const projectRoot = config.stuff_path + 'projects/' + username + '/' + help.cleanUrl(project.root) + '/';
+
+    shell.series([
+      `git checkout -b ${branchName}`,
+      `git push -u origin ${branchName}`,
+    ], projectRoot, (err) => {
+      console.log(err);
+      const message = err ? {
+        status: 400,
+        message: `${branchName} branch alredy exist!`,
+        project:project,
+        error:err,
+      } : {
+        message: `${branchName} branch successfuly created`,
+        repoUrl: cloneUrl,
+        status: 200,
+        project:project
+      };
+      resolve(message);
+    });
+
+  });
+}
 
 function gitPathGenerator(token, clone_url) {
-    let position = clone_url.indexOf('github');
-    return [clone_url.slice(0, position), token, '@', clone_url.slice(position)].join('');
+  let position = clone_url.indexOf('github');
+  return [clone_url.slice(0, position), token, '@', clone_url.slice(position)].join('');
 }
 
 function createRepo(username, repoName) {
-    return new Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => {
 
-        let token = '';
+    let token = '';
 
-        User.get(username)
-          .then(user => {
-            if (user) {
-                if (user.github.token) {
-                    token = user.github.token;
+    User.get(username)
+      .then(user => {
+        if (user) {
+          if (user.github.token) {
+            token = user.github.token;
 
-                    let github = new GitHubApi({
-                        debug: true,
-                        protocol: 'https',
-                        host: 'api.github.com',
-                        pathPrefix: '',
-                        headers: {
-                            'user-agent': 'Rodin-JS-API',
-                        },
-                        Promise: require('bluebird'),
-                        followRedirects: false, // default: true; there's currently an issue with non-get redirects, so allow ability to disable follow-redirects
-                        timeout: 5000,
-                    });
+            let github = new GitHubApi({
+              debug: true,
+              protocol: 'https',
+              host: 'api.github.com',
+              pathPrefix: '',
+              headers: {
+                'user-agent': 'Rodin-JS-API',
+              },
+              Promise: require('bluebird'),
+              followRedirects: false, // default: true; there's currently an issue with non-get redirects, so allow ability to disable follow-redirects
+              timeout: 5000,
+            });
 
-                    github.authenticate({
-                        type: 'token',
-                        token: token,
-                    });
+            github.authenticate({
+              type: 'token',
+              token: token,
+            });
 
-                    github.repos.create({
-                        name: `${repoName}_RO-${utils.generateCode(5)}`,
-                    }, (err, result) => {
-                        if (err) {
-                            const e = new APIError(`Repo with name ${repoName} alredy exist!`, httpStatus.REPO_NAME_EXIST, true);
-                            reject(e);
-                        }
+            github.repos.create({
+              name: `${repoName}_RO-${utils.generateCode(5)}`,
+            }, (err, result) => {
+              if (err) {
+                const e = new APIError(`Repo with name ${repoName} alredy exist!`, httpStatus.REPO_NAME_EXIST, true);
+                reject(e);
+              }
 
-                        resolve({
-                            success: true,
-                            data: result,
-                            token: token,
-                        });
-                    });
+              resolve({
+                success: true,
+                data: result,
+                token: token,
+              });
+            });
 
-                } else {
-                    const err = new APIError('GitHub account not linked to this user!', httpStatus.GITHUB_NOT_LINKED, true);
-                    reject(err);
-                }
-            } else {
-                const err = new APIError(`User with username ${username} not found!`, httpStatus.USER_WITH_USERNAME_NOT_FOUND, true);
-                reject(err);
-            }
-        }).error((e) => {
-            const err = new APIError('Fatal error!(DB)', httpStatus.FATAL, true);
+          } else {
+            const err = new APIError('GitHub account not linked to this user!', httpStatus.GITHUB_NOT_LINKED, true);
             reject(err);
-        });
-
+          }
+        } else {
+          const err = new APIError(`User with username ${username} not found!`, httpStatus.USER_WITH_USERNAME_NOT_FOUND, true);
+          reject(err);
+        }
+      }).error((e) => {
+      const err = new APIError('Fatal error!(DB)', httpStatus.FATAL, true);
+      reject(err);
     });
+
+  });
 }
 
 function createBranch(username, id, projectRoot, branchName) {
-    return new Promise((resolve, reject) => {
-        let token = '';
+  return new Promise((resolve, reject) => {
+    let token = '';
 
-        User.get(username)
-          .then(user => {
-            if (user) {
-                if (user.github.token) {
-                    token = user.github.token;
-                    Project.getOne(id, username)
-                      .then(project => {
-                        let clone_url = project.github.https;
-                        let position = clone_url.indexOf('github');
-                        let repo_url = [clone_url.slice(0, position), token, '@', clone_url.slice(position)].join('');
+    User.get(username)
+      .then(user => {
+        if (user) {
+          if (user.github.token) {
+            token = user.github.token;
+            Project.getOne(id, username)
+              .then(project => {
+                let clone_url = project.github.https;
+                let position = clone_url.indexOf('github');
+                let repo_url = [clone_url.slice(0, position), token, '@', clone_url.slice(position)].join('');
 
-                        shell.series([
-                          `git checkout -b ${branchName}`,
-                          `git push -u origin ${branchName}`,
-                        ], projectRoot, (err) => {
-                            if (err) {
-                                const err = new APIError(`${branchName} branch alredy exist!`, httpStatus.BAD_REQUEST, true);
-                                reject(err);
-                            }
-
-                            resolve({
-                                message: `${branchName} branch successfuly created`,
-                                repo_url: clone_url,
-                            });
-                        });
-
-                    }).catch(e => {
-                        const err = new APIError(`Project with ${id} does not exist!`, httpStatus.BAD_REQUEST, true);
-                        reject(err);
-                    });
-                } else {
-                    const err = new APIError('GitHub account not linked to this user!', httpStatus.GITHUB_NOT_LINKED, true);
+                shell.series([
+                  `git checkout -b ${branchName}`,
+                  `git push -u origin ${branchName}`,
+                ], projectRoot, (err) => {
+                  if (err) {
+                    const err = new APIError(`${branchName} branch alredy exist!`, httpStatus.BAD_REQUEST, true);
                     reject(err);
-                }
-            } else {
-                const err = new APIError(`User with username ${username} not found!`, httpStatus.USER_WITH_USERNAME_NOT_FOUND, true);
-                reject(err);
-            }
-        }).error((e) => {
-            const err = new APIError('Fatal error!(DB)', httpStatus.FATAL, true);
+                  }
+
+                  resolve({
+                    message: `${branchName} branch successfuly created`,
+                    repo_url: clone_url,
+                  });
+                });
+
+              }).catch(e => {
+              const err = new APIError(`Project with ${id} does not exist!`, httpStatus.BAD_REQUEST, true);
+              reject(err);
+            });
+          } else {
+            const err = new APIError('GitHub account not linked to this user!', httpStatus.GITHUB_NOT_LINKED, true);
             reject(err);
-        });
+          }
+        } else {
+          const err = new APIError(`User with username ${username} not found!`, httpStatus.USER_WITH_USERNAME_NOT_FOUND, true);
+          reject(err);
+        }
+      }).error((e) => {
+      const err = new APIError('Fatal error!(DB)', httpStatus.FATAL, true);
+      reject(err);
     });
+  });
 
 }
 
 function theirs(username, id, projectRoot) {
-    return new Promise((resolve, reject) => {
-        let token = '';
+  return new Promise((resolve, reject) => {
+    let token = '';
 
-        User.get(username)
-          .then(user => {
-            if (user) {
-                if (user.github.token) {
-                    token = user.github.token;
-                    console.log('username: ', username, ', id: ', id);
-                    Project.getOne(id, username)
-                      .then(project => {
-                        let repo_url = gitPathGenerator(token, project.github.https);
-                        shell.exec(`git pull origin rodin_editor`, projectRoot, (err) => {
-                            console.log('git pull error: ', err);
-                            if(err){
-                                shell.series([
-                                  'git reset -- ./',
-                                  'git checkout -- ./',
-                                  `git pull origin rodin_editor`,
-                                ], projectRoot, (err) => {
-                                    if(err) {
-                                        console.log('git pull/checkout error: ', err);
-                                        reject(err);
-                                    } else {
-                                        resolve({
-                                            message: `--GitHub repo successfuly synced`,
-                                        });
-                                    }
-                                });
-                            } else {
-                                resolve({
-                                    message: `++GitHub repo successfuly synced`,
-                                });
-                            }
-                        });
-                    }).catch(e => {
-                        const err = new APIError(`Project with ${id} id does not exist!`, httpStatus.BAD_REQUEST, true);
+    User.get(username)
+      .then(user => {
+        if (user) {
+          if (user.github.token) {
+            token = user.github.token;
+            console.log('username: ', username, ', id: ', id);
+            Project.getOne(id, username)
+              .then(project => {
+                let repo_url = gitPathGenerator(token, project.github.https);
+                shell.exec(`git pull origin rodin_editor`, projectRoot, (err) => {
+                  console.log('git pull error: ', err);
+                  if (err) {
+                    shell.series([
+                      'git reset -- ./',
+                      'git checkout -- ./',
+                      `git pull origin rodin_editor`,
+                    ], projectRoot, (err) => {
+                      if (err) {
+                        console.log('git pull/checkout error: ', err);
                         reject(err);
+                      } else {
+                        resolve({
+                          message: `--GitHub repo successfuly synced`,
+                        });
+                      }
                     });
+                  } else {
+                    resolve({
+                      message: `++GitHub repo successfuly synced`,
+                    });
+                  }
+                });
+              }).catch(e => {
+              const err = new APIError(`Project with ${id} id does not exist!`, httpStatus.BAD_REQUEST, true);
+              reject(err);
+            });
 
-                } else {
-                    const err = new APIError('GitHub account not linked to this user!', httpStatus.GITHUB_NOT_LINKED, true);
-                    reject(err);
-                }
-            } else {
-                const err = new APIError(`User with username ${username} not found!`, httpStatus.USER_WITH_USERNAME_NOT_FOUND, true);
-                reject(err);
-            }
-        }).error((e) => {
-            const err = new APIError('Fatal error!(DB)', httpStatus.FATAL, true);
+          } else {
+            const err = new APIError('GitHub account not linked to this user!', httpStatus.GITHUB_NOT_LINKED, true);
             reject(err);
-        });
+          }
+        } else {
+          const err = new APIError(`User with username ${username} not found!`, httpStatus.USER_WITH_USERNAME_NOT_FOUND, true);
+          reject(err);
+        }
+      }).error((e) => {
+      const err = new APIError('Fatal error!(DB)', httpStatus.FATAL, true);
+      reject(err);
     });
+  });
 }
 
 function ours(username, id, projectRoot) {
-    return new Promise((resolve, reject) => {
-        let token = '';
+  return new Promise((resolve, reject) => {
+    let token = '';
 
-        User.get(username)
-          .then(user => {
-            if (user) {
-                if (user.github.token) {
-                    token = user.github.token;
-                    console.log('username: ', username, ', id: ', id);
-                    Project.getOne(id, username)
-                      .then(project => {
-                        let repo_url = gitPathGenerator(token, project.github.https);
+    User.get(username)
+      .then(user => {
+        if (user) {
+          if (user.github.token) {
+            token = user.github.token;
+            console.log('username: ', username, ', id: ', id);
+            Project.getOne(id, username)
+              .then(project => {
+                let repo_url = gitPathGenerator(token, project.github.https);
 
-                        shell.series([
-                          'git add .',
-                          'git commit -m \"update\"',
-                          `git push -u origin rodin_editor`,
-                        ], projectRoot, (err) => {
+                shell.series([
+                  'git add .',
+                  'git commit -m \"update\"',
+                  `git push -u origin rodin_editor`,
+                ], projectRoot, (err) => {
 
-                            console.log('git push error: ', err);
+                  console.log('git push error: ', err);
 
-                            shell.exec(`git pull ${repo_url}`, projectRoot, (err) => {
-                                shell.series([
-                                  `git checkout --ours -- ./`,
-                                  `git config --global push.default matching`,
-                                  `git push -u origin rodin_editor`,
-                                ], projectRoot, (err) => {
-                                    console.log('git push/merge error: ', err);
-                                    reject(err);
-                                });
-                            });
-
-                            shell.exec(`git push -u origin rodin_editor`, projectRoot, (err) => {
-                                console.log('git push error: ', err);
-                                reject(err);
-                            });
-
-                            resolve({
-                                message: `GitHub repo successfuly synced`,
-                            });
-                        });
-                    }).catch(e => {
-                        const err = new APIError(`Project with ${id} id does not exist!`, httpStatus.BAD_REQUEST, true);
-                        reject(err);
+                  shell.exec(`git pull ${repo_url}`, projectRoot, (err) => {
+                    shell.series([
+                      `git checkout --ours -- ./`,
+                      `git config --global push.default matching`,
+                      `git push -u origin rodin_editor`,
+                    ], projectRoot, (err) => {
+                      console.log('git push/merge error: ', err);
+                      reject(err);
                     });
-                } else {
-                    const err = new APIError('GitHub account not linked to this user!', httpStatus.GITHUB_NOT_LINKED, true);
+                  });
+
+                  shell.exec(`git push -u origin rodin_editor`, projectRoot, (err) => {
+                    console.log('git push error: ', err);
                     reject(err);
-                }
-            } else {
-                const err = new APIError(`User with username ${username} not found!`, httpStatus.USER_WITH_USERNAME_NOT_FOUND, true);
-                reject(err);
-            }
-        }).error((e) => {
-            const err = new APIError('Fatal error!(DB)', httpStatus.FATAL, true);
+                  });
+
+                  resolve({
+                    message: `GitHub repo successfuly synced`,
+                  });
+                });
+              }).catch(e => {
+              const err = new APIError(`Project with ${id} id does not exist!`, httpStatus.BAD_REQUEST, true);
+              reject(err);
+            });
+          } else {
+            const err = new APIError('GitHub account not linked to this user!', httpStatus.GITHUB_NOT_LINKED, true);
             reject(err);
-        });
+          }
+        } else {
+          const err = new APIError(`User with username ${username} not found!`, httpStatus.USER_WITH_USERNAME_NOT_FOUND, true);
+          reject(err);
+        }
+      }).error((e) => {
+      const err = new APIError('Fatal error!(DB)', httpStatus.FATAL, true);
+      reject(err);
     });
+  });
 }
 
-export default { createRepo, createBranch, theirs, ours };
+export default {createRepo, createBranch, theirs, ours, _createRepo, _createBranch};
