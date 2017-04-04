@@ -18,7 +18,7 @@ router.route('/password')
 
 router.route('/resetPassword')
   .post(userCtrl.resetPassword)
-  .put(userCtrl.changePassword, validate(paramValidation.updatePassword), userCtrl.updatePassword, authCtrl.finalizeUser);
+  .put(userCtrl.changePassword, validate(paramValidation.updatePassword), userCtrl.updatePassword, projectCtrl.getProjectsCount, authCtrl.finalizeUser);
 
 router.route('/')
 /**
