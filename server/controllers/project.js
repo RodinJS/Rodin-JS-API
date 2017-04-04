@@ -103,7 +103,7 @@ function create(req, res, next) {
     .then(projectExist => {
       //console.log('exist', projectExist);
       if (projectExist) {
-        const message = 'Project url exists';
+        const message = 'Project url already exists';
         const errorCode = httpStatus.PROJECT_EXIST;
         const err = new APIError(message, errorCode, true);
         return next(err);
@@ -222,7 +222,7 @@ function create(req, res, next) {
         })
         .catch((e) => {
           //console.log(e);
-          const message = e.code === 11000 ? 'Project url exists' : httpStatus[400];
+          const message = e.code === 11000 ? 'Project url already exists.' : httpStatus[400];
           const errorCode = e.code === 11000 ? httpStatus.PROJECT_EXIST : httpStatus.BAD_REQUEST;
           const err = new APIError(message, errorCode, true);
           return next(err);
