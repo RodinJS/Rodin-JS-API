@@ -437,7 +437,7 @@ function uploadFiles(req, res, next) {
       }
       else {
         const folder = `${folderPath}${req.body.folderName}`;
-        if(fs.existsSync){
+        if(fs.existsSync(folder)){
           return res.status(200).send({
             success: true,
             data: {
