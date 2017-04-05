@@ -12,10 +12,10 @@ import _ from 'lodash';
 import mandrill from '../helpers/mandrill';
 import notifications from './notifications';
 import config from '../../config/env';
-
 import sendgrid from 'sendgrid';
 const sendGridHelper = sendgrid.helper;
 const sg = sendgrid('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');
+const JWTBlackList = [];
 
 /**
  * Load user and append to req.
@@ -162,7 +162,7 @@ function resetPassword(req, res, next) {
         return res.status(httpStatus.BAD_REQUEST).json(err);
     }
 
-    const query = { $or: [{ username: req.body.resetData }, { email: req.body.resetData }] };
+    const query = { $or: [{ username:new RegExp('^' + req.body.resetData.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&') + '$', 'i')  }, { email: req.body.resetData }] };
 
     User.findOne(query, (err, user) => {
         if (err) {
@@ -218,13 +218,20 @@ function changePassword(req, res, next) {
         const err = new APIError('Password not match', httpStatus.BAD_REQUEST, true);
         return next(err);
     }
+    const tokenInBlacklist = _.indexOf(JWTBlackList, req.body.token);
+
+    if(tokenInBlacklist > -1){
+      const err = new APIError('Token expired', httpStatus.UNKNOWN_TOKEN, true);
+      return next(err);
+    }
 
     jwt.verify(req.body.token, config.jwtSecret, (err, decoded) => {
         if (err) {
+            if(tokenInBlacklist > -1) JWTBlackList.splice(tokenInBlacklist, 1);
             const err = new APIError('Invalid token or secret', httpStatus.UNKNOWN_TOKEN, true);
             return next(err);
         }
-
+        JWTBlackList.push(req.body.token);
         delete req.body.token;
         delete req.body.confirmPassword;
         req.user = {
@@ -405,7 +412,7 @@ function unsyncSocial(req, res, next) {
 }
 
 function updatePassword(req, res, next) {
-    User.findOneAsync({ username: req.user.username })
+    User.get(req.user.username)
       .then((user) => {
         user.password = req.body.password;
         user.saveAsync()
