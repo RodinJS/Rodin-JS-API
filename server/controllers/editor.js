@@ -337,21 +337,21 @@ function postFile(req, res, next) {
 
         if (!fs.existsSync(filePath)) {
 
-          if(fs.existsSync(`${rootPath}/tmp`))
+          if (fs.existsSync(`${rootPath}/tmp`))
             utils.deleteFolderRecursive(`${rootPath}/tmp`);
 
           console.log(filePath, srcPath);
 
-          fsExtra.copy(srcPath, `${rootPath}/tmp/${_.last(dest)}`,  (err) => {
+          fsExtra.copy(srcPath, `${rootPath}/tmp/${_.last(dest)}`, (err) => {
             console.log('COPY ERROR', err);
             if (err) {
               const err = new APIError('Folder copy error!', httpStatus.BAD_REQUEST, true);
               return next(err);
             }
 
-            fsExtra.move(`${rootPath}/tmp/${_.last(dest)}`, `${srcPath}/${_.last(dest)}`, (moveErr)=>{
+            fsExtra.move(`${rootPath}/tmp/${_.last(dest)}`, `${srcPath}/${_.last(dest)}`, (moveErr) => {
               console.log('MOVE ERROR', moveErr);
-              if(moveErr){
+              if (moveErr) {
                 const err = new APIError('Folder copy error!', httpStatus.BAD_REQUEST, true);
                 return next(err);
               }
@@ -431,8 +431,25 @@ function uploadFiles(req, res, next) {
     }
 
     if (type === 'directory') {
-      startUpload(folderPath, req, 'directory', res, next);
-    } else {
+
+      if(action === 'replace'){
+        startUpload(folderPath, req, 'directory', res, next);
+      }
+      else {
+        const folder = `${folderPath}${req.body.folderName}`;
+        if(fs.existsSync){
+          return res.status(200).send({
+            success: true,
+            data: {
+              folder: [req.body.folderName],
+              message: `Following ${req.body.folderName} folder exists, please provide action (replace)`,
+            },
+          })
+        }
+        startUpload(folderPath, req, 'directory', res, next);
+      }
+    }
+    else {
 
       if (action === 'replace')
 
@@ -446,7 +463,8 @@ function uploadFiles(req, res, next) {
         });
 
         startUpload(folderPath, req, action, res, next);
-      } else {
+      }
+      else {
 
         let uploadingFiles = _.map(req.files, function (file) {
           return file.originalname;
