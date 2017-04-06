@@ -13,6 +13,8 @@ import mandrill from '../helpers/mandrill';
 import notifications from './notifications';
 import config from '../../config/env';
 import sendgrid from 'sendgrid';
+import Q from 'q';
+import help from '../helpers/editor';
 const sendGridHelper = sendgrid.helper;
 const sg = sendgrid('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');
 const JWTBlackList = [];
@@ -403,13 +405,30 @@ function unsyncSocial(req, res, next) {
     return next(err);
   }
 
-  User.updateAsync({username: req.params.username}, field)
-    .then(() => res.json({
-      success: true,
-      data: {},
-    }))
-    .error((e) => next(e));
+  req.field = field;
+
+
+  if(req.params.socialName && req.params.socialName === 'github'){
+
+    return Project.find({owner: req.user.username})
+      .then(projects=>{
+          return Q.all(_.map(projects, (project) => {
+            project = project.toObject();
+            project.projectRoot = config.stuff_path + 'projects/' + req.user.username + '/' + help.cleanUrl(project.root) + '/';
+            if (fs.existsSync(`${project.projectRoot}.git/`)) {
+              utils.deleteFolderRecursive(`${project.projectRoot}.git/`)
+            }
+            return Project.updateAsync({_id:project._id}, {$unset:{github:1}})
+          }))
+      })
+      .then(unsetResponse=>_unsetUserData(req, res, next))
+      .catch((e) => next(e))
+
+  }
+  return _unsetUserData(req, res, next);
 }
+
+
 
 function updatePassword(req, res, next) {
   User.get(req.user.username)
@@ -624,6 +643,15 @@ function subscribe(req, res, next) {
       return next(err);
     });
 
+}
+
+function _unsetUserData(req, res, next){
+  User.updateAsync({username: req.user.username}, req.field)
+    .then(() => res.json({
+      success: true,
+      data: {},
+    }))
+    .error((e) => next(e));
 }
 
 export default {
