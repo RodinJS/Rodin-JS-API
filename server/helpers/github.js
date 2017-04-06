@@ -264,46 +264,81 @@ function ours(username, id, projectRoot) {
               .then(project => {
                 let repo_url = gitPathGenerator(token, project.github.https);
 
-                shell.series([
-                  'git add .',
-                  'git commit -m \"update\"',
-                  `git push -u origin rodin_editor`,
-                ], projectRoot, (err) => {
+                shell.exec(`git add .`, projectRoot, (err) => {
                   if(err) {
-                    shell.exec(`git pull ${repo_url}`, projectRoot, (err) => {
-                      if(err) {
-                        console.log('git pull error: ', err);
-                        reject(err);  
-                      } else {
-                        shell.series([
-                          `git checkout --ours -- ./`,
-                          `git config --global push.default matching`,
-                          `git push -u origin rodin_editor`,
-                        ], projectRoot, (err) => {
-                          if(err) {
-                            console.log('git push/merge error: ', err);
-                            reject(err);
-                          } else {
-                            // shell.exec(`git push -u origin rodin_editor`, projectRoot, (err) => {
-                            //   if(err) {
-                            //     console.log('git push error: ', err);
-                            //     reject(err);
-                            //   } else {
-                                resolve({
-                                  message: `GitHub repo successfuly synced 1`
-                                });
-                            //   }
-                            // });
-                          }
-                        });
-                      }
-                    });
+                    console.log('git add error: ', err);
+                    reject(err);
                   } else {
-                    resolve({
-                      message: `GitHub repo successfuly synced 2`
+                    shell.exec(`git commit -m \"update\"`, projectRoot, (err) => {
+                      shell.exec(`git push -u origin rodin_editor`, projectRoot, (err) => {
+                        if(err) {
+                          shell.exec(`git pull ${repo_url}`, projectRoot, (err) => {
+                            if(err) {
+                              console.log('git pull error: ', err);
+                              reject(err);  
+                            } else {
+                              shell.series([
+                                `git checkout --ours -- ./`,
+                                `git config --global push.default matching`,
+                                `git push -u origin rodin_editor`,
+                              ], projectRoot, (err) => {
+                                if(err) {
+                                  console.log('git push/merge error: ', err);
+                                  reject(err);
+                                } else {
+                                  resolve({
+                                    message: `GitHub repo successfuly synced 1`
+                                  });
+                                }
+                              });
+                            }
+                          });
+                        } else {
+                          resolve({
+                            message: `GitHub repo successfuly synced 2`
+                          });
+                        }
+                      });
                     });
                   }
                 });
+
+                
+                // shell.series([
+                //   'git add .',
+                //   'git commit -m \"update\"',
+                //   `git push -u origin rodin_editor`,
+                // ], projectRoot, (err) => {
+                //   if(err) {
+                //     shell.exec(`git pull ${repo_url}`, projectRoot, (err) => {
+                //       if(err) {
+                //         console.log('git pull error: ', err);
+                //         reject(err);  
+                //       } else {
+                //         shell.series([
+                //           `git checkout --ours -- ./`,
+                //           `git config --global push.default matching`,
+                //           `git push -u origin rodin_editor`,
+                //         ], projectRoot, (err) => {
+                //           if(err) {
+                //             console.log('git push/merge error: ', err);
+                //             reject(err);
+                //           } else {
+                //             resolve({
+                //               message: `GitHub repo successfuly synced 1`
+                //             });
+                //           }
+                //         });
+                //       }
+                //     });
+                //   } else {
+                //     resolve({
+                //       message: `GitHub repo successfuly synced 2`
+                //     });
+                //   }
+                // });
+
+
               }).catch(e => {
                 const err = new APIError(`Project with ${id} id does not exist!`, httpStatus.BAD_REQUEST, true);
                 reject(err);
