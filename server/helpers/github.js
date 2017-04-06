@@ -231,8 +231,8 @@ function theirs(username, id, projectRoot) {
                   }
                 });
               }).catch(e => {
-              const err = new APIError(`Project with ${id} id does not exist!`, httpStatus.BAD_REQUEST, true);
-              reject(err);
+                const err = new APIError(`Project with ${id} id does not exist!`, httpStatus.BAD_REQUEST, true);
+                reject(err);
             });
 
           } else {
@@ -244,8 +244,8 @@ function theirs(username, id, projectRoot) {
           reject(err);
         }
       }).error((e) => {
-      const err = new APIError('Fatal error!(DB)', httpStatus.FATAL, true);
-      reject(err);
+        const err = new APIError('Fatal error!(DB)', httpStatus.FATAL, true);
+        reject(err);
     });
   });
 }
@@ -269,32 +269,44 @@ function ours(username, id, projectRoot) {
                   'git commit -m \"update\"',
                   `git push -u origin rodin_editor`,
                 ], projectRoot, (err) => {
-
-                  console.log('git push error: ', err);
-
-                  shell.exec(`git pull ${repo_url}`, projectRoot, (err) => {
-                    shell.series([
-                      `git checkout --ours -- ./`,
-                      `git config --global push.default matching`,
-                      `git push -u origin rodin_editor`,
-                    ], projectRoot, (err) => {
-                      console.log('git push/merge error: ', err);
-                      reject(err);
+                  if(err) {
+                    shell.exec(`git pull ${repo_url}`, projectRoot, (err) => {
+                      if(err) {
+                        console.log('git pull error: ', err);
+                        reject(err);  
+                      } else {
+                        shell.series([
+                          `git checkout --ours -- ./`,
+                          `git config --global push.default matching`,
+                          `git push -u origin rodin_editor`,
+                        ], projectRoot, (err) => {
+                          if(err) {
+                            console.log('git push/merge error: ', err);
+                            reject(err);
+                          } else {
+                            // shell.exec(`git push -u origin rodin_editor`, projectRoot, (err) => {
+                            //   if(err) {
+                            //     console.log('git push error: ', err);
+                            //     reject(err);
+                            //   } else {
+                                resolve({
+                                  message: `GitHub repo successfuly synced`
+                                });
+                            //   }
+                            // });
+                          }
+                        });
+                      }
                     });
-                  });
-
-                  shell.exec(`git push -u origin rodin_editor`, projectRoot, (err) => {
-                    console.log('git push error: ', err);
-                    reject(err);
-                  });
-
-                  resolve({
-                    message: `GitHub repo successfuly synced`,
-                  });
+                  } else {
+                    resolve({
+                      message: `GitHub repo successfuly synced`
+                    });
+                  }
                 });
               }).catch(e => {
-              const err = new APIError(`Project with ${id} id does not exist!`, httpStatus.BAD_REQUEST, true);
-              reject(err);
+                const err = new APIError(`Project with ${id} id does not exist!`, httpStatus.BAD_REQUEST, true);
+                reject(err);
             });
           } else {
             const err = new APIError('GitHub account not linked to this user!', httpStatus.GITHUB_NOT_LINKED, true);
