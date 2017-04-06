@@ -211,12 +211,12 @@ function theirs(username, id, projectRoot) {
                   console.log('git pull error: ', err);
                   if (err) {
                     shell.series([
-                      'git reset -- ./',
-                      'git checkout -- ./',
-                      `git pull origin rodin_editor`,
+                      'git fetch origin rodin_editor',
+                      'git reset --hard FETCH_HEAD',
+                      'git clean -df',
                     ], projectRoot, (err) => {
                       if (err) {
-                        console.log('git pull/checkout error: ', err);
+                        console.log('git fetch/reset error: ', err);
                         reject(err);
                       } else {
                         resolve({
@@ -234,7 +234,6 @@ function theirs(username, id, projectRoot) {
                 const err = new APIError(`Project with ${id} id does not exist!`, httpStatus.BAD_REQUEST, true);
                 reject(err);
             });
-
           } else {
             const err = new APIError('GitHub account not linked to this user!', httpStatus.GITHUB_NOT_LINKED, true);
             reject(err);
