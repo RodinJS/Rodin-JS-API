@@ -279,7 +279,7 @@ function ours(username, id, projectRoot) {
                         console.log("------6. ----------------");
                         if(err) {
                           console.log("------7. ----------------");
-                          shell.exec(`git pull ${repo_url}`, projectRoot, (err) => {
+                          shell.exec(`git pull ${repo_url} rodin_editor`, projectRoot, (err) => {
                             console.log("------8. ----------------");
                             if(err) {
                               console.log("------9. ----------------");
