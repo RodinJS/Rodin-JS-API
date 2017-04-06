@@ -262,43 +262,26 @@ function ours(username, id, projectRoot) {
             console.log('username: ', username, ', id: ', id);
             Project.getOne(id, username)
               .then(project => {
-                console.log("------1. ----------------");
                 let repo_url = gitPathGenerator(token, project.github.https);
 
                 shell.exec(`git add .`, projectRoot, (err) => {
-                  console.log("------2. ----------------");
                   if(err) {
-                    console.log("------3. ----------------");
                     console.log('git add error: ', err);
                     reject(err);
                   } else {
-                    console.log("------4. ----------------");
                     shell.exec(`git commit -m \"update\"`, projectRoot, (err) => {
-                      console.log("------5. ----------------");
                       shell.exec(`git push -u origin rodin_editor`, projectRoot, (err) => {
-                        console.log("------6. ----------------");
                         if(err) {
-                          console.log("------7. ----------------");
                           shell.exec(`git pull ${repo_url} rodin_editor`, projectRoot, (err) => {
-                            console.log("------8. ----------------");
                             if(err) {
-                              console.log("------9. ----------------");
                               console.log('git pull error: ', err);
                               reject(err);  
                             } else {
-                              console.log("------10. ----------------");
-                              shell.series([
-                                `git checkout --ours -- ./`,
-                                `git config --global push.default matching`,
-                                `git push -u origin rodin_editor`,
-                              ], projectRoot, (err) => {
-                                console.log("------11. ----------------");
+                              shell.exec(`git push -f origin rodin_editor`, projectRoot, (err) => {
                                 if(err) {
-                                  console.log("------12. ----------------");
-                                  console.log('git push/merge error: ', err);
+                                  console.log('git force push/merge error: ', err);
                                   reject(err);
                                 } else {
-                                  console.log("------13. ----------------");
                                   resolve({
                                     message: `GitHub repo successfuly synced 1`
                                   });
@@ -307,7 +290,6 @@ function ours(username, id, projectRoot) {
                             }
                           });
                         } else {
-                          console.log("------14. ----------------");
                           resolve({
                             message: `GitHub repo successfuly synced 2`
                           });
@@ -316,43 +298,6 @@ function ours(username, id, projectRoot) {
                     });
                   }
                 });
-
-                
-                // shell.series([
-                //   'git add .',
-                //   'git commit -m \"update\"',
-                //   `git push -u origin rodin_editor`,
-                // ], projectRoot, (err) => {
-                //   if(err) {
-                //     shell.exec(`git pull ${repo_url}`, projectRoot, (err) => {
-                //       if(err) {
-                //         console.log('git pull error: ', err);
-                //         reject(err);  
-                //       } else {
-                //         shell.series([
-                //           `git checkout --ours -- ./`,
-                //           `git config --global push.default matching`,
-                //           `git push -u origin rodin_editor`,
-                //         ], projectRoot, (err) => {
-                //           if(err) {
-                //             console.log('git push/merge error: ', err);
-                //             reject(err);
-                //           } else {
-                //             resolve({
-                //               message: `GitHub repo successfuly synced 1`
-                //             });
-                //           }
-                //         });
-                //       }
-                //     });
-                //   } else {
-                //     resolve({
-                //       message: `GitHub repo successfuly synced 2`
-                //     });
-                //   }
-                // });
-
-
               }).catch(e => {
                 const err = new APIError(`Project with ${id} id does not exist!`, httpStatus.BAD_REQUEST, true);
                 reject(err);
