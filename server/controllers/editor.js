@@ -349,7 +349,7 @@ function postFile(req, res, next) {
               return next(err);
             }
 
-            fsExtra.move(`${rootPath}/tmp/${_.last(dest)}`, `${srcPath}/${_.last(dest)}`, (moveErr) => {
+            fsExtra.move(`${rootPath}/tmp/${_.last(dest)}`, filePath, (moveErr)=>{
               console.log('MOVE ERROR', moveErr);
               if (moveErr) {
                 const err = new APIError('Folder copy error!', httpStatus.BAD_REQUEST, true);
