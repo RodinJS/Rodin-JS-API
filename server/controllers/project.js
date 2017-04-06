@@ -117,6 +117,7 @@ function create(req, res, next) {
         owner: req.user.username,
         displayName: req.body.displayName,
         description: req.body.description,
+        github: { https: help.cleanUrl(req.body.githubUrl)}
         isNew: true
       });
 
@@ -125,11 +126,6 @@ function create(req, res, next) {
 
           if (!savedProject) return;
 
-          let queryString = { //default project update query string (without github url)
-            $push: {
-              projects: savedProject._id
-            }
-          }; 
 
           let project = savedProject.toObject();
 
@@ -194,27 +190,27 @@ function create(req, res, next) {
               });
             }
 
-            
-
             if (req.body.githubUrl) { // RO-243 #create project from git repo
               git.clone(req.user.username, help.cleanUrl(req.body.githubUrl), rootDir)
                 .catch(e => {
                   fs.appendFileSync(rootDir + '/error.log', e + '\n');
                 });
-
-                let githubUrls = {
-                  github: {
-                    https: help.cleanUrl(req.body.githubUrl),
-                  }
-                };
-                queryString['$set'] = githubUrls;
             }
 
             User.get(req.user.username)
               .then(user => {
                 if (user) {
-                  console.log("----------------------------------------queryString", queryString);
-                  User.updateAsync({username: req.user.username}, queryString)
+                  User.updateAsync({username: req.user.username}, {
+                    $push: {
+                      "projects": savedProject._id
+                    },
+                    $set: {
+                      github: {
+                        git: result.data.git_url,
+                        https: help.cleanUrl(req.body.githubUrl),
+                      },
+                    }
+                  })
                     .then(updatedUser => {
                       return res.status(201).json({
                         "success": true,
