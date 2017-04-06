@@ -272,23 +272,16 @@ function ours(username, id, projectRoot) {
                     shell.exec(`git commit -m \"update\"`, projectRoot, (err) => {
                       shell.exec(`git push -u origin rodin_editor`, projectRoot, (err) => {
                         if(err) {
-                          shell.exec(`git pull ${repo_url} rodin_editor`, projectRoot, (err) => {
+                          shell.exec(`git push -f origin rodin_editor`, projectRoot, (err) => {
                             if(err) {
-                              console.log('git pull error: ', err);
-                              reject(err);  
+                              console.log('git force push/merge error: ', err);
+                              reject(err);
                             } else {
-                              shell.exec(`git push -f origin rodin_editor`, projectRoot, (err) => {
-                                if(err) {
-                                  console.log('git force push/merge error: ', err);
-                                  reject(err);
-                                } else {
-                                  resolve({
-                                    message: `GitHub repo successfuly synced 1`
-                                  });
-                                }
+                              resolve({
+                                message: `GitHub repo successfuly synced 1`
                               });
                             }
-                          });
+                          }); 
                         } else {
                           resolve({
                             message: `GitHub repo successfuly synced 2`
