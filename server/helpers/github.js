@@ -207,26 +207,17 @@ function theirs(username, id, projectRoot) {
             Project.getOne(id, username)
               .then(project => {
                 let repo_url = gitPathGenerator(token, project.github.https);
-                shell.exec(`git pull origin rodin_editor`, projectRoot, (err) => {
-                  console.log('git pull error: ', err);
+                shell.series([
+                  'git fetch origin rodin_editor',
+                  'git reset --hard FETCH_HEAD',
+                  'git clean -df',
+                ], projectRoot, (err) => {
                   if (err) {
-                    shell.series([
-                      'git fetch origin rodin_editor',
-                      'git reset --hard FETCH_HEAD',
-                      'git clean -df',
-                    ], projectRoot, (err) => {
-                      if (err) {
-                        console.log('git fetch/reset error: ', err);
-                        reject(err);
-                      } else {
-                        resolve({
-                          message: `--GitHub repo successfuly synced`,
-                        });
-                      }
-                    });
+                    console.log('git fetch/reset error: ', err);
+                    reject(err);
                   } else {
                     resolve({
-                      message: `++GitHub repo successfuly synced`,
+                      message: `--GitHub repo successfuly synced`,
                     });
                   }
                 });
