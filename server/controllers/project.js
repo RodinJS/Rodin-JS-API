@@ -117,7 +117,7 @@ function create(req, res, next) {
         owner: req.user.username,
         displayName: req.body.displayName,
         description: req.body.description,
-        github: { https: help.cleanUrl(req.body.githubUrl)}
+        github: { https: help.cleanUrl(req.body.githubUrl)},
         isNew: true
       });
 
