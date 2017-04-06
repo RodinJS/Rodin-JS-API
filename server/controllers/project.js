@@ -190,8 +190,7 @@ function create(req, res, next) {
               });
             }
 
-            if (req.body.githubUrl) {
-              // RO-243 #create project from git repo
+            if (req.body.githubUrl) { // RO-243 #create project from git repo
               git.clone(req.user.username, help.cleanUrl(req.body.githubUrl), rootDir)
                 .catch(e => {
                   fs.appendFileSync(rootDir + '/error.log', e + '\n');
