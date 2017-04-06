@@ -305,10 +305,35 @@ function ours(username, id, projectRoot) {
           reject(err);
         }
       }).error((e) => {
-      const err = new APIError('Fatal error!(DB)', httpStatus.FATAL, true);
-      reject(err);
+        const err = new APIError('Fatal error!(DB)', httpStatus.FATAL, true);
+        reject(err);
     });
   });
 }
 
-export default {createRepo, createBranch, theirs, ours, _createRepo, _createBranch};
+function clone(username, repo_url, projectRoot) {
+  return new Promise((resolve, reject) => {
+    User.get(username)
+      .then(user => {
+        if (user) {
+            shell.exec(`git clone ${repo_url} .`, projectRoot, (err) => {
+              console.log('git clone error: ', err);
+              reject(err);
+            });
+
+            resolve({
+              message: `Successfuly cretaed project from GitHub repo.`,
+            });
+        } else {
+          const err = new APIError(`User with username ${username} not found!`, httpStatus.USER_WITH_USERNAME_NOT_FOUND, true);
+          reject(err);
+        }
+      }).error((e) => {
+        const err = new APIError('Fatal error!(DB)', httpStatus.FATAL, true);
+        reject(err);
+    });
+  });
+}
+
+
+export default {createRepo, createBranch, theirs, ours, clone, _createRepo, _createBranch};
