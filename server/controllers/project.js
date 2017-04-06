@@ -117,7 +117,7 @@ function create(req, res, next) {
         owner: req.user.username,
         displayName: req.body.displayName,
         description: req.body.description,
-        github: { https: help.cleanUrl(req.body.githubUrl)},
+        github: { https: help.cleanUrl(req.body.githubUrl) },
         isNew: true
       });
 
@@ -203,12 +203,6 @@ function create(req, res, next) {
                   User.updateAsync({username: req.user.username}, {
                     $push: {
                       "projects": savedProject._id
-                    },
-                    $set: {
-                      github: {
-                        git: result.data.git_url,
-                        https: help.cleanUrl(req.body.githubUrl),
-                      },
                     }
                   })
                     .then(updatedUser => {
