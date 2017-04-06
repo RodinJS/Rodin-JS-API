@@ -290,7 +290,7 @@ function ours(username, id, projectRoot) {
                             //     reject(err);
                             //   } else {
                                 resolve({
-                                  message: `GitHub repo successfuly synced`
+                                  message: `GitHub repo successfuly synced 1`
                                 });
                             //   }
                             // });
@@ -300,7 +300,7 @@ function ours(username, id, projectRoot) {
                     });
                   } else {
                     resolve({
-                      message: `GitHub repo successfuly synced`
+                      message: `GitHub repo successfuly synced 2`
                     });
                   }
                 });
