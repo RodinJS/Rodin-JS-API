@@ -305,14 +305,23 @@ function clone(username, repo_url, projectRoot) {
     User.get(username)
       .then(user => {
         if (user) {
-            shell.exec(`git clone ${repo_url} .`, projectRoot, (err) => {
-              console.log('git clone error: ', err);
+          shell.exec(`git init`, projectRoot, (err) => {
+            if(err) {
+              console.log('git init error: ', err);
               reject(err);
-            });
-
-            resolve({
-              message: `Successfuly cretaed project from GitHub repo.`,
-            });
+            } else {
+              shell.exec(`git pull ${repo_url}`, projectRoot, (err) => {
+                if(err) {
+                  console.log('git pull error: ', err);
+                  reject(err);              
+                } else {
+                  resolve({
+                    message: `Successfuly cretaed project from GitHub repo.`,
+                  });
+                }
+              });
+            }
+          });
         } else {
           const err = new APIError(`User with username ${username} not found!`, httpStatus.USER_WITH_USERNAME_NOT_FOUND, true);
           reject(err);
