@@ -37,7 +37,7 @@
   },
   "homepage": "https://github.com/grigorkh/Rodin-JS-API#readme",
   "dependencies": {
-    "babel-plugin-transform-es2015-modules-systemjs": "^6.19.0",
+    "babel-plugin-transform-es2015-modules-systemjs": "^6.24.1",
     "bcrypt-nodejs": "0.0.3",
     "bluebird": "^3.1.4",
     "body-parser": "^1.14.2",
