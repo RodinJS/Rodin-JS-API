@@ -14,6 +14,7 @@ import utils from '../helpers/common';
 import mandrill from '../helpers/mandrill';
 import userCapacity from '../helpers/directorySize';
 import transpiler from '../helpers/transpiler';
+import git from '../helpers/github';
 import _ from 'lodash';
 
 const getStatus = (project, device, cb) => {
@@ -103,7 +104,7 @@ function create(req, res, next) {
     .then(projectExist => {
       //console.log('exist', projectExist);
       if (projectExist) {
-        const message = 'Project exists';
+        const message = 'Project url already exists';
         const errorCode = httpStatus.PROJECT_EXIST;
         const err = new APIError(message, errorCode, true);
         return next(err);
@@ -118,6 +119,10 @@ function create(req, res, next) {
         description: req.body.description,
         isNew: true
       });
+
+      if(req.body.githubUrl) {
+        project.githubUrl = help.cleanUrl(req.body.githubUrl);
+      }
 
       project.saveAsync()
         .then((savedProject) => {
@@ -169,11 +174,9 @@ function create(req, res, next) {
 
                             }
                           }
-                        ).then(result => {
-                        })
-                          .catch((e) => {
-                            fs.appendFileSync(rootDir + '/error.log', e + '\n');
-                          });
+                        ).catch((e) => {
+                          fs.appendFileSync(rootDir + '/error.log', e + '\n');
+                        });
                       }
 
                     });
@@ -188,6 +191,13 @@ function create(req, res, next) {
                 }
 
               });
+            }
+
+            if (req.body.githubUrl) { // RO-243 #create project from git repo
+              git.clone(req.user.username, help.cleanUrl(req.body.githubUrl), rootDir)
+                .catch(e => {
+                  fs.appendFileSync(rootDir + '/error.log', e + '\n');
+                });
             }
 
             User.get(req.user.username)
@@ -221,15 +231,15 @@ function create(req, res, next) {
           }
         })
         .catch((e) => {
-          //console.log(e);
-          const message = e.code === 11000 ? 'Project url exists' : httpStatus[400];
+          console.log(e);
+          const message = e.code === 11000 ? 'Project url already exists.' : httpStatus[400] + ' Catch 1';
           const errorCode = e.code === 11000 ? httpStatus.PROJECT_EXIST : httpStatus.BAD_REQUEST;
           const err = new APIError(message, errorCode, true);
           return next(err);
         })
     })
     .catch(e => {
-      const err = new APIError("Bad request", 400, true);
+      const err = new APIError("Bad request Catch 2", httpStatus.BAD_REQUEST, true);
       return next(err);
     })
 }
