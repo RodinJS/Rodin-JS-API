@@ -117,9 +117,12 @@ function create(req, res, next) {
         owner: req.user.username,
         displayName: req.body.displayName,
         description: req.body.description,
-        githubUrl: help.cleanUrl(req.body.githubUrl),
         isNew: true
       });
+
+      if(req.body.githubUrl) {
+        project.githubUrl = help.cleanUrl(req.body.githubUrl);
+      }
 
       project.saveAsync()
         .then((savedProject) => {
