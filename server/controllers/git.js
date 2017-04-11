@@ -112,7 +112,7 @@ function create(req, res, next) {
           'git init',
           'git add -A',
         ], projectRoot, (err) => {
-          shell.exec(`git commit -m \"first\"`, projectRoot, (err) => {
+          shell.exec(`git commit -m \"first commit\"`, projectRoot, (err) => {
             console.log('git commit error: ', err);
             shell.exec(`git remote add origin  ${repo_url}`, projectRoot, (err) => {
               console.log('git remote add error: ', err);
@@ -121,8 +121,8 @@ function create(req, res, next) {
                 return next(err);
               } else {
                 shell.exec( `git push -f origin master`, projectRoot, (err) => {
+                  console.log('git push error: ', err);
                   if (err) {
-                    console.log('git push error: ', err);
                     const err = {
                       status: 400,
                       code: 3,
