@@ -175,6 +175,7 @@ const httpStatus = {
     GITHUB_NOT_LINKED: 350,
     NO_PROJECT_ROOT: 351,
     REPO_NAME_EXIST: 352,
+    REPO_DOES_NOT_EXIST: 353,
     // working with custom domain names [360-370]
     NO_DOMAIN_NAME: 360,
     COULD_NOT_CREATE_TEMPLATE: 361,
