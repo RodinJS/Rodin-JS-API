@@ -117,7 +117,7 @@ function create(req, res, next) {
             shell.exec(`git remote add origin  ${repo_url}`, projectRoot, (err) => {
               console.log('git remote add error: ', err);
               if(err) {
-                const err = new APIError('git remote add origin error: ', httpStatus.FATAL, true);
+                console.log('git remote add error: ', err)
                 return next(err);
               } else {
                 shell.exec( `git push -f origin master`, projectRoot, (err) => {
@@ -131,6 +131,7 @@ function create(req, res, next) {
                     return res.status(400).send({
                       success: false,
                       error: err,
+                      gago: "push error"
                     });
                   }
 
