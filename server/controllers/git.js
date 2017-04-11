@@ -329,7 +329,7 @@ function syncProjects(req, res, next) {
       if (branchesResponse.length > 0) {
         const success = _.filter(branchesResponse, (branch) => branch.status == 200).length;
         const failed = _.filter(branchesResponse, (branch) => branch.status == 400).length;
-        const message = success > 0 ? `${success} project(s) successfuly synced` : `Problem with syncing projects with github. Please contact support for details support@rodin.io`;
+        const message = success > 0 ? `${success} project(s) successfully synced` : `Problem with syncing projects with github. Please contact support for details support@rodin.io`;
         req.notification = {
           username: req.user.username,
           error: success <= 0,
