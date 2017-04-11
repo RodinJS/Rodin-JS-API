@@ -1,8 +1,17 @@
 // execute a single shell command where "cmd" is a string
 exports.exec = (cmd, dir, cb) => {
-	var child_process = require('child_process');
+	var spawn = require('child_process').spawn;
 	var parts = cmd.split(/\s+/g);
-	var p = child_process.spawn(parts[0], parts.slice(1), { stdio: 'inherit', cwd: dir });
+	const p = spawn(parts[0], parts.slice(1), { stdio: 'inherit', cwd: dir });
+	
+	p.stdout.on('data', (data) => {
+		console.log(`stdout: ${data}`);
+	});
+
+	p.stderr.on('data', (data) => {
+		console.log(`stderr: ${data}`);
+	});
+
 	p.on('exit', (code) => {
 		var err = null;
 		if (code) {
@@ -13,13 +22,6 @@ exports.exec = (cmd, dir, cb) => {
 		}
 
 		if (cb) cb(err);
-	});
-	p.stdout.on('data', (data) => {
-		console.log(`stdout: ${data}`);
-	});
-
-	p.stderr.on('data', (data) => {
-		console.log(`stderr: ${data}`);
 	});
 };
 
