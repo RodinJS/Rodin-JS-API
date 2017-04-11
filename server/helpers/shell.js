@@ -4,13 +4,17 @@ exports.exec = (cmd, dir, cb) => {
 	var parts = cmd.split(/\s+/g);
 	const p = spawn(parts[0], parts.slice(1), { stdio: 'inherit', cwd: dir });
 	
-	p.stdout.on('data', (data) => {
-		console.log(`stdout: ${data}`);
-	});
+	if(p.stdout) {
+		p.stdout.on('data', (data) => {
+			console.log(`stdout: ${data}`);
+		});
+	}
 
-	p.stderr.on('data', (data) => {
-		console.log(`stderr: ${data}`);
-	});
+	if(p.stderr) {
+		p.stderr.on('data', (data) => {
+			console.log(`stderr: ${data}`);
+		});
+	}
 
 	p.on('exit', (code) => {
 		var err = null;
