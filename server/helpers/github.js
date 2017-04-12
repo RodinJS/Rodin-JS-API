@@ -81,7 +81,7 @@ function deleteRepo(url, username) {
             let match_owner = /(http(s)?)(:\/\/)(github.com\/)(\S+)\/(\S+).git/.exec(url);
             github.repos.delete({ owner: match_owner[5], repo: match_owner[6] }, (err, result) => {
               if (err) {
-                const e = new APIError(`Cant delete ${match_owner[6]} repo!`, httpStatus.REPO_NAME_EXIST, true);
+                const e = new APIError(`Cant delete ${match_owner[6]} repo!`, httpStatus.CANT_DELETE_REPO, true);
                 return reject(e);
               }
 
