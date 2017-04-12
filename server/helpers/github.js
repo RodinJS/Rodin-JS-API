@@ -391,4 +391,4 @@ function clone(username, repo_url, projectRoot) {
 }
 
 
-export default {createRepo, createBranch, theirs, ours, clone, _createRepo, _createBranch};
+export default {createRepo, createBranch, theirs, ours, clone, _createRepo, _createBranch, deleteRepo};
