@@ -83,6 +83,8 @@ const httpStatus = {
     350: 'GITHUB_NOT_LINKED',
     351: 'NO_PROJECT_ROOT',
     352: 'REPO_NAME_EXIST',
+    353: 'REPO_DOES_NOT_EXIST',
+    354: 'CANT_DELETE_REPO',
     360: 'NO_DOMAIN_NAME',
     361: 'COULD_NOT_CREATE_TEMPLATE',
     362: 'ERROR_IN_CONFIG_FILE',
@@ -176,6 +178,7 @@ const httpStatus = {
     NO_PROJECT_ROOT: 351,
     REPO_NAME_EXIST: 352,
     REPO_DOES_NOT_EXIST: 353,
+    CANT_DELETE_REPO: 354,
     // working with custom domain names [360-370]
     NO_DOMAIN_NAME: 360,
     COULD_NOT_CREATE_TEMPLATE: 361,

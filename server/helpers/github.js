@@ -50,6 +50,63 @@ function _createRepo(repoName, token, project) {
   });
 }
 
+function deleteRepo(url, username) {
+  return new Promise((resolve, reject) => {
+
+    let token = '';
+
+    User.get(username)
+      .then(user => {
+        if (user) {
+          if (user.github.token) {
+            token = user.github.token;
+
+            let github = new GitHubApi({
+              debug: true,
+              protocol: 'https',
+              host: 'api.github.com',
+              pathPrefix: '',
+              headers: {
+                'user-agent': 'Rodin-API',
+              },
+              Promise: require('bluebird'),
+              followRedirects: false, // default: true; there's currently an issue with non-get redirects, so allow ability to disable follow-redirects
+              timeout: 5000,
+            });
+            github.authenticate({
+              type: 'token',
+              token: token,
+            });
+
+            let match_owner = /(http(s)?)(:\/\/)(github.com\/)(\S+)\/(\S+).git/.exec(url);
+            github.repos.delete({ owner: match_owner[5], repo: match_owner[6] }, (err, result) => {
+              if (err) {
+                const e = new APIError(`Cant delete ${match_owner[6]} repo!`, httpStatus.CANT_DELETE_REPO, true);
+                return reject(e);
+              }
+
+              resolve({
+                success: true,
+                data: 'Repo Successfuly Deleted',
+              });
+
+            });
+
+          } else {
+            const err = new APIError('GitHub account not linked to this user!', httpStatus.GITHUB_NOT_LINKED, true);
+            reject(err);
+          }
+        } else {
+          const err = new APIError(`User with username ${username} not found!`, httpStatus.USER_WITH_USERNAME_NOT_FOUND, true);
+          reject(err);
+        }
+      }).error((e) => {
+      const err = new APIError('Fatal error!(DB)', httpStatus.FATAL, true);
+      reject(err);
+    });
+  });
+}
+
 function _createBranch(username, project, branchName, token) {
   return new Promise((resolve, reject) => {
     const cloneUrl = project.github.https;

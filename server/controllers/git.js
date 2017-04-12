@@ -123,16 +123,23 @@ function create(req, res, next) {
                 shell.exec( `git push -u origin master`, projectRoot, (err) => {
                   console.log('git push error: ', err);
                   if (err) {
-                    const err = {
-                      status: 400,
-                      code: 3,
-                      message: 'Can\'t create git repo',
-                    };
-                    return res.status(400).send({
-                      success: false,
-                      error: err,
-                      gago: "push error"
-                    });
+                    // const err = {
+                    //   status: 400,
+                    //   code: 3,
+                    //   message: 'Can\'t create git repo',
+                    // };
+                    // return res.status(400).send({
+                    //   success: false,
+                    //   error: err,
+                    //   gago: "push error"
+                    // });
+                    git.deleteRepo(clone_url, req.user.username)
+                      .then(result => {
+                        return next(result);
+                      })      
+                      .catch(e => {
+                        return next(e);
+                      });
                   }
 
                   Project.findOneAndUpdateAsync(
