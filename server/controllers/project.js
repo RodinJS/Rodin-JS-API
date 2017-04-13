@@ -59,31 +59,22 @@ const getStatus = (project, device, cb) => {
 function get(req, res, next) {
   Project.getOne(req.params.id, req.user.username)
     .then((project) => {
-      if (project) {
-        if (req.query.device) {
-          return getStatus(project, req.query.device, (err, project) => {
-            if(err){
-              const err = new APIError('Something went wrong', httpStatus.BAD_REQUEST, true);
-              return next(err);
-            }
-            return res.status(200).json({
-              success: true,
-              data: project
-            });
+      if(!project) return _onError(next, {error:'Project is empty', code:httpStatus.NOT_FOUND});
+
+      if (req.query.device) {
+        return getStatus(project, req.query.device, (err, project) => {
+          if(err) return _onError(next, {error:'Something went wrong', code:httpStatus.BAD_REQUEST});
+          return res.status(200).json({
+            success: true,
+            data: project
           });
-        }
-
-        req.project = project.toObject();
-        return next();
+        });
       }
-      const err = new APIError('Project is empty', httpStatus.NOT_FOUND, true);
-      return next(err);
-    })
-    .catch((e) => {
-      const err = new APIError('Project not found', httpStatus.NOT_FOUND, true);
-      return next(e);
 
-    });
+      req.project = project.toObject();
+      return next();
+    })
+    .catch((e) => _onError(next, {error:'Project not found', code:httpStatus.NOT_FOUND}));
 }
 
 /**
@@ -254,16 +245,8 @@ function create(req, res, next) {
 function update(req, res, next) {
   req.body.updatedAt = new Date();
   Project.findOneAndUpdate({_id: req.params.id, owner: req.user.username}, {$set: req.body}, {new: true})
-    .then(project => {
-      return res.status(200).json({
-        "success": true,
-        "data": project
-      });
-    })
-    .catch(e => {
-      const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
-      return next(err);
-    });
+    .then(project => res.status(200).json({ "success": true,  "data": project} ))
+    .catch(e => _onError(next, {error:'Can\'t update info', code:httpStatus.BAD_REQUEST}));
 }
 
 /**
@@ -276,12 +259,11 @@ function list(req, res, next) {
   const limit = parseInt(req.query.limit) || 50;
   const skip = parseInt(req.query.skip) || 0;
 
-  Project.list({limit, skip}, req.user.username, req.query._queryString).then((projects) => {
-    res.status(200).json({
+  Project.list({limit, skip}, req.user.username, req.query._queryString)
+    .then((projects) => res.status(200).json({
       success: true,
       data: projects
-    })
-  })
+    }))
     .error((e) => next(e));
 }
 
@@ -294,58 +276,42 @@ function remove(req, res, next) {
   const username = req.user.username;
   User.getPermission(username, id)
     .then(user => {
-      if (user) {
+      if(!user) return _onError(next, {error:'User has no permission to modify this project!', code:310});
 
-        Project.removeAsync({_id: id})
+      Project.removeAsync({_id: id})
 
-          .then((deletedProject) => {
-            if (deletedProject.result.ok === 1) {
+        .then((deletedProject) => {
+          if (deletedProject.result.ok === 1) {
 
-              const rootDir = config.stuff_path + 'projects/' + req.user.username + '/' + req.project.root;
+            const rootDir = config.stuff_path + 'projects/' + req.user.username + '/' + req.project.root;
+            const publishDir = config.stuff_path + 'public/' + req.user.username + '/' + req.project.root;
+            const publicDir = config.stuff_path + 'publish/' + req.user.username + '/' + req.project.root;
+            const historyDir = config.stuff_path + 'history/' + req.user.username + '/' + req.project.root;
 
-              const publishDir = config.stuff_path + 'public/' + req.user.username + '/' + req.project.root;
-
-              const publicDir = config.stuff_path + 'publish/' + req.user.username + '/' + req.project.root;
-
-              const historyDir = config.stuff_path + 'history/' + req.user.username + '/' + req.project.root;
-
-              if (fs.existsSync(rootDir)) {
-                utils.deleteFolderRecursive(rootDir);
-              }
-
-              if (fs.existsSync(publishDir)) {
-                utils.deleteFolderRecursive(publishDir);
-              }
-
-              if (fs.existsSync(publicDir)) {
-                utils.deleteFolderRecursive(publicDir);
-              }
-
-              if (fs.existsSync(historyDir)) {
-                utils.deleteFolderRecursive(historyDir);
-              }
-
-
-              User.updateAsync({username: username}, {$pull: {projects: id}})
-                .then(updatedUser => {
-                  return res.status(200).json({
-                    "success": true,
-                    "data": "Project Successfuly deleted!"
-                  });
-                });
-            } else {
-              const err = new APIError("Something went wrong!", 312, true);
-              return next(err);
+            if (fs.existsSync(rootDir)) {
+              utils.deleteFolderRecursive(rootDir);
             }
 
-          }).error((e) => next(e));
+            if (fs.existsSync(publishDir)) {
+              utils.deleteFolderRecursive(publishDir);
+            }
+
+            if (fs.existsSync(publicDir)) {
+              utils.deleteFolderRecursive(publicDir);
+            }
+
+            if (fs.existsSync(historyDir)) {
+              utils.deleteFolderRecursive(historyDir);
+            }
 
 
-      }
-      else {
-        const err = new APIError('User has no permission to modify this project!', 310, true);
-        return next(err);
-      }
+            User.updateAsync({username: username}, {$pull: {projects: id}})
+              .then(updatedUser => res.status(200).json({"success": true, "data": "Project Successfuly deleted!"}));
+          }
+          else _onError(next, {error:"Something went wrong!", code:312})
+
+        })
+        .catch((e) => next(e));
 
     });
 }
@@ -379,38 +345,21 @@ function makePublic(req, res, next) {
           const srcDir = `${config.stuff_path}projects/${username}/${help.cleanUrl(req.project.root)}`;
           const publicDir = `${config.stuff_path}public/${username}/${help.cleanUrl(req.project.root)}`;
           fsExtra.ensureSymlinkSync(srcDir, publicDir);
-
-          return res.status(200).json({
-            "success": true,
-            "data": {publicDir}
-          });
-
+          return res.status(200).json({"success": true, "data": {publicDir}});
         }
         else {
           const publicDir = `${config.stuff_path}public/${username}/${help.cleanUrl(req.project.root)}`;
 
           if (fs.existsSync(publicDir)) {
             fs.unlinkSync(publicDir);
-            return res.status(200).json({
-              "success": true,
-              "data": {publicDir}
-            });
+            return res.status(200).json({"success": true, "data": {publicDir}});
           }
-          else {
-            const err = new APIError('link exist!', httpStatus.BAD_REQUEST, true);
-            return next(err);
-          }
+          else _onError(next, {error:'link exist!', code:httpStatus.BAD_REQUEST})
 
         }
       }
-      else {
-        const err = new APIError('Can\'t update info--', httpStatus.BAD_REQUEST, true);
-        return next(err);
-      }
-    }).catch(e => {
-    const err = new APIError('Can\'t update info++', httpStatus.BAD_REQUEST, true);
-    return next(e);
-  });
+      else _onError(next, {error:'Can\'t update info--', code:httpStatus.BAD_REQUEST})
+    }).catch(e => _onError(next, {error:'Can\'t update info++', code:httpStatus.BAD_REQUEST}));
 }
 
 /**
@@ -785,6 +734,11 @@ function transpile(req, res, next) {
 
 function finalize(req, res, next) {
   return res.status(200).json({success: true, data: req.project});
+}
+
+function _onError(next, error){
+  const err = new APIError(error.error, error.code, true);
+  return next(err);
 }
 
 export default {// jscs:ignore
