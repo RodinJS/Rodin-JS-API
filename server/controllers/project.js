@@ -110,135 +110,142 @@ function create(req, res, next) {
 				isNew: true
 			});
 
+			let saveProject = function (project, req, res, next) {
+				project.saveAsync()
+					.then((savedProject) => {
+
+						if (!savedProject) return;
+
+
+						let project = savedProject.toObject();
+
+						let rootDir = config.stuff_path + 'projects/' + req.user.username + '/' + project.root;
+
+						let historyDir = config.stuff_path + 'history/' + req.user.username + '/' + project.root;
+
+						if (!fs.existsSync(historyDir)) {
+							fs.mkdirSync(historyDir); //creating root dir for project
+						}
+
+						if (!fs.existsSync(rootDir)) {
+
+							fs.mkdirSync(rootDir); //creating root dir for project
+
+							if (req.body.templateId) {
+
+								ProjectTemplates.getOne(req.body.templateId).then((templateProject) => {
+
+									if (templateProject) {
+
+										templateProject = templateProject.toObject();
+
+										let templateDir = 'resources/templates/' + templateProject.root;
+
+										// Check template exist
+										if (fs.existsSync(templateDir)) {
+
+											//copy tempate
+											fsExtra.copy(templateDir, rootDir, function (err) {
+												if (err)
+													fs.appendFileSync(rootDir + '/error.log', err + '\n');
+												else {
+													Project.updateAsync(
+														{
+															_id: project._id,
+															owner: req.user.username
+														},
+														{
+															$set: {
+																updatedAt: new Date(),
+																templateOf: templateProject.name
+
+															}
+														}
+													).catch((e) => {
+														fs.appendFileSync(rootDir + '/error.log', e + '\n');
+													});
+												}
+
+											});
+
+										}
+										else {
+											fs.appendFileSync(rootDir + '/error.log', 'Template not exist' + '\n');
+										}
+									}
+									else {
+										fs.appendFileSync(rootDir + '/error.log', 'Template not exist' + '\n');
+									}
+
+								});
+							}
+
+							if (req.body.githubUrl) { // RO-243 #create project from git repo
+								git.clone(req.user.username, help.cleanUrl(req.body.githubUrl), rootDir)
+									.catch(e => {
+										const err = new APIError('GitHub project does not exists!', httpStatus.REPO_DOES_NOT_EXIST, true);
+										return next(err);
+									});
+							}
+
+							User.get(req.user.username)
+								.then(user => {
+									if (user) {
+										User.updateAsync({username: req.user.username}, {
+											$push: {
+												"projects": savedProject._id
+											}
+										})
+											.then(updatedUser => {
+												return res.status(201).json({
+													"success": true,
+													"data": savedProject.outcome()
+												});
+											})
+											.catch((e) => {
+												const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+												return next(err);
+											});
+									}
+									else {
+										const err = new APIError('User not found!', 310);
+										return next(err);
+									}
+								})
+								.error((e) => {
+									const err = new APIError("Something went wrong!", 312, true);
+									return next(err);
+								});
+						}
+					})
+					.catch((e) => {
+						console.log(e);
+						const message = e.code === 11000 ? 'Project url already exists.' : httpStatus[400] + ' Catch 1';
+						const errorCode = e.code === 11000 ? httpStatus.PROJECT_EXIST : httpStatus.BAD_REQUEST;
+						const err = new APIError(message, errorCode, true);
+						return next(err);
+					})
+			}
+
 			if(req.body.githubUrl) {
 				urlExists(help.cleanUrl(req.body.githubUrl), (err, exists) => {
 					console.log("GitHub repo exists: ", exists);
 					if(exists) {
 						project.githubUrl = help.cleanUrl(req.body.githubUrl);
-						project.saveAsync()
-							.then((savedProject) => {
-
-								if (!savedProject) return;
-
-
-								let project = savedProject.toObject();
-
-								let rootDir = config.stuff_path + 'projects/' + req.user.username + '/' + project.root;
-
-								let historyDir = config.stuff_path + 'history/' + req.user.username + '/' + project.root;
-
-								if (!fs.existsSync(historyDir)) {
-									fs.mkdirSync(historyDir); //creating root dir for project
-								}
-
-								if (!fs.existsSync(rootDir)) {
-
-									fs.mkdirSync(rootDir); //creating root dir for project
-
-									if (req.body.templateId) {
-
-										ProjectTemplates.getOne(req.body.templateId).then((templateProject) => {
-
-											if (templateProject) {
-
-												templateProject = templateProject.toObject();
-
-												let templateDir = 'resources/templates/' + templateProject.root;
-
-												// Check template exist
-												if (fs.existsSync(templateDir)) {
-
-													//copy tempate
-													fsExtra.copy(templateDir, rootDir, function (err) {
-														if (err)
-															fs.appendFileSync(rootDir + '/error.log', err + '\n');
-														else {
-															Project.updateAsync(
-																{
-																	_id: project._id,
-																	owner: req.user.username
-																},
-																{
-																	$set: {
-																		updatedAt: new Date(),
-																		templateOf: templateProject.name
-
-																	}
-																}
-															).catch((e) => {
-																fs.appendFileSync(rootDir + '/error.log', e + '\n');
-															});
-														}
-
-													});
-
-												}
-												else {
-													fs.appendFileSync(rootDir + '/error.log', 'Template not exist' + '\n');
-												}
-											}
-											else {
-												fs.appendFileSync(rootDir + '/error.log', 'Template not exist' + '\n');
-											}
-
-										});
-									}
-
-									if (req.body.githubUrl) { // RO-243 #create project from git repo
-										git.clone(req.user.username, help.cleanUrl(req.body.githubUrl), rootDir)
-											.catch(e => {
-												const err = new APIError('GitHub project does not exists!', httpStatus.REPO_DOES_NOT_EXIST, true);
-												return next(err);
-											});
-									}
-
-									User.get(req.user.username)
-										.then(user => {
-											if (user) {
-												User.updateAsync({username: req.user.username}, {
-													$push: {
-														"projects": savedProject._id
-													}
-												})
-													.then(updatedUser => {
-														return res.status(201).json({
-															"success": true,
-															"data": savedProject.outcome()
-														});
-													})
-													.catch((e) => {
-														const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
-														return next(err);
-													});
-											}
-											else {
-												const err = new APIError('User not found!', 310);
-												return next(err);
-											}
-										})
-										.error((e) => {
-											const err = new APIError("Something went wrong!", 312, true);
-											return next(err);
-										});
-								}
-							})
-							.catch((e) => {
-								console.log(e);
-								const message = e.code === 11000 ? 'Project url already exists.' : httpStatus[400] + ' Catch 1';
-								const errorCode = e.code === 11000 ? httpStatus.PROJECT_EXIST : httpStatus.BAD_REQUEST;
-								const err = new APIError(message, errorCode, true);
-								return next(err);
-							})
+						saveProject(project, req, res, next);
 					} else {
 						const err = new APIError('GitHub project does not exists!', httpStatus.REPO_DOES_NOT_EXIST, true);
 						return next(err);
 					}
 				});
+			} else {
+				saveProject(project, req, res, next);
 			}
+			
 		})
 		.catch(e => {
 			const err = new APIError("Bad request Catch 2", httpStatus.BAD_REQUEST, true);
-			return next(err);
+			return next(e);
 		})
 }
 
