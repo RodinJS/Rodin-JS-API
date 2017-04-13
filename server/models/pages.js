@@ -50,14 +50,14 @@ Pages.statics = {
     },
 
     getPagesList() {
-        return this.find().select({ title: 1, slug: 1, state: 1, putOnFooter: 1 })
+        return this.find().select({ title: 1, slug: 1, state: 1, putOnFooter: 1, externalURL:1 })
           .then((pages) => {
-            if (pages) {
-                return pages;
+            if (!pages) {
+              const err = new APIError('Error while requesting pages list!----', httpStatus.NOT_FOUND, true);
+              return Promise.reject(err);
             }
+            return pages;
 
-            const err = new APIError('Error while requesting pages list!----', httpStatus.NOT_FOUND, true);
-            return Promise.reject(err);
         })
           .catch((e)=> {
             const err = new APIError('Error while requesting pages list!----', httpStatus.NOT_FOUND, true);
