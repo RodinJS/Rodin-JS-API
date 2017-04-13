@@ -124,22 +124,14 @@ function create(req, res, next) {
                   console.log('git push error: ', err);
                   if (err) {
                     const err = {
-                      status: 400,
-                      code: 3,
-                      message: 'Can\'t create git repo',
+                      status: 353,
+                      code: 353,
+                      message: 'GitHub project does not exist!',
                     };
-                    return res.status(400).send({
+                    return res.status(353).send({
                       success: false,
-                      error: err,
-                      gago: "push error"
+                      error: err
                     });
-                    // git.deleteRepo(clone_url, req.user.username)
-                    //   .then(result => {
-                    //     return next(result);
-                    //   })      
-                    //   .catch(e => {
-                    //     return next(e);
-                    //   });
                   }
 
                   Project.findOneAndUpdateAsync(
