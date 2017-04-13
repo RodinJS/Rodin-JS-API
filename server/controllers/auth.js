@@ -71,6 +71,7 @@ function finalizeUser(req, res, next) {
     role: user.role,
     profile: user.profile,
     usernameConfirmed: req.user.usernameConfirmed,
+    allowProjectsCount: user.allowProjectsCount,
     creationDate:user.createdAt,
     github:user.github ? user.github.email : false,
     facebook:user.facebook ? user.facebook.email : false,
