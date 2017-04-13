@@ -110,67 +110,81 @@ function create(req, res, next) {
 
         shell.series([
           'git init',
-          'git add -A',
+          'git add .',
         ], projectRoot, (err) => {
           shell.exec(`git commit -m \"first\"`, projectRoot, (err) => {
-            shell.series([
-              `git remote add origin  ${repo_url}`,
-              `git push -f origin master`,
-            ], projectRoot, (err) => {
-              console.log('git push error: ', err);
-              if (err) {
-                const err = {
-                  status: 400,
-                  code: 3,
-                  message: 'Can\'t create git repo',
-                };
-                return res.status(400).send({
-                  success: false,
-                  error: err,
+            console.log('git commit error: ', err);
+            shell.exec(`git remote add origin  ${repo_url}`, projectRoot, (err) => {
+              console.log('git remote add error: ', err);
+              if(err) {
+                console.log('git remote add error: ', err)
+                return next(err);
+              } else {
+                shell.exec( `git push -u origin master`, projectRoot, (err) => {
+                  console.log('git push error: ', err);
+                  if (err) {
+                    const err = {
+                      status: 400,
+                      code: 3,
+                      message: 'Can\'t create git repo',
+                    };
+                    return res.status(400).send({
+                      success: false,
+                      error: err,
+                      gago: "push error"
+                    });
+                    // git.deleteRepo(clone_url, req.user.username)
+                    //   .then(result => {
+                    //     return next(result);
+                    //   })      
+                    //   .catch(e => {
+                    //     return next(e);
+                    //   });
+                  }
+
+                  Project.findOneAndUpdateAsync(
+                    {
+                      _id: req.body.id,
+                      owner: req.user.username,
+                    },
+                    {
+                      $set: {
+                        github: {
+                          git: result.data.git_url,
+                          https: result.data.clone_url,
+                        },
+                      },
+                    },
+                    {
+                      new: true,
+                    }).then(projData => {
+                      let repo_info = result;
+                      git.createBranch(req.user.username, help.cleanUrl(req.body.id), projectRoot, 'rodin_editor')
+                        .then(result => {
+                          return res.status(200).json({
+                            success: true,
+                            data: {
+                              name: repo_info.data.name,
+                              private: repo_info.data.private,
+                              git_url: repo_info.data.git_url,
+                              clone_url: repo_info.data.clone_url,
+                              location: repo_info.data.meta.location,
+                              status: repo_info.data.meta.status,
+                              branch: result,
+                            },
+                          });
+                        })
+                        .catch(e => {
+                          const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+                          return next(e);
+                        });
+                    })
+                    .catch(e => {
+                      const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+                      return next(e);
+                    });
                 });
               }
-
-              Project.findOneAndUpdateAsync(
-                {
-                  _id: req.body.id,
-                  owner: req.user.username,
-                },
-                {
-                  $set: {
-                    github: {
-                      git: result.data.git_url,
-                      https: result.data.clone_url,
-                    },
-                  },
-                },
-                {
-                  new: true,
-                }).then(projData => {
-                let repo_info = result;
-                git.createBranch(req.user.username, help.cleanUrl(req.body.id), projectRoot, 'rodin_editor')
-                  .then(result => {
-                    return res.status(200).json({
-                      success: true,
-                      data: {
-                        name: repo_info.data.name,
-                        private: repo_info.data.private,
-                        git_url: repo_info.data.git_url,
-                        clone_url: repo_info.data.clone_url,
-                        location: repo_info.data.meta.location,
-                        status: repo_info.data.meta.status,
-                        branch: result,
-                      },
-                    });
-                  })
-                  .catch(e => {
-                    const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
-                    return next(e);
-                  });
-              })
-              .catch(e => {
-                const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
-                return next(e);
-              });
             });
           });
         });
@@ -329,7 +343,7 @@ function syncProjects(req, res, next) {
       if (branchesResponse.length > 0) {
         const success = _.filter(branchesResponse, (branch) => branch.status == 200).length;
         const failed = _.filter(branchesResponse, (branch) => branch.status == 400).length;
-        const message = success > 0 ? `${success} project(s) successfuly synced` : `Problem with syncing projects with github. Please contact support for details support@rodin.io`;
+        const message = success > 0 ? `${success} project(s) successfully synced` : `Problem with syncing projects with github. Please contact support for details support@rodin.io`;
         req.notification = {
           username: req.user.username,
           error: success <= 0,
