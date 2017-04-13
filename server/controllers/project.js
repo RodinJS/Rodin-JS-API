@@ -1,6 +1,7 @@
 // jscs:disable
 import fs from 'fs';
 import path from 'path';
+import urlExists from 'url-exists';
 import Project from '../models/project';
 import ProjectTemplates from '../models/projectTemplate';
 import User from '../models/user';
@@ -85,155 +86,160 @@ function get(req, res, next) {
  * @returns {Project}
  */
 function create(req, res, next) {
-  if (req.projectsCount.total >= req.user.allowProjectsCount) {
-    const err = new APIError(`Maximum projects count exceeded, allowed project count ${req.user.allowProjectsCount}`, 400, true);
-    return next(err);
-  }
+	if (req.projectsCount.total >= req.user.allowProjectsCount) {
+		const err = new APIError(`Maximum projects count exceeded, allowed project count ${req.user.allowProjectsCount}`, 400, true);
+		return next(err);
+	}
+
+	Project.getByName(req.body.name, req.user.username)
+		.then(projectExist => {
+			if (projectExist) {
+				const message = 'Project url already exists';
+				const errorCode = httpStatus.PROJECT_EXIST;
+				const err = new APIError(message, errorCode, true);
+				return next(err);
+			}
+
+			let project = new Project({
+				name: req.body.name,
+				tags: req.body.tags,
+				root: req.body.name,
+				owner: req.user.username,
+				displayName: req.body.displayName,
+				description: req.body.description,
+				isNew: true
+			});
+
+			if(req.body.githubUrl) {
+				urlExists(help.cleanUrl(req.body.githubUrl), (err, exists) => {
+					console.log("GitHub repo exists: ", exists);
+					if(exists) {
+						project.githubUrl = help.cleanUrl(req.body.githubUrl);
+						project.saveAsync()
+							.then((savedProject) => {
+
+								if (!savedProject) return;
 
 
-  Project.getByName(req.body.name, req.user.username)
-    .then(projectExist => {
-      //console.log('exist', projectExist);
-      if (projectExist) {
-        const message = 'Project url already exists';
-        const errorCode = httpStatus.PROJECT_EXIST;
-        const err = new APIError(message, errorCode, true);
-        return next(err);
-      }
+								let project = savedProject.toObject();
 
-      let project = new Project({
-        name: req.body.name,
-        tags: req.body.tags,
-        root: req.body.name,
-        owner: req.user.username,
-        displayName: req.body.displayName,
-        description: req.body.description,
-        isNew: true
-      });
+								let rootDir = config.stuff_path + 'projects/' + req.user.username + '/' + project.root;
 
-      if(req.body.githubUrl) {
-        project.githubUrl = help.cleanUrl(req.body.githubUrl);
-      }
+								let historyDir = config.stuff_path + 'history/' + req.user.username + '/' + project.root;
 
-      project.saveAsync()
-        .then((savedProject) => {
+								if (!fs.existsSync(historyDir)) {
+									fs.mkdirSync(historyDir); //creating root dir for project
+								}
 
-          if (!savedProject) return;
+								if (!fs.existsSync(rootDir)) {
 
+									fs.mkdirSync(rootDir); //creating root dir for project
 
-          let project = savedProject.toObject();
+									if (req.body.templateId) {
 
-          let rootDir = config.stuff_path + 'projects/' + req.user.username + '/' + project.root;
+										ProjectTemplates.getOne(req.body.templateId).then((templateProject) => {
 
-          let historyDir = config.stuff_path + 'history/' + req.user.username + '/' + project.root;
+											if (templateProject) {
 
-          if (!fs.existsSync(historyDir)) {
-            fs.mkdirSync(historyDir); //creating root dir for project
-          }
+												templateProject = templateProject.toObject();
 
-          if (!fs.existsSync(rootDir)) {
+												let templateDir = 'resources/templates/' + templateProject.root;
 
-            fs.mkdirSync(rootDir); //creating root dir for project
+												// Check template exist
+												if (fs.existsSync(templateDir)) {
 
-            if (req.body.templateId) {
+													//copy tempate
+													fsExtra.copy(templateDir, rootDir, function (err) {
+														if (err)
+															fs.appendFileSync(rootDir + '/error.log', err + '\n');
+														else {
+															Project.updateAsync(
+																{
+																	_id: project._id,
+																	owner: req.user.username
+																},
+																{
+																	$set: {
+																		updatedAt: new Date(),
+																		templateOf: templateProject.name
 
-              ProjectTemplates.getOne(req.body.templateId).then((templateProject) => {
+																	}
+																}
+															).catch((e) => {
+																fs.appendFileSync(rootDir + '/error.log', e + '\n');
+															});
+														}
 
-                if (templateProject) {
+													});
 
-                  templateProject = templateProject.toObject();
+												}
+												else {
+													fs.appendFileSync(rootDir + '/error.log', 'Template not exist' + '\n');
+												}
+											}
+											else {
+												fs.appendFileSync(rootDir + '/error.log', 'Template not exist' + '\n');
+											}
 
-                  let templateDir = 'resources/templates/' + templateProject.root;
+										});
+									}
 
-                  // Check template exist
-                  if (fs.existsSync(templateDir)) {
+									if (req.body.githubUrl) { // RO-243 #create project from git repo
+										git.clone(req.user.username, help.cleanUrl(req.body.githubUrl), rootDir)
+											.catch(e => {
+												const err = new APIError('GitHub project does not exist!', httpStatus.REPO_DOES_NOT_EXIST, true);
+												return next(err);
+											});
+									}
 
-                    //copy tempate
-                    fsExtra.copy(templateDir, rootDir, function (err) {
-                      if (err)
-                        fs.appendFileSync(rootDir + '/error.log', err + '\n');
-                      else {
-                        Project.updateAsync(
-                          {
-                            _id: project._id,
-                            owner: req.user.username
-                          },
-                          {
-                            $set: {
-                              updatedAt: new Date(),
-                              templateOf: templateProject.name
-
-                            }
-                          }
-                        ).catch((e) => {
-                          fs.appendFileSync(rootDir + '/error.log', e + '\n');
-                        });
-                      }
-
-                    });
-
-                  }
-                  else {
-                    fs.appendFileSync(rootDir + '/error.log', 'Template not exist' + '\n');
-                  }
-                }
-                else {
-                  fs.appendFileSync(rootDir + '/error.log', 'Template not exist' + '\n');
-                }
-
-              });
-            }
-
-            if (req.body.githubUrl) { // RO-243 #create project from git repo
-              git.clone(req.user.username, help.cleanUrl(req.body.githubUrl), rootDir)
-                .catch(e => {
-                  const err = new APIError('GitHub project does not exist!', httpStatus.REPO_DOES_NOT_EXIST, true);
-                  return next(err);
-                });
-            }
-
-            User.get(req.user.username)
-              .then(user => {
-                if (user) {
-                  User.updateAsync({username: req.user.username}, {
-                    $push: {
-                      "projects": savedProject._id
-                    }
-                  })
-                    .then(updatedUser => {
-                      return res.status(201).json({
-                        "success": true,
-                        "data": savedProject.outcome()
-                      });
-                    })
-                    .catch((e) => {
-                      const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
-                      return next(err);
-                    });
-                }
-                else {
-                  const err = new APIError('User not found!', 310);
-                  return next(err);
-                }
-              })
-              .error((e) => {
-                const err = new APIError("Something went wrong!", 312, true);
-                return next(err);
-              });
-          }
-        })
-        .catch((e) => {
-          console.log(e);
-          const message = e.code === 11000 ? 'Project url already exists.' : httpStatus[400] + ' Catch 1';
-          const errorCode = e.code === 11000 ? httpStatus.PROJECT_EXIST : httpStatus.BAD_REQUEST;
-          const err = new APIError(message, errorCode, true);
-          return next(err);
-        })
-    })
-    .catch(e => {
-      const err = new APIError("Bad request Catch 2", httpStatus.BAD_REQUEST, true);
-      return next(err);
-    })
+									User.get(req.user.username)
+										.then(user => {
+											if (user) {
+												User.updateAsync({username: req.user.username}, {
+													$push: {
+														"projects": savedProject._id
+													}
+												})
+													.then(updatedUser => {
+														return res.status(201).json({
+															"success": true,
+															"data": savedProject.outcome()
+														});
+													})
+													.catch((e) => {
+														const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+														return next(err);
+													});
+											}
+											else {
+												const err = new APIError('User not found!', 310);
+												return next(err);
+											}
+										})
+										.error((e) => {
+											const err = new APIError("Something went wrong!", 312, true);
+											return next(err);
+										});
+								}
+							})
+							.catch((e) => {
+								console.log(e);
+								const message = e.code === 11000 ? 'Project url already exists.' : httpStatus[400] + ' Catch 1';
+								const errorCode = e.code === 11000 ? httpStatus.PROJECT_EXIST : httpStatus.BAD_REQUEST;
+								const err = new APIError(message, errorCode, true);
+								return next(err);
+							})
+					} else {
+						const err = new APIError('GitHub project does not exist!', httpStatus.REPO_DOES_NOT_EXIST, true);
+						return next(err);
+					}
+				});
+			}
+		})
+		.catch(e => {
+			const err = new APIError("Bad request Catch 2", httpStatus.BAD_REQUEST, true);
+			return next(err);
+		})
 }
 
 /**
