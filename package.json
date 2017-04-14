@@ -60,7 +60,7 @@
     "helpscout": "0.0.1",
     "helpscout-docs": "^0.2.3",
     "http-status": "^0.2.0",
-    "joi": "10.0.0",
+    "joi": "10.4.0",
     "jsonwebtoken": "7.1.9",
     "line-by-line": "^0.1.5",
     "mandrill-api": "^1.0.45",
@@ -83,6 +83,7 @@
     "simple-git": "^1.64.0",
     "socket.io": "^1.6.0",
     "stripe": "^4.12.0",
+    "url-exists": "^1.0.3",
     "winston": "^2.1.1"
   },
   "devDependencies": {

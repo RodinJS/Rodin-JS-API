@@ -5,25 +5,30 @@
 import Notifications from '../models/notifications';
 import APIError from '../helpers/APIError';
 import _  from 'lodash';
+import request from 'request-promise';
+import config from '../../config/env';
+
+
 
 /**
  * Get project for preview
  * @returns {Project}
  */
 function create(req, res, next) {
-    const label = req.notification.error ? req.notification.error.message : req.notification.data;
+    const label = req.notification.error ? req.notification.error.message : _.isObject(req.notification.data) ? req.notification.data.message : req.notification.data;
     const project = req.project ? _.pick(req.project, ['_id', 'name']) : undefined;
     const notification = new Notifications({
         username: req.user.username,
         label: label,
         project: project,
-        error: req.notification.error || false,
+        error: req.notification.error || _.isObject(req.notification.data) ? req.notification.data.error : false,
     });
 
     notification.save(err => {
         if (err) {
             if (next) {
-                const e = new APIError('Something went wrong!', 400, true);
+              console.log(err);
+              const e = new APIError('Something went wrong!', 400, true);
                 return next(e);
             }
             //todo write log
@@ -76,4 +81,27 @@ function remove(req, res, next) {
     });
 }
 
-export default { create, get, update, remove };
+function pushSocket(req) {
+  if(_.isUndefined(req.notification.username)){
+    return console.log('no username')
+  }
+  if(_.isUndefined(req.notification.event)){
+    return console.log('no event')
+  }
+  const options = {
+    method: 'POST',
+    uri: `${config.socketURL}/ss/hooks`,
+    body: req.notification,
+    json: true, // Automatically stringifies the body to JSON
+  };
+
+  request(options)
+    .then((response) => {
+      console.log(response);
+    })
+    .catch((err)  => {
+      console.log(err);
+    });
+}
+
+export default { create, get, update, remove, pushSocket};

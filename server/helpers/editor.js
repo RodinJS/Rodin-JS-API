@@ -1,4 +1,5 @@
 import config from '../../config/env';
+
 // don't let users crawl up the folder structure by using a/../../../c/d
 function cleanUrl(url) {
     url = decodeURIComponent(url);
