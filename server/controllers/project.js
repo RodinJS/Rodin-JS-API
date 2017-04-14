@@ -183,7 +183,7 @@ function create(req, res, next) {
 							if (req.body.githubUrl) { // RO-243 #create project from git repo
 								git.clone(req.user.username, help.cleanUrl(req.body.githubUrl), rootDir)
 									.catch(e => {
-										const err = new APIError('GitHub project does not exists!', httpStatus.REPO_DOES_NOT_EXIST, true);
+										const err = new APIError('GitHub project does not exist!', httpStatus.REPO_DOES_NOT_EXIST, true);
 										return next(err);
 									});
 							}
@@ -234,7 +234,7 @@ function create(req, res, next) {
 						project.githubUrl = help.cleanUrl(req.body.githubUrl);
 						saveProject(project, req, res, next);
 					} else {
-						const err = new APIError('GitHub project does not exists!', httpStatus.REPO_DOES_NOT_EXIST, true);
+						const err = new APIError('GitHub project does not exist!', httpStatus.REPO_DOES_NOT_EXIST, true);
 						return next(err);
 					}
 				});
