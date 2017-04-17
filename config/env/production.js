@@ -3,6 +3,7 @@ export default {
   jwtSecret: '4DNSrMPuQ3Y3McBu96wd2GzGheDXuft8gDqLEQVWHnXQfcaGFtM2ZBgyNYzPN7CK',
   db: 'mongodb://localhost/rodin-js-api-production',
   clientURL: 'https://rodin.io',
+  editorURL: 'https://editor.rodin.io',
   port: 3000,
   socketPort: 4000,
   socketURL: 'https://ss.rodin.space',
