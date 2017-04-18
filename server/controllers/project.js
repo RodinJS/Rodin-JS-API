@@ -241,7 +241,7 @@ function create(req, res, next) {
 			} else {
 				saveProject(project, req, res, next);
 			}
-			
+
 		})
 		.catch(e => {
 			const err = new APIError("Bad request Catch 2", httpStatus.BAD_REQUEST, true);
@@ -596,7 +596,7 @@ function getPublishedProjects(req, res, next) {
   const limit = parseInt(req.query.limit) || 10;
 
 
-  Project.list({skip: skip, limit: limit}, false, false, true)
+  Project.list({skip: skip, limit: limit}, false, false, true, true)
     .then(publishedProject => {
       return res.status(200).json({
         success: true, data: _.map(publishedProject, (project) => {
