@@ -429,7 +429,6 @@ function unsyncSocial(req, res, next) {
 }
 
 
-
 function updatePassword(req, res, next) {
   User.get(req.user.username)
     .then((user) => {
@@ -645,6 +644,64 @@ function subscribe(req, res, next) {
 
 }
 
+
+/**
+ * METAVERSE subscription
+ * @param req
+ * @param res
+ * @param next
+ */
+function metaverse(req, res, next){
+  if (_.isUndefined(req.body.email)) {
+    const err = new APIError('Please provide email', 400, true);
+    return next(err);
+  }
+  if (_.isUndefined(req.body.first_name)) {
+    const err = new APIError('Please provide name', 400, true);
+    return next(err);
+  }
+  if (_.isUndefined(req.body.price)) {
+    const err = new APIError('Please provide price', 400, true);
+    return next(err);
+  }
+
+  req.body.metaverse = "true";
+
+  const setSubscriber = sg.emptyRequest({
+    method: 'POST',
+    path: '/v3/contactdb/recipients',
+    body: [req.body],
+  });
+
+
+  sg.API(setSubscriber)
+    .then(response => {
+      if (response.body.error_count > 0) {
+        const err = new APIError('Something went wrong!', 400, true);
+        return next(err);
+      }
+      req.mailSettings = {
+        to: req.body.email,
+        from: 'team@rodin.io',
+        fromName: 'Rodin team',
+        templateName: 'rodin_metaverse',
+        subject: 'Stake claimed',
+        handleBars: [{
+          name: 'userName',
+          content: req.body.first_name,
+        }]
+      };
+      mandrill.sendMail(req, res, () => {
+
+      });
+      return res.status(200).json({success:true, data:'Stake claimed'});
+    })
+    .catch(e=>{
+      const err = new APIError('Something went wrong!', 400, true);
+      return next(err);
+    })
+}
+
 function _unsetUserData(req, res, next){
   User.updateAsync({username: req.user.username}, req.field)
     .then(() => res.json({
@@ -671,4 +728,5 @@ export default {
   finalize,
   unsyncSocial,
   subscribe,
+  metaverse
 };
