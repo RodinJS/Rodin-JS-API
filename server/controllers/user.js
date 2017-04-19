@@ -660,10 +660,6 @@ function metaverse(req, res, next){
     const err = new APIError('Please provide name', 400, true);
     return next(err);
   }
-  if (_.isUndefined(req.body.price)) {
-    const err = new APIError('Please provide price', 400, true);
-    return next(err);
-  }
 
   req.body.metaverse = "true";
 
@@ -685,7 +681,7 @@ function metaverse(req, res, next){
         from: 'team@rodin.io',
         fromName: 'Rodin team',
         templateName: 'rodin_metaverse',
-        subject: 'Stake claimed',
+        subject: 'Rodin Metaverse',
         handleBars: [{
           name: 'userName',
           content: req.body.first_name,
