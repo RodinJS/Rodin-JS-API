@@ -269,7 +269,10 @@ router.route('/ours')
  */
   .post(check.ifTokenValid, gitCtrl.ours);
 
+
+router.route('/syncProject/:projectId')
+  .post(check.ifTokenValid, gitCtrl.syncProject);
 router.route('/syncProjects')
-  .post(check.ifTokenValid, gitCtrl.syncProjects)
+  .post(check.ifTokenValid, gitCtrl.syncProjects);
 
 export default router;
