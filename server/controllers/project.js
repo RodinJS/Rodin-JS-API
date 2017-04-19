@@ -257,6 +257,7 @@ function create(req, res, next) {
  */
 function update(req, res, next) {
   req.body.updatedAt = new Date();
+  req.body.state = 'pending';
   Project.findOneAndUpdate({_id: req.params.id, owner: req.user.username}, {$set: req.body}, {new: true})
     .then(project => res.status(200).json({ "success": true,  "data": project} ))
     .catch(e => _onError(next, {error:'Can\'t update info', code:httpStatus.BAD_REQUEST}));
@@ -351,7 +352,7 @@ function makePublic(req, res, next) {
   const id = req.params.id;
   const username = req.user.username;
   const status = req.body.status;
-  Project.updateAsync({_id: id}, {$set: {"public": status}})
+  Project.updateAsync({_id: id}, {$set: {"public": status, state : 'pending'}})
     .then(updatedProject => {
       if (updatedProject.nModified === 1) {
         if (status === 'true') {
@@ -405,8 +406,9 @@ function publishProject(req, res, next) {
       Project.findOneAndUpdate({_id: req.params.id, owner: req.user.username}, {
         $set: {
           publishDate: new Date(),
-          publishedPublic: publishedPublic
-        }
+          publishedPublic: publishedPublic,
+          state : 'pending',
+    }
       }, {new: true})
         .then(project => {
           if (project) {

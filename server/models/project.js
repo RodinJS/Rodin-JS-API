@@ -102,7 +102,7 @@ const ProjectSchema = new mongoose.Schema({
     },
     githubUrl: {
         type: String,
-    },    
+    },
     domain: {
         type: String,
     },
@@ -123,6 +123,10 @@ const ProjectSchema = new mongoose.Schema({
     publishedPublic: {
         type: Boolean,
     },
+    state:{
+      type:String,
+      default:"pending"
+    }
 });
 
 /**
@@ -240,12 +244,15 @@ ProjectSchema.statics = {
         }
 
         if(approved){
-          if(query.$and)
-            query.$and.push({approved:true});
-          else
-            query.$and = [{approved:true}];
+          if(query.$and){
+            query.$and.push({state:'approved'});
+          }
+          else {
+            query.$and = [
+              {state:'approved'}
+            ]
+          }
         }
-
 
         return this.find(query)
           .sort({ createdAt: -1 })

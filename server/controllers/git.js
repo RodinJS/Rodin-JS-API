@@ -380,7 +380,6 @@ function syncProject(req, res, next) {
       return Project.findById(projectID)
     })
     .then(project => {
-      console.log(project);
       project = project.toObject();
       project.projectRoot = config.stuff_path + 'projects/' + username + '/' + help.cleanUrl(project.root) + '/';
       if (fs.existsSync(`${project.projectRoot}.git/`)) {
@@ -406,12 +405,17 @@ function syncProject(req, res, next) {
       return Project.findOneAndUpdateAsync(query, options, {new: true});
     })
     .then(project=>{
+      console.log('project', project);
       project = project.toObject();
       return git._createBranch(username, project, 'rodin_editor', gitToken)
     })
     .then(branchResponse=>{
       if (!branchResponse || branchResponse.status == 400) return res.status(400).json({success:false, data:`Can't sync project`});
       return res.status(200).json({success:true, data:'Project successfully synced'});
+    })
+    .catch(err=>{
+      console.log('Cant sync project', err);
+      res.status(400).json({success:false, data:`Can't sync project`})
     })
 }
 

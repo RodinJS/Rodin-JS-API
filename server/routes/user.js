@@ -315,6 +315,9 @@ router.route('/confirmUsername')
 router.route('/subscribe')
   .post(userCtrl.subscribe);
 
+router.route('/metaverse')
+  .post(userCtrl.metaverse);
+
 
 /** Load user when API with username route parameter is hit */
 // router.param('username', userCtrl.load);
