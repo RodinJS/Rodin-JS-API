@@ -42,9 +42,6 @@ function send(req) {
         return resolve(err);
       }
       return resolve(response.statusCode);
-    /*  console.log(response.statusCode);
-      console.log(response.body);
-      console.log(response.headers);*/
     });
   });
 }
