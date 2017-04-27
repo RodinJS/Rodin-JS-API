@@ -13,6 +13,7 @@ import config from '../../config/env';
 import fsExtra from 'fs-extra';
 import utils from '../helpers/common';
 import mandrill from '../helpers/mandrill';
+import RDSendgrid from '../helpers/sendgrid';
 import userCapacity from '../helpers/directorySize';
 import transpiler from '../helpers/transpiler';
 import git from '../helpers/github';
@@ -427,9 +428,7 @@ function publishProject(req, res, next) {
                 content: `${config.clientURL}/${req.user.username}/${req.project.name}`
               }]
             };
-            mandrill.sendMail(req, res, (response) => {
-              //console.log(response);
-            });
+            RDSendgrid.send(req);
             return res.status(200).json({success: true, data: project})
 
           }
