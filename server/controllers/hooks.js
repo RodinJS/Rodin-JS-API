@@ -7,6 +7,7 @@ import httpStatus from '../helpers/httpStatus';
 import APIError from '../helpers/APIError';
 import User from '../models/user';
 import mandrill from '../helpers/mandrill';
+import RDSendgrid from '../helpers/sendgrid';
 import Utils from '../helpers/common';
 import notifications from '../controllers/notifications';
 import request from 'request-promise';
@@ -87,32 +88,31 @@ function build(req, res, next) {
                 data: `${project.name} ${req.params.device} build complete`,
             };
 
-            mandrill.sendMail(req, res, () => {
-
+            RDSendgrid.send(req)
+              .then(mailSent=>{
                 const options = {
-                    method: 'POST',
-                    uri: `${config.socketURL}/ss/hooks`,
-                    body: {
-                        username: req.user.username,
-                        label: req.notification.error ? req.notification.error.message : req.notification.data,
-                        project: _.pick(req.project, ['_id', 'name']),
-                        error: req.notification.error || false,
-                        event: 'projectBuild',
-                    },
-                    json: true, // Automatically stringifies the body to JSON
+                  method: 'POST',
+                  uri: `${config.socketURL}/ss/hooks`,
+                  body: {
+                    username: req.user.username,
+                    label: req.notification.error ? req.notification.error.message : req.notification.data,
+                    project: _.pick(req.project, ['_id', 'name']),
+                    error: req.notification.error || false,
+                    event: 'projectBuild',
+                  },
+                  json: true, // Automatically stringifies the body to JSON
                 };
 
                 request(options)
                   .then((response) => {
                     console.log(response);
-                })
+                  })
                   .catch((err)  => {
                     console.log(err);
-                });
+                  });
                 notifications.create(req, false, false);
                 return res.status(200).json(req.notification);
-
-            });
+              })
         }).error((e) => {
             const err = new APIError('Something happen', httpStatus.BAD_REQUEST, true);
             return next(err);
