@@ -35,8 +35,20 @@ function getMyModules(req, res, next) {
 
     ModulesSubscribe.getByOwner(req.user.username)
       .then(subscribedModules => {
+
         subscribedModules = subscribedModules.map(m => m.toObject());
-        const subscribedModulesIds = subscribedModules.map(m => _.pick(m, ['moduleId']).moduleId);
+
+        const validModules = _.filter(subscribedModules, (module)=>  (new Date() < new Date(module.expiredAt)));
+        const expiredModules = _.filter(subscribedModules, (module) => (new Date() > new Date(module.expiredAt)));
+        const subscribedModulesIds = validModules.map(m => _.pick(m, ['moduleId']).moduleId);
+
+
+        //If there is expired modules delete it
+        if(expiredModules.length > 0){
+            _.each(expiredModules, (module)=>{
+                ModulesSubscribe.delete(module._id);
+            })
+        }
 
         Modules.find({ _id: { $in: subscribedModulesIds } })
           .then(modules => {
@@ -59,13 +71,13 @@ function getMyModules(req, res, next) {
                             };
                             return override;
                         });
-                        let moduleInfo = _.find(subscribedModules, (subscribedModule) => subscribedModule.moduleId.toString() === module._id.toString());
-                        module.unsubscribed = moduleInfo.unsubscribed;
-                        module.expiredAt = moduleInfo.expiredAt;
                     }
-
+                    let moduleInfo = _.find(validModules, (subscribedModule) => subscribedModule.moduleId.toString() === module._id.toString());
+                    module.unsubscribed = moduleInfo.unsubscribed;
+                    module.expiredAt = moduleInfo.expiredAt;
                     return module;
                 });
+
 
                 return onSuccess(mappedModules, res);
             })
