@@ -405,7 +405,7 @@ function _fileOnSuccess(req, res, message) {
       name: req.project.name,
     },
     {
-      $set: {updatedAt: new Date()},
+      $set: {updatedAt: new Date(), state : 'pending'},
     });
   res.status(200).json(message);
 }

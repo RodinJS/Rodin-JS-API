@@ -7,6 +7,7 @@ import httpStatus from '../helpers/httpStatus';
 import APIError from '../helpers/APIError';
 import Utils from '../helpers/common';
 import mandrill from '../helpers/mandrill';
+import RDSendgrid from '../helpers/sendgrid';
 import fs from 'fs';
 import _    from 'lodash';
 import utils from '../helpers/common';
@@ -246,9 +247,8 @@ function socialAuth(req, res, next) {
               expiresIn: "7d"
             });
 
-            mandrill.sendMail(req, res, () => {
-              return next();
-            });
+            RDSendgrid.send(req)
+            return next();
 
           })
           .error((e) => {

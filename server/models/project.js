@@ -102,7 +102,7 @@ const ProjectSchema = new mongoose.Schema({
     },
     githubUrl: {
         type: String,
-    },    
+    },
     domain: {
         type: String,
     },
@@ -123,6 +123,10 @@ const ProjectSchema = new mongoose.Schema({
     publishedPublic: {
         type: Boolean,
     },
+    state:{
+      type:String,
+      default:"pending"
+    }
 });
 
 /**
@@ -210,7 +214,7 @@ ProjectSchema.statics = {
      * @param {number} limit - Limit number of projects to be returned.
      * @returns {Promise<Project[]>}
      */
-    list({ skip = 0, limit = 50 } = {}, owner, _queryString = null, published) {
+    list({ skip = 0, limit = 50 } = {}, owner, _queryString = null, published, approved) {
         const query = {};
         if (owner) {
             query.owner = owner;
@@ -237,6 +241,17 @@ ProjectSchema.statics = {
               { publishDate: { $exists: true } },
               { publishedPublic: { $eq: true } },
             ];
+        }
+
+        if(approved){
+          if(query.$and){
+            query.$and.push({state:'approved'});
+          }
+          else {
+            query.$and = [
+              {state:'approved'}
+            ]
+          }
         }
 
         return this.find(query)

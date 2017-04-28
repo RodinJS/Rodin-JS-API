@@ -17,11 +17,13 @@ import config from '../../config/env';
 function create(req, res, next) {
     const label = req.notification.error ? req.notification.error.message : _.isObject(req.notification.data) ? req.notification.data.message : req.notification.data;
     const project = req.project ? _.pick(req.project, ['_id', 'name']) : undefined;
-    const notification = new Notifications({
+
+  console.log('NOTIFICATION DATA', req.notification);
+  const notification = new Notifications({
         username: req.user.username,
         label: label,
         project: project,
-        error: req.notification.error || _.isObject(req.notification.data) ? req.notification.data.error : false,
+        error: req.notification.error ? req.notification.error  :  _.isObject(req.notification.data) ? req.notification.data.error : false,
     });
 
     notification.save(err => {
