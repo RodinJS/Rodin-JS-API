@@ -52,7 +52,7 @@
     "express-sanitize-escape": "^1.1.0",
     "express-validation": "1.0.0",
     "express-winston": "^1.2.0",
-    "extract-zip": "^1.6.0",
+    "extract-zip": "^1.6.5",
     "fs-extra": "^0.30.0",
     "github": "^7.0.0",
     "goo.gl": "^0.1.4",
