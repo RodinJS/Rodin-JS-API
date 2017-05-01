@@ -43,7 +43,6 @@ function load(req, res, next, username) {
   });
 }
 
-
 /**
  * Get user
  * @returns {User}
@@ -216,6 +215,10 @@ function resetPassword(req, res, next) {
 
   });
 
+}
+
+function checkResetPasswordUsed(req, res, ext){
+  res.status(200).json({success:true, data:{tokenUsed:_.indexOf(JWTBlackList, req.query.token) > -1 ? true : false}});
 }
 
 function changePassword(req, res, next) {
@@ -429,7 +432,6 @@ function unsyncSocial(req, res, next) {
   }
   return _unsetUserData(req, res, next);
 }
-
 
 function updatePassword(req, res, next) {
   User.get(req.user.username)
@@ -719,6 +721,7 @@ export default {
   confirmUsername,
   resetPassword,
   changePassword,
+  checkResetPasswordUsed,
   finalize,
   unsyncSocial,
   subscribe,

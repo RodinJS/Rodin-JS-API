@@ -17,6 +17,7 @@ router.route('/password')
   .put(check.ifTokenValid, validate(paramValidation.updatePassword), userCtrl.updatePassword, userCtrl.finalize);
 
 router.route('/resetPassword')
+  .get(userCtrl.checkResetPasswordUsed)
   .post(userCtrl.resetPassword)
   .put(userCtrl.changePassword, validate(paramValidation.updatePassword), userCtrl.updatePassword, projectCtrl.getProjectsCount, authCtrl.finalizeUser);
 
