@@ -10,6 +10,7 @@ import fsExtra from 'fs-extra';
 import utils from '../helpers/common';
 import _ from 'lodash';
 import mandrill from '../helpers/mandrill';
+import RDSendgrid from '../helpers/sendgrid';
 import notifications from './notifications';
 import config from '../../config/env';
 import sendgrid from 'sendgrid';
@@ -202,14 +203,16 @@ function resetPassword(req, res, next) {
           content: `${config.clientURL}/reset-password?t=${resetToken}`,
         },],
     };
-    mandrill.sendMail(req, res, () => {
-      let responseMessage = 'Mail sent';
 
-      if (req.body.test && req.body.test === 'giveMeAToken')
-        responseMessage = resetToken;
+    RDSendgrid.send(req)
+      .then(response=>{
+        let responseMessage = 'Mail sent';
 
-      res.status(200).json({success: true, data: responseMessage});
-    });
+        if (req.body.test && req.body.test === 'giveMeAToken')
+          responseMessage = resetToken;
+
+        res.status(200).json({success: true, data: responseMessage});
+      });
 
   });
 
@@ -335,28 +338,27 @@ function create(req, res, next) {
               content: savedUser.username,
             }],
           };
-
-          mandrill.sendMail(req, res, () => {
-            return res.json({
-              success: true,
-              data: {
-                token,
-                user: {
-                  email: savedUser.email,
-                  username: savedUser.username,
-                  role: savedUser.role,
-                  profile: savedUser.profile,
-                  projects: {
-                    unpublished: 0,
-                    published: 0,
-                    total: 0,
+          RDSendgrid.send(req)
+            .then(response=>{
+              return res.json({
+                success: true,
+                data: {
+                  token,
+                  user: {
+                    email: savedUser.email,
+                    username: savedUser.username,
+                    role: savedUser.role,
+                    profile: savedUser.profile,
+                    projects: {
+                      unpublished: 0,
+                      published: 0,
+                      total: 0,
+                    },
+                    usedStorage: 0,
                   },
-                  usedStorage: 0,
                 },
-              },
+              });
             });
-
-          });
         })
         .error((e) => {
           const err = new APIError('Username or Email already exists.', httpStatus.SOMETHING_WENT_WRONG, true);
@@ -378,7 +380,11 @@ function update(req, res, next) {
       success: true,
       data: {},
     }))
-    .error((e) => next(e));
+    .error((e) => {
+      const message = e.code === 11000 ? 'Email already exists.' : httpStatus[400] + ' Catch 1';
+      const err = new APIError(message, httpStatus.SOMETHING_WENT_WRONG, true);
+      return next(err);
+    });
 }
 
 function unsyncSocial(req, res, next) {
@@ -619,9 +625,7 @@ function subscribe(req, res, next) {
             templateName: 'rodin_subsribe',
             subject: 'Welcome to Rodin',
           };
-          mandrill.sendMail(req, res, () => {
-
-          });
+          RDSendgrid.send(req);
 
           return res.status(200).json({
             success: true,
@@ -687,9 +691,7 @@ function metaverse(req, res, next){
           content: req.body.first_name,
         }]
       };
-      mandrill.sendMail(req, res, () => {
-
-      });
+      RDSendgrid.send(req)
       return res.status(200).json({success:true, data:'Stake claimed'});
     })
     .catch(e=>{
@@ -724,5 +726,5 @@ export default {
   finalize,
   unsyncSocial,
   subscribe,
-  metaverse
+  metaverse,
 };

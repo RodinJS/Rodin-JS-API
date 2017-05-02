@@ -13,6 +13,7 @@ import config from '../../config/env';
 import fsExtra from 'fs-extra';
 import utils from '../helpers/common';
 import mandrill from '../helpers/mandrill';
+import RDSendgrid from '../helpers/sendgrid';
 import userCapacity from '../helpers/directorySize';
 import transpiler from '../helpers/transpiler';
 import git from '../helpers/github';
@@ -427,9 +428,7 @@ function publishProject(req, res, next) {
                 content: `${config.clientURL}/${req.user.username}/${req.project.name}`
               }]
             };
-            mandrill.sendMail(req, res, (response) => {
-              //console.log(response);
-            });
+            RDSendgrid.send(req);
             return res.status(200).json({success: true, data: project})
 
           }
@@ -534,7 +533,10 @@ function rePublishProject(req, res, next) {
         const err = new APIError('Publishing error', httpStatus.BAD_REQUEST, true);
         return next(err);
       }
-      res.status(200).json({success: true, data: {}});
+      Project.findOneAndUpdate({_id: req.params.id, owner: req.user.username}, {$set: {state : 'pending'}}, {new: true})
+        .then(project=> res.status(200).json({success: true, data: {}}))
+        .catch(err=> res.status(400).json({success:false, data:`Can't update project`}))
+      ;
     });
 
 
