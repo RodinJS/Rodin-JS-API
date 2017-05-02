@@ -64,7 +64,6 @@ modules.statics = {
     },
 
     delete(code) {
-
     },
 
     list({ skip = 0, limit = 50 } = {},  _queryString = null) {
