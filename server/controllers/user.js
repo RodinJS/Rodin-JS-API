@@ -380,7 +380,11 @@ function update(req, res, next) {
       success: true,
       data: {},
     }))
-    .error((e) => next(e));
+    .error((e) => {
+      const message = e.code === 11000 ? 'Email already exists.' : httpStatus[400] + ' Catch 1';
+      const err = new APIError(message, httpStatus.SOMETHING_WENT_WRONG, true);
+      return next(err);
+    });
 }
 
 function unsyncSocial(req, res, next) {
