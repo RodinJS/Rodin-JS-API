@@ -622,7 +622,7 @@ function subscribe(req, res, next) {
 
           req.mailSettings = {
             to: req.body.email,
-            from: 'taron@rodin.io',
+            from: 'noreply@rodin.io',
             fromName: 'Rodin team',
             templateName: 'rodin_subsribe',
             subject: 'Welcome to Rodin',

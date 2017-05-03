@@ -324,7 +324,6 @@ function uploadFiles(req, res, next) {
 
     }
 
-
     if (action === 'replace') {
       return File.upload(req, folderPath)
         .then(uploaded => _fileOnSuccess(req, res, {success: true, data: 'Files successfuly uploaded!'}))
