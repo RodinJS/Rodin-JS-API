@@ -30,7 +30,8 @@ const build = (req, res, next) => {
             'icon-h': fs.createReadStream(req.files['icon-h'][0].path),
         },
     }, (err, httpResponse, body) => {
-        if (err || httpResponse.statusCode !== 200) {
+      console.log('ANDROID', err, body);
+      if (err || httpResponse.statusCode !== 200) {
             return next(new APIError('something went wrong, try again later', httpStatus.BAD_REQUEST, true));
         }
 
