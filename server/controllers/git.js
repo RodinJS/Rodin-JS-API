@@ -22,7 +22,7 @@ const APIURLS = {
 };
 
 function getToken(req, res, next) {
-
+  console.log('QUERY', req.query);
   const options = {
     uri: APIURLS.AUTH,
     qs: {
@@ -91,6 +91,13 @@ function successAuth(req, res, next) {
 }
 
 function successSync(req, res, next) {
+  if(req.query.projectId){
+    return Project.findById(req.query.projectId)
+      .then(project=>{
+        project = project.toObject();
+        res.redirect(`${config.editorURL}/${project.owner}/${project.root}?token=${req.gitAccessToken}&id=${req.body.id}&socialEmail=${req.body.socialEmail}`);
+      })
+  }
   res.redirect(`${config.clientURL}/profile?token=${req.gitAccessToken}&id=${req.body.id}&socialEmail=${req.body.socialEmail}`);
   //res.redirect(`http://localhost:8000/#/profile?token=${req.gitAccessToken}&id=${req.body.id}`);
 }
@@ -116,11 +123,11 @@ function create(req, res, next) {
             console.log('git commit error: ', err);
             shell.exec(`git remote add origin  ${repo_url}`, projectRoot, (err) => {
               console.log('git remote add error: ', err);
-              if(err) {
+              if (err) {
                 console.log('git remote add error: ', err)
                 return next(err);
               } else {
-                shell.exec( `git push -u origin master`, projectRoot, (err) => {
+                shell.exec(`git push -u origin master`, projectRoot, (err) => {
                   console.log('git push error: ', err);
                   if (err) {
                     const err = {
@@ -150,27 +157,27 @@ function create(req, res, next) {
                     {
                       new: true,
                     }).then(projData => {
-                      let repo_info = result;
-                      git.createBranch(req.user.username, help.cleanUrl(req.body.id), projectRoot, 'rodin_editor')
-                        .then(result => {
-                          return res.status(200).json({
-                            success: true,
-                            data: {
-                              name: repo_info.data.name,
-                              private: repo_info.data.private,
-                              git_url: repo_info.data.git_url,
-                              clone_url: repo_info.data.clone_url,
-                              location: repo_info.data.meta.location,
-                              status: repo_info.data.meta.status,
-                              branch: result,
-                            },
-                          });
-                        })
-                        .catch(e => {
-                          const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
-                          return next(e);
+                    let repo_info = result;
+                    git.createBranch(req.user.username, help.cleanUrl(req.body.id), projectRoot, 'rodin_editor')
+                      .then(result => {
+                        return res.status(200).json({
+                          success: true,
+                          data: {
+                            name: repo_info.data.name,
+                            private: repo_info.data.private,
+                            git_url: repo_info.data.git_url,
+                            clone_url: repo_info.data.clone_url,
+                            location: repo_info.data.meta.location,
+                            status: repo_info.data.meta.status,
+                            branch: result,
+                          },
                         });
-                    })
+                      })
+                      .catch(e => {
+                        const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+                        return next(e);
+                      });
+                  })
                     .catch(e => {
                       const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
                       return next(e);
@@ -363,6 +370,55 @@ function syncProjects(req, res, next) {
     })
 }
 
+function syncProject(req, res, next) {
+  const username = req.user.username;
+  const projectID = req.params.projectId;
+  let gitToken = '';
+  _getUserSyncedToken(username)
+    .then(token => {
+      gitToken = token;
+      return Project.findById(projectID)
+    })
+    .then(project => {
+      project = project.toObject();
+      project.projectRoot = config.stuff_path + 'projects/' + username + '/' + help.cleanUrl(project.root) + '/';
+      if (fs.existsSync(`${project.projectRoot}.git/`)) {
+        utils.deleteFolderRecursive(`${project.projectRoot}.git/`)
+      }
+      return git._createRepo(project.name, gitToken, project)
+    })
+    .then(repoCreated => _pushPorject(repoCreated))
+    .then(project => {
+      if (project.status == 400) return null;
+      const query = {
+        _id: project.data.project._id,
+        owner: username
+      };
+      const options = {
+        $set: {
+          github: {
+            git: project.data.gitUrl,
+            https: project.data.cloneUrl,
+          },
+        }
+      };
+      return Project.findOneAndUpdateAsync(query, options, {new: true});
+    })
+    .then(project=>{
+      console.log('project', project);
+      project = project.toObject();
+      return git._createBranch(username, project, 'rodin_editor', gitToken)
+    })
+    .then(branchResponse=>{
+      if (!branchResponse || branchResponse.status == 400) return res.status(400).json({success:false, data:`Can't sync project`});
+      return res.status(200).json({success:true, data:'Project successfully synced'});
+    })
+    .catch(err=>{
+      console.log('Cant sync project', err);
+      res.status(400).json({success:false, data:`Can't sync project`})
+    })
+}
+
 function _getUserSyncedToken(userName) {
   return new Promise((resolve, reject) => {
     User.get(userName)
@@ -406,4 +462,4 @@ function _pushPorject(repoData) {
 
 }
 
-export default {getToken, getUser, successAuth, successSync, create, theirs, ours, branch, syncProjects};
+export default {getToken, getUser, successAuth, successSync, create, theirs, ours, branch, syncProjects, syncProject};
