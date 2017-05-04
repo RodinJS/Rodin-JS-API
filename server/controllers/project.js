@@ -36,11 +36,18 @@ const getStatus = (project, device, cb) => {
       console.log('STATUS: err', err);
       console.log('STATUS: body', body);
 
-      if (err) return reject({error: httpStatus[363], code: 363});
       const buildResponse = JSON.parse(body);
 
 
-      if (buildResponse.error) return reject({error: buildResponse.error.message, code: 364});
+      if (err || buildResponse.error) {
+        project = project.toObject();
+        project.fields = {
+          error:{
+            messge:buildResponse.error.message || 'something happens'
+          }
+        };
+        return resolve(project);
+      }
 
       project.build[device].built = buildResponse.data.buildStatus;
       const projectDuplicate = _.clone(project.toObject());
