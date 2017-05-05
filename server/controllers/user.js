@@ -384,7 +384,7 @@ function update(req, res, next) {
       data: {},
     }))
     .error((e) => {
-      const message = e.code === 11000 ? 'Email already exists.' : httpStatus[400] + ' Catch 1';
+      const message = e.code === 11000 ? 'Email already in use.' : httpStatus[400] + ' Catch 1';
       const err = new APIError(message, httpStatus.SOMETHING_WENT_WRONG, true);
       return next(err);
     });
