@@ -17,7 +17,7 @@ import extract from 'extract-zip';
  */
 function create(req, filePath) {
   return new Promise((resolve, reject) => {
-    if (fs.existsSync(filePath)) return reject({error: 'folder already exist!', code: httpStatus.FILE_DOES_NOT_EXIST});
+    if (fs.existsSync(filePath)) return reject({error: 'Folder already exists!', code: httpStatus.FILE_ALREDY_EXIST});
     fsExtra.ensureDir(filePath, (err) => {
       if (err) reject({error: `Can't create folder!`, code: httpStatus.COULD_NOT_CREATE_FILE});
       resolve(true);
@@ -37,7 +37,7 @@ function copy(req, srcPath, filePath, rootPath) {
     const source = srcPath.split('/');
     const dest = filePath.split('/');
     if (!fs.existsSync(srcPath)) return reject({error: 'Folder does not exist!', code: httpStatus.PATH_DOES_NOT_EXIST});
-    if (fs.existsSync(filePath)) return reject({error: 'Folder already exist!', code: httpStatus.FILE_ALREDY_EXIST});
+    if (fs.existsSync(filePath)) return reject({error: 'Folder already exists!', code: httpStatus.FILE_ALREDY_EXIST});
     if (fs.existsSync(`${rootPath}/tmp`)) utils.deleteFolderRecursive(`${rootPath}/tmp`);
     fsExtra.copy(srcPath, `${rootPath}/tmp/${_.last(dest)}`, (err) => {
       if (err) return reject({error: 'Folder copy error!', code: httpStatus.BAD_REQUEST});
