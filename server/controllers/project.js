@@ -353,7 +353,7 @@ function makePublic(req, res, next) {
   const id = req.params.id;
   const username = req.user.username;
   const status = req.body.status;
-  Project.updateAsync({_id: id}, {$set: {"public": status, state : 'pending'}})
+  Project.updateAsync({_id: id}, {$set: {"public": status}})
     .then(updatedProject => {
       if (updatedProject.nModified === 1) {
         if (status === 'true') {
