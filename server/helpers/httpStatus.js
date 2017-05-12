@@ -88,6 +88,11 @@ const httpStatus = {
     360: 'NO_DOMAIN_NAME',
     361: 'COULD_NOT_CREATE_TEMPLATE',
     362: 'ERROR_IN_CONFIG_FILE',
+
+    363: 'Build server unavialable',
+    364: 'Buld failed',
+
+
     601: 'UNKNOWN_SOCKET_CHANNEL',
     602: 'UNKNOWN_SOCKET_ROOM',
     603: 'PERMISSION_SOCKET_DENIED',
