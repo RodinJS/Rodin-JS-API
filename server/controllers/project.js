@@ -357,7 +357,7 @@ function makePublic(req, res, next) {
   const id = req.params.id;
   const username = req.user.username;
   const status = req.body.status;
-  Project.updateAsync({_id: id}, {$set: {"public": status, state: 'pending'}})
+  Project.updateAsync({_id: id}, {$set: {"public": status}})
     .then(updatedProject => {
       if (updatedProject.nModified === 1) {
         if (status === 'true') {
@@ -537,7 +537,10 @@ function rePublishProject(req, res, next) {
         const err = new APIError('Publishing error', httpStatus.BAD_REQUEST, true);
         return next(err);
       }
-      res.status(200).json({success: true, data: {}});
+      Project.findOneAndUpdate({_id: req.params.id, owner: req.user.username}, {$set: {state : 'pending'}}, {new: true})
+        .then(project=> res.status(200).json({success: true, data: {}}))
+        .catch(err=> res.status(400).json({success:false, data:`Can't update project`}))
+      ;
     });
 
 

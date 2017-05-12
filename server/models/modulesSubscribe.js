@@ -86,7 +86,14 @@ subscribedModules.statics = {
         });
     },
 
-    delete(code) {},
+    delete(moduleId) {
+      this.findByIdAndRemove(moduleId)
+        .then(removedModule => removedModule)
+        .catch((e)=>{
+          const err = new APIError('User dont have subscribed modules!', httpStatus.NOT_FOUND, true);
+          return Promise.reject(err);
+        })
+    },
 
 };
 

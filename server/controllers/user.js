@@ -9,16 +9,14 @@ import fs from 'fs';
 import fsExtra from 'fs-extra';
 import utils from '../helpers/common';
 import _ from 'lodash';
-import mandrill from '../helpers/mandrill';
 import RDSendgrid from '../helpers/sendgrid';
 import notifications from './notifications';
 import config from '../../config/env';
 import sendgrid from 'sendgrid';
 import Q from 'q';
 import help from '../helpers/editor';
-const sendGridHelper = sendgrid.helper;
+import moment from 'moment';
 const sg = sendgrid('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');
-const JWTBlackList = [];
 
 /**
  * Load user and append to req.
@@ -42,7 +40,6 @@ function load(req, res, next, username) {
     }
   });
 }
-
 
 /**
  * Get user
@@ -165,57 +162,90 @@ function resetPassword(req, res, next) {
     return res.status(httpStatus.BAD_REQUEST).json(err);
   }
 
-  const query = {$or: [{username: new RegExp('^' + req.body.resetData.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&') + '$', 'i')}, {email: req.body.resetData.toLowerCase()}]};
+  const query = {
+    $or: [
+      {username: new RegExp('^' + req.body.resetData.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&') + '$', 'i')},
+      {email: req.body.resetData.toLowerCase()}
+    ]
+  };
 
-  User.findOne(query, (err, user) => {
-    if (err) {
+
+  User.findOne(query)
+    .then(user => {
+      if (!user) {
+        const err = new APIError('User not exist!', httpStatus.BAD_REQUEST, true);
+        return next(err);
+      }
+
+      const email = user.email;
+      const resetToken = utils.generateCode(15);
+
+      user.resetPasswordToken = resetToken;
+      user.resetPasswordExpires = moment().add(1, 'days');
+
+      user.save()
+        .then(userSaved => {
+
+          req.mailSettings = {
+            to: email,
+            from: 'team@rodin.io',
+            fromName: 'Rodin team',
+            templateName: 'rodin_forget',
+            subject: 'Password reset request',
+            handleBars: [{
+              name: 'userName',
+              content: user.profile.firstName || user.username,
+            },
+              {
+                name: 'resetLink',
+                content: `${config.clientURL}/reset-password?t=${resetToken}`,
+              }]
+          };
+
+          RDSendgrid.send(req)
+            .then(response => {
+              let responseMessage = 'Mail sent';
+
+              if (req.body.test && req.body.test === 'giveMeAToken')
+                responseMessage = resetToken;
+
+              res.status(200).json({success: true, data: responseMessage});
+            });
+        })
+        .catch(e => {
+          const err = new APIError(`Can't update data`, httpStatus.BAD_REQUEST, true);
+          return next(err);
+        })
+    })
+    .catch(e => {
       const err = new APIError('Something wrong!', httpStatus.BAD_REQUEST, true);
       return next(err);
-    }
-
-    if (!user) {
-      const err = new APIError('User not exist!', httpStatus.BAD_REQUEST, true);
-      return next(err);
-    }
-
-    const email = user.email;
-
-    const resetToken = jwt.sign({ //jwt.verify
-      username: user.username,
-      email: user.email,
-      random: user.password.slice(-15),
-    }, config.jwtSecret, {
-      expiresIn: '1d',
     });
 
-    req.mailSettings = {
-      to: email,
-      from: 'team@rodin.io',
-      fromName: 'Rodin team',
-      templateName: 'rodin_forget',
-      subject: 'Password reset request',
-      handleBars: [{
-        name: 'userName',
-        content: user.profile.firstName || user.username,
-      },
-        {
-          name: 'resetLink',
-          content: `${config.clientURL}/reset-password?t=${resetToken}`,
-        },],
-    };
+}
 
-    RDSendgrid.send(req)
-      .then(response=>{
-        let responseMessage = 'Mail sent';
+function checkResetPasswordUsed(req, res, ext) {
+  User.findOne({resetPasswordToken: req.query.token})
+    .then(user => {
+      const expired = (user && user.resetPasswordExpires) ? moment(new Date()).isAfter(user.resetPasswordExpires) : true;
 
-        if (req.body.test && req.body.test === 'giveMeAToken')
-          responseMessage = resetToken;
+      if ((user && user.resetPasswordExpires) && expired) {
+        user.resetPasswordExpires = null;
+        user.resetPasswordToken = null;
+        user.save();
+      }
 
-        res.status(200).json({success: true, data: responseMessage});
-      });
-
-  });
-
+      res.status(200).json({
+        success: true,
+        data: {tokenUsed: expired}
+      })
+    })
+    .catch(err => {
+      res.status(200).json({
+        success: true,
+        data: {tokenUsed: false}
+      })
+    });
 }
 
 function changePassword(req, res, next) {
@@ -223,28 +253,28 @@ function changePassword(req, res, next) {
     const err = new APIError('Password not match', httpStatus.BAD_REQUEST, true);
     return next(err);
   }
-  const tokenInBlacklist = _.indexOf(JWTBlackList, req.body.token);
+  User.findOne({resetPasswordToken: req.body.token})
+    .then(user=>{
+      if(!user){
+        const err = new APIError('Invalid token or secret', httpStatus.UNKNOWN_TOKEN, true);
+        return next(err);
+      }
+      user.resetPasswordExpires = null;
+      user.resetPasswordToken = null;
+      user.save();
+      delete req.body.token;
+      delete req.body.confirmPassword;
+      req.user = {
+        username: user.username,
+        email: user.email,
+      };
+      return next();
 
-  if (tokenInBlacklist > -1) {
-    const err = new APIError('Token expired', httpStatus.UNKNOWN_TOKEN, true);
-    return next(err);
-  }
-
-  jwt.verify(req.body.token, config.jwtSecret, (err, decoded) => {
-    if (err) {
-      if (tokenInBlacklist > -1) JWTBlackList.splice(tokenInBlacklist, 1);
+    })
+    .catch(e=>{
       const err = new APIError('Invalid token or secret', httpStatus.UNKNOWN_TOKEN, true);
       return next(err);
-    }
-    JWTBlackList.push(req.body.token);
-    delete req.body.token;
-    delete req.body.confirmPassword;
-    req.user = {
-      username: decoded.username,
-      email: decoded.email,
-    };
-    return next();
-  });
+    });
 }
 
 /**
@@ -339,7 +369,7 @@ function create(req, res, next) {
             }],
           };
           RDSendgrid.send(req)
-            .then(response=>{
+            .then(response => {
               return res.json({
                 success: true,
                 data: {
@@ -380,7 +410,11 @@ function update(req, res, next) {
       success: true,
       data: {},
     }))
-    .error((e) => next(e));
+    .error((e) => {
+      const message = e.code === 11000 ? 'Email already in use.' : httpStatus[400] + ' Catch 1';
+      const err = new APIError(message, httpStatus.SOMETHING_WENT_WRONG, true);
+      return next(err);
+    });
 }
 
 function unsyncSocial(req, res, next) {
@@ -410,26 +444,25 @@ function unsyncSocial(req, res, next) {
   req.field = field;
 
 
-  if(req.params.socialName && req.params.socialName === 'github'){
+  if (req.params.socialName && req.params.socialName === 'github') {
 
     return Project.find({owner: req.user.username})
-      .then(projects=>{
-          return Q.all(_.map(projects, (project) => {
-            project = project.toObject();
-            project.projectRoot = config.stuff_path + 'projects/' + req.user.username + '/' + help.cleanUrl(project.root) + '/';
-            if (fs.existsSync(`${project.projectRoot}.git/`)) {
-              utils.deleteFolderRecursive(`${project.projectRoot}.git/`)
-            }
-            return Project.updateAsync({_id:project._id}, {$unset:{github:1}})
-          }))
+      .then(projects => {
+        return Q.all(_.map(projects, (project) => {
+          project = project.toObject();
+          project.projectRoot = config.stuff_path + 'projects/' + req.user.username + '/' + help.cleanUrl(project.root) + '/';
+          if (fs.existsSync(`${project.projectRoot}.git/`)) {
+            utils.deleteFolderRecursive(`${project.projectRoot}.git/`)
+          }
+          return Project.updateAsync({_id: project._id}, {$unset: {github: 1}})
+        }))
       })
-      .then(unsetResponse=>_unsetUserData(req, res, next))
+      .then(unsetResponse => _unsetUserData(req, res, next))
       .catch((e) => next(e))
 
   }
   return _unsetUserData(req, res, next);
 }
-
 
 function updatePassword(req, res, next) {
   User.get(req.user.username)
@@ -616,7 +649,7 @@ function subscribe(req, res, next) {
 
           req.mailSettings = {
             to: req.body.email,
-            from: 'taron@rodin.io',
+            from: 'noreply@rodin.io',
             fromName: 'Rodin team',
             templateName: 'rodin_subsribe',
             subject: 'Welcome to Rodin',
@@ -651,7 +684,7 @@ function subscribe(req, res, next) {
  * @param res
  * @param next
  */
-function metaverse(req, res, next){
+function metaverse(req, res, next) {
   if (_.isUndefined(req.body.email)) {
     const err = new APIError('Please provide email', 400, true);
     return next(err);
@@ -688,15 +721,15 @@ function metaverse(req, res, next){
         }]
       };
       RDSendgrid.send(req)
-      return res.status(200).json({success:true, data:'Stake claimed'});
+      return res.status(200).json({success: true, data: 'Stake claimed'});
     })
-    .catch(e=>{
+    .catch(e => {
       const err = new APIError('Something went wrong!', 400, true);
       return next(err);
     })
 }
 
-function _unsetUserData(req, res, next){
+function _unsetUserData(req, res, next) {
   User.updateAsync({username: req.user.username}, req.field)
     .then(() => res.json({
       success: true,
@@ -719,6 +752,7 @@ export default {
   confirmUsername,
   resetPassword,
   changePassword,
+  checkResetPasswordUsed,
   finalize,
   unsyncSocial,
   subscribe,
