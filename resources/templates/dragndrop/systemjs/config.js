@@ -1,21 +1,21 @@
 (function (global) {
 
-  var paths = {
-    'npm:': 'https://cdn.rodin.io/v0.0.5/'
-  };
+    var paths = {
+        'npm:': 'https://cdn.rodin.io/v0.0.6/'
+    };
 
-  var map = {
-    'rodin/core': 'npm:core',
-    'rodin/physics': 'npm:physics'
-  };
+    var map = {
+        'rodin/core': 'npm:core',
+        'rodin/physics': 'npm:physics'
+    };
 
-  var packages = {
-    'dist': { main: 'index.js', defaultExtension: 'js' },
-    'rodin/core': { main: 'index.js', defaultExtension: 'js' },
-    'rodin/physics': { main: 'index.js', defaultExtension: 'js' },
-  };
+    var packages = {
+        'dist': {main: 'index.js', defaultExtension: 'js'},
+        'rodin/core': {main: 'index.js', defaultExtension: 'js'},
+        'rodin/physics': {main: 'index.js', defaultExtension: 'js'},
+    };
 
-  var moduleNames = [
+    var moduleNames = [
         'core/error',
         'core/time',
         'core/scene',
@@ -34,30 +34,32 @@
         'core/button',
         'core/gamePad',
         'core/utils',
-        'core/utils/math',
-        'core/utils/threeWrappers',
         'core/loader',
         'core/plugin',
-        'core/particleSystem'
-  ];
+        'core/particleSystem',
+        'core/color',
+        'core/camera',
+        'core/avatar',
+        'core/math'
+    ];
 
-  function packIndex(moduleName) {
-    packages['' + paths['npm:'] + moduleName + ''] = { main: 'index.js', defaultExtension: 'js' };
-  }
-
-  moduleNames.forEach(packIndex);
-
-  var config = {
-    paths: paths,
-    map: map,
-    packages: packages,
-    meta: {
-        '*': {
-            authorization: true
-        }
+    function packIndex(moduleName) {
+        packages['' + paths['npm:'] + moduleName + ''] = {main: 'index.js', defaultExtension: 'js'};
     }
-  };
 
-  System.config(config);
+    moduleNames.forEach(packIndex);
+
+    var config = {
+        paths: paths,
+        map: map,
+        packages: packages,
+        meta: {
+            '*': {
+                authorization: true
+            }
+        }
+    };
+
+    System.config(config);
 
 })(this);
