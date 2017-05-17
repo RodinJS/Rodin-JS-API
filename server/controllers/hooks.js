@@ -29,7 +29,6 @@ function validateKey(req, res, next) {
 
 function build(req, res, next) {
   //req.body.updatedAt = new Date();
-  console.log("-----------req body -------", req.body);
 
   console.log('WEB HOOK', req.body);
 
@@ -49,8 +48,6 @@ function build(req, res, next) {
   update[`build.${req.params.device}.built`] = req.body.built || false;
   update[`build.${req.params.device}.buildId`] = req.body.buildId;
 
-
-
   Project.findByIdAndUpdate(req.params.id, {$set: update}, {new: true})
     .then(project => {
       if (!project) {
@@ -63,7 +60,6 @@ function build(req, res, next) {
           const err = new APIError('User Not Found', httpStatus.NOT_FOUND, true);
           return next(err);
         }
-
 
         req.mailSettings = {
           to: user.email,
@@ -91,20 +87,29 @@ function build(req, res, next) {
         req.user = user;
         req.project = project;
 
+        let appNmae = project.name;
         let notificationSTATUS = 200;
+        if (req.body.project.appName) {
+          appName = req.body.project.appName;
+        }
+
         if(req.body.buildStatus === false && req.body.error) { // RO-840, RO-838
+          let errorMessage = `build failed`;
+          if(httpStatus[`${req.body.error.message}`]) {
+            errorMessage = httpStatus[`${req.body.error.message}`].messgae;
+          }
           notificationSTATUS = 500;
           req.notification = {
             success: false,
             error: {
-              message: `${project.name} ${req.params.device} build failed.`,
+              message: `${appName} ${req.params.device} ${errorMessage}`,
               status: notificationSTATUS,
             }
           };
         } else {
           req.notification = {
             success: true,
-            data: `${project.name} ${req.params.device} build complete`,
+            data: `${appName} ${req.params.device} build complete`,
           };  
         }
 
