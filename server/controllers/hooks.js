@@ -29,6 +29,7 @@ function validateKey(req, res, next) {
 
 function build(req, res, next) {
   //req.body.updatedAt = new Date();
+  console.log("-----------req body -------", req.body);
 
   console.log('WEB HOOK', req.body);
 
@@ -47,6 +48,7 @@ function build(req, res, next) {
   const update = {};
   update[`build.${req.params.device}.built`] = req.body.built || false;
   update[`build.${req.params.device}.buildId`] = req.body.buildId;
+
 
   Project.findByIdAndUpdate(req.params.id, {$set: update}, {new: true})
     .then(project => {
