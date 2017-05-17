@@ -50,6 +50,7 @@ function build(req, res, next) {
   update[`build.${req.params.device}.buildId`] = req.body.buildId;
 
 
+
   Project.findByIdAndUpdate(req.params.id, {$set: update}, {new: true})
     .then(project => {
       if (!project) {
@@ -62,6 +63,7 @@ function build(req, res, next) {
           const err = new APIError('User Not Found', httpStatus.NOT_FOUND, true);
           return next(err);
         }
+
 
         req.mailSettings = {
           to: user.email,
@@ -85,12 +87,26 @@ function build(req, res, next) {
               content: req.params.device,
             }],
         };
+
         req.user = user;
         req.project = project;
-        req.notification = {
-          success: true,
-          data: `${project.name} ${req.params.device} build complete`,
-        };
+
+        let notificationSTATUS = 200;
+        if(req.body.buildStatus === false && req.body.error) { // RO-840, RO-838
+          notificationSTATUS = 500;
+          req.notification = {
+            success: false,
+            error: {
+              message: `${project.name} ${req.params.device} build failed.`,
+              status: notificationSTATUS,
+            }
+          };
+        } else {
+          req.notification = {
+            success: true,
+            data: `${project.name} ${req.params.device} build complete`,
+          };  
+        }
 
         RDSendgrid.send(req)
           .then(mailSent => {
@@ -116,7 +132,7 @@ function build(req, res, next) {
               });
 
             notifications.create(req, false, false);
-            return res.status(200).json(req.notification);
+            return res.status(notificationSTATUS).json(req.notification);
           })
       })
         .error((e) => {
