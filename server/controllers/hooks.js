@@ -87,7 +87,7 @@ function build(req, res, next) {
         req.user = user;
         req.project = project;
 
-        let appNmae = project.name;
+        let appName = project.name;
         let notificationSTATUS = 200;
         if (req.body.project.appName) {
           appName = req.body.project.appName;
