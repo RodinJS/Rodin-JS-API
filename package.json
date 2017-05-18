@@ -40,7 +40,7 @@
     "babel-plugin-transform-es2015-modules-systemjs": "^6.19.0",
     "bcrypt-nodejs": "0.0.3",
     "bluebird": "^3.1.4",
-    "body-parser": "^1.14.2",
+    "body-parser": "^1.17.2",
     "boom": "^4.0.0",
     "compression": "^1.6.1",
     "cookie-parser": "^1.4.1",
