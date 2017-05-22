@@ -237,7 +237,7 @@ const httpStatus = {
     PROFILECONTENTERROR : {
         code:374,
         messgae: `build failed. Incorrect Provisioning profile.`,        
-    }
+    },
 
 
     // working with sockets [600~]
