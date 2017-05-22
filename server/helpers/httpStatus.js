@@ -100,6 +100,7 @@ const httpStatus = {
     371: 'BUILDERROR',
     372: 'CLEANERROR',
     373: 'CERTIMPORTERROR',
+    374: 'PROFILECONTENTERROR',
 
     601: 'UNKNOWN_SOCKET_CHANNEL',
     602: 'UNKNOWN_SOCKET_ROOM',
@@ -231,8 +232,12 @@ const httpStatus = {
     },
     CERTIMPORTERROR: { 
         code:373,
-        messgae: `build failed. Invalid certificate or Password`,
+        messgae: `build failed. Invalid certificate or Password.`,
     },
+    PROFILECONTENTERROR : {
+        code:374,
+        messgae: `build failed. Incorrect Provisioning profile.`,        
+    }
 
 
     // working with sockets [600~]
