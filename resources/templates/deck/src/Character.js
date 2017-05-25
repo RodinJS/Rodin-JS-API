@@ -25,9 +25,6 @@ export class Character extends RODIN.Sculpt {
             
             RODIN.GamePad.viveLeft.sculpt.add(this.hands.left.clone());
             RODIN.GamePad.oculusTouchLeft.sculpt.add(this.hands.left.clone());
-            
-            RODIN.GamePad.viveLeft.raycastingLine._threeObject.material.color= new THREE.Color( 0x336699 );
-            RODIN.GamePad.oculusTouchLeft.raycastingLine._threeObject.material.color= new THREE.Color( 0x336699 );
         });
         this.hands.right.on(RODIN.CONST.READY, () => {
             this.hands.right._threeObject.children[0].material.transparent = true;
@@ -39,8 +36,7 @@ export class Character extends RODIN.Sculpt {
             RODIN.GamePad.viveRight.sculpt.add(this.hands.right.clone());
             RODIN.GamePad.oculusTouchRight.sculpt.add(this.hands.right.clone());
             
-            RODIN.GamePad.viveRight.raycastingLine._threeObject.material.color= new THREE.Color( 0x336699 );
-            RODIN.GamePad.oculusTouchRight.raycastingLine._threeObject.material.color= new THREE.Color( 0x336699 );
+            RODIN.GamePad.viveRight.initRaycastingLine()
         });
         
         this.hideObject = (object) => {
