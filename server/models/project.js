@@ -254,13 +254,13 @@ ProjectSchema.statics = {
           }
         }
 
-        const sortBy = {}; 
+        let sortBy = {}; 
         if(filter == 'az') { //RO-882 # fix for production app
-            sortBy = { name: 1 }
+            sortBy = { name: 1 };
         } else if(filter == 'popular') {
-            sortBy = { createdAt: -1 }
+            sortBy = { createdAt: -1 };
         } else {
-            sortBy = { createdAt: -1 }
+            sortBy = { createdAt: -1 };
         }
 
         return this.find(query)
