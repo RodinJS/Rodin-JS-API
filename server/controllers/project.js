@@ -603,8 +603,11 @@ function getPublishedProjects(req, res, next) {
   const skip = parseInt(req.query.skip) || 0;
   const limit = parseInt(req.query.limit) || 10;
 
+  if(req.query.filter) {
+    const filter = req.query.filter;
+  }
 
-  Project.list({skip: skip, limit: limit}, false, false, true, true)
+  Project.list({skip: skip, limit: limit}, false, false, true, true, filter)
     .then(publishedProject => {
       return res.status(200).json({
         success: true, data: _.map(publishedProject, (project) => {
