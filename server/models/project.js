@@ -216,13 +216,44 @@ ProjectSchema.statics = {
         });
     },
 
+    count(owner, published, approved, type = 'featured'){
+      const query = {};
+      if (owner) {
+        query.owner = owner;
+      }
+
+      if(type){
+        query.type = type;
+      }
+
+      if (published) {
+        query.$and = [
+          { publishDate: { $exists: true } },
+          { publishedPublic: { $eq: true } },
+        ];
+      }
+
+      if(approved) {
+        if(query.$and){
+          query.$and.push({state:'approved'});
+        }
+        else {
+          query.$and = [
+            {state:'approved'}
+          ]
+        }
+      }
+
+      return this.find(query).count().execAsync();
+    },
+
     /**
      * List projects in descending order of 'createdAt' timestamp.
      * @param {number} skip - Number of projects to be skipped.
      * @param {number} limit - Limit number of projects to be returned.
      * @returns {Promise<Project[]>}
      */
-    list({ skip = 0, limit = 50 } = {}, owner, _queryString = null, published, approved, filter = 'recent', type) {
+    list({ skip = 0, limit = 50 } = {}, owner, _queryString = null, published, approved, filter = 'recent', type = 'featured') {
         const query = {};
         if (owner) {
             query.owner = owner;
@@ -266,7 +297,7 @@ ProjectSchema.statics = {
           query.type = type;
         }
 
-        let sortBy = {}; 
+        let sortBy = {};
         if(filter == 'az') { //RO-882 # fix for production app
             sortBy = { name: 1 };
         } else if(filter == 'popular') {
