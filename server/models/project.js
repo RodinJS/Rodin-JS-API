@@ -64,7 +64,15 @@ const ProjectSchema = new mongoose.Schema({
             version: String,
         },
         daydream: {
-            type: Boolean,
+            requested: {
+                type: Boolean,
+                default: false,
+            },
+            built: {
+                type: Boolean,
+                default: false,
+            },
+            buildId: String,
             version: String,
         },
         gearvr: {
