@@ -116,6 +116,8 @@ function create(req, res, next) {
       });
 
       let saveProject = function (project, req, res, next) {
+
+
         project.saveAsync()
           .then((savedProject) => {
 
@@ -612,7 +614,7 @@ function getPublishedProjects(req, res, next) {
   Project.list({skip: skip, limit: limit}, false, false, true, true, filter, type)
     .then(publishedProject => {
       Projects = _.map(publishedProject, (project) => _.pick(project, allowedFields));
-      return Project.count(false,  true, true, type);
+      return Project.projectsCount(false,  true, true, type);
     })
     .then(projectsCount=>{
       return res.status(200).json({
