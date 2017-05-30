@@ -602,17 +602,16 @@ function getPublishedProjects(req, res, next) {
 
   const skip = parseInt(req.query.skip) || 0;
   const limit = parseInt(req.query.limit) || 10;
+  const filter = req.query.filter || false;
+  const type = req.query.type || 'featured';
+  const allowedFields = ['name', 'owner', 'id', 'thumbnail', 'description', 'root', 'displayName', 'type'];
 
-  if(req.query.filter) {
-    const filter = req.query.filter;
-  }
 
-  Project.list({skip: skip, limit: limit}, false, false, true, true, filter)
+  Project.list({skip: skip, limit: limit}, false, false, true, true, filter, type)
     .then(publishedProject => {
       return res.status(200).json({
-        success: true, data: _.map(publishedProject, (project) => {
-          return _.pick(project, ['name', 'owner', 'id', 'thumbnail', 'description', 'root', 'displayName'])
-        })
+        success: true,
+        data: _.map(publishedProject, (project) => _.pick(project, allowedFields))
       });
     })
     .catch((error) => {

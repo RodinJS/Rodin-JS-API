@@ -214,7 +214,7 @@ ProjectSchema.statics = {
      * @param {number} limit - Limit number of projects to be returned.
      * @returns {Promise<Project[]>}
      */
-    list({ skip = 0, limit = 50 } = {}, owner, _queryString = null, published, approved, filter = 'recent') {
+    list({ skip = 0, limit = 50 } = {}, owner, _queryString = null, published, approved, filter = 'recent', type) {
         const query = {};
         if (owner) {
             query.owner = owner;
@@ -252,6 +252,10 @@ ProjectSchema.statics = {
               {state:'approved'}
             ]
           }
+        }
+
+        if(type){
+          query.type = type;
         }
 
         let sortBy = {}; 
