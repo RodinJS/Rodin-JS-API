@@ -216,7 +216,7 @@ ProjectSchema.statics = {
         });
     },
 
-    count(owner, published, approved, type = 'featured'){
+    projectsCount(owner, published, approved, type = 'featured'){
       const query = {};
       if (owner) {
         query.owner = owner;
