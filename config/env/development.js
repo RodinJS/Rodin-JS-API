@@ -61,6 +61,17 @@ export default {
       appId: 'f4357582f4711a27',
       appSecret: '780befc0-fa03-a5ef-f942-94c142da',
   },
+  daydream: {
+    urls: {
+      build: 'http://13.92.235.174:10001/api/v1/project',
+      cancel: 'http://13.92.235.174:10001/api/v1/project',
+      get: 'http://13.92.235.174:10001/api/v1/project',
+      download: 'http://13.92.235.174:10001/api/v1/bin',
+      getStatus: 'http://13.92.235.174:10001/api/v1/status',
+    },
+    appId: 'f4357582f4711a27',
+    appSecret: '780befc0-fa03-a5ef-f942-94c142da',
+  },
   oculus: {
     urls: {
       build: 'http://13.92.235.174:10002/api/v1/project',
