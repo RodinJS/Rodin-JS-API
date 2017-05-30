@@ -607,11 +607,20 @@ function getPublishedProjects(req, res, next) {
   const allowedFields = ['name', 'owner', 'id', 'thumbnail', 'description', 'root', 'displayName', 'type'];
 
 
+  let Projects = {};
+
   Project.list({skip: skip, limit: limit}, false, false, true, true, filter, type)
     .then(publishedProject => {
+      Projects = _.map(publishedProject, (project) => _.pick(project, allowedFields));
+      return Project.count(false,  true, true, type);
+    })
+    .then(projectsCount=>{
       return res.status(200).json({
         success: true,
-        data: _.map(publishedProject, (project) => _.pick(project, allowedFields))
+        data: {
+          projects:Projects,
+          count:projectsCount
+        }
       });
     })
     .catch((error) => {
