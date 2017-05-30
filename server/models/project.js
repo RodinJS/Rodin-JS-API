@@ -253,7 +253,7 @@ ProjectSchema.statics = {
      * @param {number} limit - Limit number of projects to be returned.
      * @returns {Promise<Project[]>}
      */
-    list({ skip = 0, limit = 50 } = {}, owner, _queryString = null, published, approved, filter = 'recent', type = 'featured') {
+    list({ skip = 0, limit = 50 } = {}, owner, _queryString = null, published = false, approved = false, filter = 'recent', type) {
         const query = {};
         if (owner) {
             query.owner = owner;
