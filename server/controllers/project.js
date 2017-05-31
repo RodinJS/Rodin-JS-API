@@ -281,10 +281,21 @@ function list(req, res, next) {
   const skip = parseInt(req.query.skip) || 0;
 
   Project.list({limit, skip}, req.user.username, req.query._queryString)
-    .then((projects) => res.status(200).json({
-      success: true,
-      data: projects
-    }))
+    .then((projects) => {
+      if(req.query.count){
+         return Project.projectsCount(req.user.username,  false, false, false)
+           .then(projectsCount=>{
+             res.status(200).json({
+               success: true,
+               data: {
+                 projects:projects,
+                 count:projectsCount
+               }
+             });
+           })
+      }
+      return res.status(200).json({success: true, data: projects})
+    })
     .error((e) => next(e));
 }
 
