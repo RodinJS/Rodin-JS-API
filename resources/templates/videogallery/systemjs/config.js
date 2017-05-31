@@ -54,7 +54,12 @@
     var config = {
         paths: paths,
         map: map,
-        packages: packages
+        packages: packages,
+        meta: {
+            '*': {
+                authorization: true
+            }
+        }
     };
 
     System.config(config);

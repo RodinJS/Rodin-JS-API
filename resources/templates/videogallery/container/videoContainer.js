@@ -1,7 +1,15 @@
 import { videos } from '../data/videos.js';
 import { Thumbnail } from '../components/Thumbnail.js';
-import { linearView, cylindricView, gridView } from '../components/Gallery.js';
+import { linearView, cylindricalView, gridView } from '../components/Gallery.js';
 import { VideoPlayer } from './videoPlayerConatainer.js';
+
+/**
+ * Here we create 3 different layouts for thumbnails and a video player
+ * Layout types are;
+ * linear
+ * flat
+ * cylinder
+ */
 export class VideoContainer {
     constructor(blinkAnimation) {
         this.blinkAnimation  = blinkAnimation;
@@ -19,7 +27,7 @@ export class VideoContainer {
                 gridView(this.thumbs);
                 break;
             case 'cylinder':
-                cylindricView(this.thumbs);
+                cylindricalView(this.thumbs);
                 break;
             default:
                 linearView(this.thumbs);

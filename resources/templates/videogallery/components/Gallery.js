@@ -1,12 +1,27 @@
 import * as RODIN from 'rodin/core';
 import {Thumbnail} from "./Thumbnail.js";
 
+/**
+ * our grid view
+ * @type {null}
+ */
 let view = null;
 
+/**
+ * function for changing grid's layout
+ * @param thumbs
+ * @param viewNumber
+ */
 export const setView = (thumbs, viewNumber) => {
-
+    /**
+     * a variable for keeping our postion when changing the view
+     * @type {null}
+     */
     let lastCenter = null;
 
+    /**
+     * remove the old view before creating a new one
+     */
     if (view && view.sculpt) {
         RODIN.Scene.remove(view.sculpt);
         view.sculpt = null;
@@ -14,6 +29,9 @@ export const setView = (thumbs, viewNumber) => {
     }
     view = null;
 
+    /**
+     * choose the type we need
+     */
     switch (viewNumber) {
         case 0:
             view = new RODIN.HorizontalGrid(4, 1, 1.1, 1.8);
@@ -31,7 +49,7 @@ export const setView = (thumbs, viewNumber) => {
 
             break;
     }
-
+    // events for our view
     view.onShow((elem, index, alpha) => {
         elem.visible = true;
     });
@@ -42,7 +60,7 @@ export const setView = (thumbs, viewNumber) => {
         elem.position.set(0, 0, -5);
         elem.visible = false;
     });
-    //view.onMove(()=>{});
+
     view.setGetElement((index) => {
         if (index < 0)
             return;
@@ -55,25 +73,39 @@ export const setView = (thumbs, viewNumber) => {
         }
         return thumbs[index];
     });
+
+    /**
+     * restore the old position
+     */
     if (lastCenter)
         view.center = lastCenter;
 
-    // view.on(RODIN.CONST.SCROLL_END, () => {
-    //     Thumbnail.reset(view.sculpt);
-    // });
-
+    /**
+     * add the view to the scene
+     */
     RODIN.Scene.add(view.sculpt);
 
 };
-
+/**
+ * set linear view
+ * @param thumbs
+ */
 export function linearView(thumbs) {
     setView(thumbs, 0);
 }
 
+/**
+ * set grid view
+ * @param thumbs
+ */
 export function gridView(thumbs) {
     setView(thumbs, 1);
 }
 
-export function cylindricView(thumbs) {
+/**
+ * set cylindrical view
+ * @param thumbs
+ */
+export function cylindricalView(thumbs) {
     setView(thumbs, 2);
 }

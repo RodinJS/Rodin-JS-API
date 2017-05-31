@@ -1,10 +1,16 @@
 import * as RODIN from 'rodin/core';
 import { VPcontrolPanel } from '../components/vpControls.js';
 RODIN.start();
-
+/**
+ * Create a separate scene for video player
+ * @type {RODIN.Scene}
+ */
 export const videoPlayerScene = new RODIN.Scene('videoPlayerScene');
-window.camera = videoPlayerScene.activeCamera;
 
+/**
+ * Creates a video player
+ * with controls and a video
+ */
 export class VideoPlayer {
     constructor() {
         this.player = new RODIN.MaterialPlayer({
@@ -14,7 +20,13 @@ export class VideoPlayer {
         });
     }
 
-
+    /**
+     * Play a video with given parameters
+     * @param url
+     * @param title
+     * @param backgroundImage
+     * @param transition
+     */
     playVideo(url, title, backgroundImage, transition) {
         if (this.controls) {
             this.controls.destroy();
@@ -33,7 +45,9 @@ export class VideoPlayer {
 
     }
 
-
+    /**
+     * Initializes environment for the video player
+     */
     container() {
         let controlPanel, material, sphere;
 

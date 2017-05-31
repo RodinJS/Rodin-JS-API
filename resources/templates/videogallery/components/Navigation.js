@@ -1,6 +1,10 @@
 import * as RODIN from 'rodin/core';
 import { Icons } from '../data/buttons.js';
 import { Button } from './Button.js';
+
+/**
+ * a class that handles view changing buttons
+ */
 export class Navigation {
 
     constructor(videoContainer) {
