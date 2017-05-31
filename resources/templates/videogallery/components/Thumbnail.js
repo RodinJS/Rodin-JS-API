@@ -1,5 +1,8 @@
 import * as RODIN from 'rodin/core';
 
+/**
+ * a class for thumbnails
+ */
 export class Thumbnail extends RODIN.Sculpt {
     constructor(params, videoPlayer, blinkAnimation) {
         super();
@@ -33,14 +36,28 @@ export class Thumbnail extends RODIN.Sculpt {
         })
     }
 
+    /**
+     * hover animation for more
+     * @param evt
+     */
     moreHover(evt) {
         Thumbnail.thumbAnimation(evt.target, {position: {z: 0.2}}, 'moreHover', 50);
     }
 
+    /**
+     * hover our animation for more
+     * @param evt
+     */
     moreHoverOut(evt) {
         Thumbnail.thumbAnimation(evt.target, {position: {z: 0.1}}, 'moreHoverOut', 50);
     }
 
+
+    /**
+     * renders our thumbnail
+     * @param id
+     * @returns {Thumbnail}
+     */
     draw(id) {
         this.element = new RODIN.Element({
             name: this.params.name,
@@ -79,10 +96,19 @@ export class Thumbnail extends RODIN.Sculpt {
         return this;
     }
 
+    /**
+     * button down event
+     * @param e
+     */
     onButtonDown(e) {
         this._lastButtonDown = RODIN.Time.now;
     }
 
+
+    /**
+     * button up event
+     * @param e
+     */
     onButtonUp(e) {
         if (RODIN.Time.now - this._lastButtonDown > 400)
             return;
@@ -117,6 +143,11 @@ export class Thumbnail extends RODIN.Sculpt {
         }
     }
 
+    /**
+     * gets a description object
+     * @param id
+     * @returns {RODIN.Element}
+     */
     getDescription(id) {
         this.description = new RODIN.Element({
             name: 'description',
@@ -151,6 +182,10 @@ export class Thumbnail extends RODIN.Sculpt {
         return this.description;
     }
 
+    /**
+     * toggle description visibility
+     * @param evt
+     */
     showHideDescription(evt) {
         evt && evt.stopPropagation();
         for (let i = 0; i < this.element._children.length; i++) {
@@ -160,6 +195,13 @@ export class Thumbnail extends RODIN.Sculpt {
         this.isDescriptionMode = !this.isDescriptionMode;
     }
 
+    /**
+     * animation for the thumbnail
+     * @param obj
+     * @param params
+     * @param name
+     * @param duration
+     */
     static thumbAnimation(obj, params, name, duration) {
         const navigationAnimation = new RODIN.AnimationClip(name, params);
         navigationAnimation.duration(duration);
@@ -167,6 +209,10 @@ export class Thumbnail extends RODIN.Sculpt {
         obj.animation.start(name);
     }
 
+    /**
+     * resets all thumbnail's views to default
+     * @param thumbnailContainer
+     */
     static reset(thumbnailContainer) {
         for (let i = 0; i < thumbnailContainer._children.length; i++) {
             const ch = thumbnailContainer._children[i];

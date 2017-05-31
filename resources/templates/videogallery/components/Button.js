@@ -1,4 +1,8 @@
 import * as RODIN from 'rodin/core';
+
+/**
+ * A class for our navigation buttons
+ */
 export class Button {
     constructor(width, height, name, image) {
         this.width = width;
@@ -8,7 +12,11 @@ export class Button {
         this.draw();
     }
 
+    /**
+     * renders the button
+     */
     draw() {
+        // we use a plane for our buttons
         this.element = new RODIN.Plane(this.width, this.height, new THREE.MeshBasicMaterial({
             transparent: true,
             map: RODIN.Loader.loadTexture('./src/assets/icons/Button_background_short.png')
@@ -36,7 +44,6 @@ export class Button {
             ppm: 2000,
             transparent: true
         });
-
 
         this.button.on(RODIN.CONST.READY, btn => {
             this.element.position.z = 0.01;
