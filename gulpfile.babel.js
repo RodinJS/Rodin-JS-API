@@ -10,7 +10,7 @@ import apidoc from 'gulp-apidoc';
 const plugins = gulpLoadPlugins();
 const testPath = './server/tests/';
 const paths = {
-    js: ['./**/*.js', '!dist/**', '!projects/**', '!publish/**', '!public/**', '!node_modules/**', '!coverage/**', '!history/**'],
+    js: ['./**/*.js', '!dist/**', '!projects/**', '!publish/**', '!public/**', '!node_modules/**', '!coverage/**', '!history/**', '!resources/**'],
     nonJs: ['./package.json', './.gitignore'],
     tests: './server/tests/*.js',
     singleTestFile: ['' + testPath + '1.user.test.js', `${testPath}2.projects.test.js`, `${testPath}7.modules.test.js`, '' + testPath + '99.removeUser.test.js'],
