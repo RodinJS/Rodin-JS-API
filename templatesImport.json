@@ -57,5 +57,14 @@
     ],
     "thumbnail": "",
     "root": "videoplayer"
+  },
+  {
+    "name": "Video Gallery",
+    "description": "Video Gallery Template",
+    "tags": [
+      "gallery"
+    ],
+    "thumbnail": "",
+    "root": "videogallery"
   }
 ]
