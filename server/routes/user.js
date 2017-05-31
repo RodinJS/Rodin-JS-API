@@ -159,7 +159,7 @@ router.route('/')
 	 *      }
    *
    */
-  .post(validate(paramValidation.createUser), userCtrl.validateInvitationCode, userCtrl.validatePreSignUpCode, userCtrl.create);
+  .post(validate(paramValidation.createUser), userCtrl.validatePreSignUpCode, userCtrl.create);
 
 router.route('/me')
 /**
