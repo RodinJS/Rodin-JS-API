@@ -261,7 +261,7 @@ ProjectSchema.statics = {
      * @param {number} limit - Limit number of projects to be returned.
      * @returns {Promise<Project[]>}
      */
-    list({ skip = 0, limit = 50 } = {}, owner, _queryString = null, published = false, approved = false, filter = 'recent', type) {
+    list({ skip = 0, limit = 50 } = {}, owner, _queryString = null, published = false, approved = false, sort = 'recent', type) {
         const query = {};
         if (owner) {
             query.owner = owner;
@@ -306,9 +306,9 @@ ProjectSchema.statics = {
         }
 
         let sortBy = {};
-        if(filter == 'az') { //RO-882 # fix for production app
+        if(sort == 'az') { //RO-882 # fix for production app
             sortBy = { name: 1 };
-        } else if(filter == 'popular') {
+        } else if(sort == 'popular') {
             sortBy = { createdAt: -1 };
         } else {
             sortBy = { createdAt: -1 };

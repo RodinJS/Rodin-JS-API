@@ -12,7 +12,7 @@ import request from 'request';
 import config from '../../config/env';
 import fsExtra from 'fs-extra';
 import utils from '../helpers/common';
-import mandrill from '../helpers/mandrill';
+import check from './check';
 import RDSendgrid from '../helpers/sendgrid';
 import userCapacity from '../helpers/directorySize';
 import transpiler from '../helpers/transpiler';
@@ -615,14 +615,14 @@ function getPublishedProjects(req, res, next) {
 
   const skip = parseInt(req.query.skip) || 0;
   const limit = parseInt(req.query.limit) || 10;
-  const filter = req.query.filter || false;
+  const sort = req.query.sort || false;
   const type = req.query.type || 'featured';
   const allowedFields = ['name', 'owner', 'id', 'thumbnail', 'description', 'root', 'displayName', 'type'];
 
 
   let Projects = {};
 
-  Project.list({skip: skip, limit: limit}, false, false, true, true, filter, type)
+  Project.list({skip: skip, limit: limit}, false, false, true, true, sort, type)
     .then(publishedProject => {
       Projects = _.map(publishedProject, (project) => _.pick(project, allowedFields));
       return Project.projectsCount(false,  true, true, type);
@@ -760,6 +760,40 @@ function getProjectSize(req, res, next) {
   });
 }
 
+function getAllProjectsCount(req, res, next){
+  let userProjectsCount = null;
+  let featuredCount = 0;
+  let demosCount = 0;
+
+  check.validateToken(req)
+    .then(tokenValid=>{
+       if(tokenValid){
+         Project.projectsCount(tokenValid.username,  false, false, false)
+           .then(projectsCount => userProjectsCount = projectsCount || 0)
+       }
+      Project.projectsCount(false,  true, true, 'featured')
+        .then(featuredProjectsCount=>{
+          featuredCount = featuredProjectsCount;
+          return Project.projectsCount(false,  true, true, 'demos');
+        })
+        .then(demosProjectsCount=>{
+          demosCount = demosProjectsCount;
+          res.status(200).json({
+            success:true,
+            data:{
+              userProjects:userProjectsCount,
+              featuredProjects:featuredCount,
+              demoProjects:demosCount,
+            }
+          })
+        })
+        .catch(error=>{
+          const err = new APIError('Can\'t get projects count', httpStatus.BAD_REQUEST, true);
+          return next(err)
+        })
+    })
+}
+
 function transpile(req, res, next) {
   Project.getOne(req.params.id, req.user.username)
     .then(project => {
@@ -805,5 +839,6 @@ export default {// jscs:ignore
   getProjectsCount,
   getProjectSize,
   transpile,
-  finalize
+  finalize,
+  getAllProjectsCount
 };
