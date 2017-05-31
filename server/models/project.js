@@ -216,6 +216,14 @@ ProjectSchema.statics = {
         });
     },
 
+  /**
+   * Get published project count based on searching criterias
+   * @param owner
+   * @param published
+   * @param approved
+   * @param type
+   * @returns {*}
+   */
     projectsCount(owner, published, approved, type = 'featured'){
       const query = {};
       if (owner) {
