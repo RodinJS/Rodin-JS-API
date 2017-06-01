@@ -87,11 +87,14 @@ function build(req, res, next) {
         req.user = user;
         req.project = project;
 
+
+
         let appName = project.name;
         let notificationSTATUS = 200;
-        if (req.body.project.appName) {
+        if (req.body.project && req.body.project.appName) {
           appName = req.body.project.appName;
         }
+
 
         if(req.body.buildStatus === false && req.body.error) { // RO-840, RO-838
           let errorMessage = `build failed`;
@@ -106,12 +109,15 @@ function build(req, res, next) {
               status: notificationSTATUS,
             }
           };
-        } else {
+        }
+        else {
           req.notification = {
             success: true,
             data: `${appName} ${req.params.device} build complete`,
-          };  
+          };
         }
+
+        console.log('appName', appName);
 
         RDSendgrid.send(req)
           .then(mailSent => {

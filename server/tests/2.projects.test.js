@@ -199,7 +199,7 @@ describe('## Projects APIs', () => {
         const validDevices = ['oculus', 'vive', 'daydream', 'gearvr', 'ios', 'android'];
         for (let i = 0; i < validDevices.length; i++) {
             request(app)
-              .post('/api/hooks/build/' + project.info._id + '/' + validDevices[i])
+              .post(`/api/hooks/build/${project.info._id}/${validDevices[i]}`)
               .set(User.generateHookHeader())
               .send(project.hookRequest)
               .expect(httpStatus.OK)
