@@ -22,7 +22,7 @@ export class blinkAnimation extends RODIN.EventEmitter {
             color: 0x000000
         }));
         this.topEyelid.position.z = -0.02;
-        this.topEyelid.position.y = 0.04;
+        this.topEyelid.position.y = 0.12;
         /**
          * bottom eyelid
          * @type {RODIN.Plane}
@@ -33,7 +33,7 @@ export class blinkAnimation extends RODIN.EventEmitter {
         }));
         this.eyelidContainer._threeObject.renderOrder = 10000;
         this.bottomEyelid.position.z = -0.02;
-        this.bottomEyelid.position.y = -0.04;
+        this.bottomEyelid.position.y = -0.12;
         this.eyelidContainer.add(this.topEyelid);
         this.eyelidContainer.add(this.bottomEyelid);
 
@@ -51,11 +51,11 @@ export class blinkAnimation extends RODIN.EventEmitter {
         /**
          * add animations to our eyelids
          */
-        this.topEyelid.animation.add(blinkAnimation._makeAnimation(0.04, 'open', 1000));
-        this.bottomEyelid.animation.add(blinkAnimation._makeAnimation(-0.04, 'open', 1000));
+        this.topEyelid.animation.add(blinkAnimation._makeAnimation(0.12, 'open', 2000));
+        this.bottomEyelid.animation.add(blinkAnimation._makeAnimation(-0.12, 'open', 2000));
 
-        this.topEyelid.animation.add(blinkAnimation._makeAnimation(0.025, 'close', 1000));
-        this.bottomEyelid.animation.add(blinkAnimation._makeAnimation(-0.025, 'close', 1000));
+        this.topEyelid.animation.add(blinkAnimation._makeAnimation(0.025, 'close', 2000));
+        this.bottomEyelid.animation.add(blinkAnimation._makeAnimation(-0.025, 'close', 2000));
 
     }
 

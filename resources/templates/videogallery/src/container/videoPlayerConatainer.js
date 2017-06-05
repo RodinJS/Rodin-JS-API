@@ -1,5 +1,5 @@
 import * as RODIN from 'rodin/core';
-import { VPcontrolPanel } from '../components/vpControls.js';
+import {VPcontrolPanel} from '../components/vpControls.js';
 RODIN.start();
 /**
  * Create a separate scene for video player
@@ -28,20 +28,21 @@ export class VideoPlayer {
      * @param transition
      */
     playVideo(url, title, backgroundImage, transition) {
-        if (this.controls) {
-            this.controls.destroy();
-            this.controls.parent.remove(this.controls)
-        }
-        this.controls = new VPcontrolPanel({
-            player: this.player,
-            title: title,
-            cover: backgroundImage,
-            distance: 2,
-            width: 3
-        },transition);
-        this.container();
+        if (!this.controls) {
+            this.controls = new VPcontrolPanel({
+                player: this.player,
+                title: title,
+                cover: backgroundImage,
+                distance: 2,
+                width: 3
+            }, transition);
+            this.container();
 
-        this.player.loadVideo(url)
+            this.player.loadVideo(url)
+        } else {
+            this.controls.loadVideo(title, url, backgroundImage);
+        }
+
 
     }
 

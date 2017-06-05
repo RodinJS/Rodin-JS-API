@@ -28,14 +28,13 @@ export const setView = (thumbs, viewNumber) => {
         lastCenter = view.center;
     }
     view = null;
-
     /**
      * choose the type we need
      */
     switch (viewNumber) {
         case 0:
-            view = new RODIN.HorizontalGrid(4, 1, 1.1, 1.8);
-            view.sculpt.position.set(0, 2.1, -3);
+            view = new RODIN.HorizontalSemiCircleGrid(7, 1, 1.1, 1.8, 3.5);
+            view.sculpt.position.set(0, 2.1, 0);
 
             break;
         case 1:
@@ -44,11 +43,27 @@ export const setView = (thumbs, viewNumber) => {
 
             break;
         case 2:
-            view = new RODIN.VerticalSemiCircleGrid(5, 2, 0.5, 1.8, 3);
-            view.sculpt.position.set(0, 2.5, -3);
-
+            view = new RODIN.VerticalSemiCircleGrid(7, 2, 0.5, 1.2, 3.5);
+            view.sculpt.position.set(0, 2.6, 0);
             break;
     }
+
+    let isScrolling = false;
+    view.on(RODIN.CONST.SCROLL_START, (evt) => {
+        // evt.stopPropagation();
+        if (isScrolling) {
+            return;
+        }
+        isScrolling = true;
+        Thumbnail.reset(view.sculpt);
+    });
+
+    view.on(RODIN.CONST.SCROLL_END, (evt) => {
+        evt.stopPropagation();
+        isScrolling = false;
+    });
+
+
     // events for our view
     view.onShow((elem, index, alpha) => {
         elem.visible = true;
@@ -77,8 +92,8 @@ export const setView = (thumbs, viewNumber) => {
     /**
      * restore the old position
      */
-    if (lastCenter)
-        view.center = lastCenter;
+    // if (lastCenter)
+    // view.center = lastCenter;
 
     /**
      * add the view to the scene

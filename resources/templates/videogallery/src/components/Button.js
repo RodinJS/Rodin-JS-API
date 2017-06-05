@@ -46,14 +46,14 @@ export class Button {
         });
 
         this.button.on(RODIN.CONST.READY, btn => {
-            this.element.position.z = 0.01;
+            this.element.position.z = 0.005;
             this.element.add(this.glow);
-            this.glow.position.z = 0.02;
+            this.glow.position.z = 0.006;
             this.glow.scale.set(0.8, .8, .8);
             this.element.add(btn.target);
             btn.target._threeObject.renderOrder = 3;
             btn.target.scale.set(.8, .8, .8);
-            btn.target.position.z = 0.03;
+            btn.target.position.z = 0.02;
         });
     }
 

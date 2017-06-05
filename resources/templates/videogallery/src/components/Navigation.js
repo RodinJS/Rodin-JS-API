@@ -29,10 +29,10 @@ export class Navigation {
             this.viewChange.name = 'textChange';
             this.viewChange._threeObject.material.visible = false;
             e.target.add(this.viewChange);
-            this.viewChange.position.y = 0.12;
+            this.viewChange.position.y = 0.135;
             e.target._threeObject.renderOrder = 0;
             e.target.position.z = -2;
-            e.target.position.y = 1.3;
+            e.target.position.y = 1.1;
 
             for (let i = 0; i < 3; i++) {
                 let button = new Button(.2, .2, Icons[i].name, Icons[i].path);
@@ -53,11 +53,11 @@ export class Navigation {
                     btn.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, (e) => {
                         this.openNavigation(e);
                     });
-                    this.setActiveButton('Linear');
                 });
                 button.active.on(RODIN.CONST.GAMEPAD_HOVER, this.onHoverAnimation.bind(this));
                 button.active.on(RODIN.CONST.GAMEPAD_HOVER_OUT, this.onHoverOutAnimation.bind(this));
             }
+            this.setActiveButton('Linear');
         });
     }
 
@@ -123,6 +123,7 @@ export class Navigation {
         this.showNavigation();
         this.showViewChange();
         this.buttons.map((value, key) => {
+            value.element._threeObject.material.visible = false;
             value.element._threeObject.visible = true;
             Navigation.animation(value.element, {
                 position: {

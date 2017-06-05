@@ -8,8 +8,9 @@ import { Navigation} from '../components/Navigation.js';
  * Eyelid animation,
  * Loader
  */
-export class MainContainer {
+export class MainContainer extends RODIN.Sculpt{
     constructor() {
+        super();
         /**
          * skybox for all the environment
          * at first it has space texture
@@ -21,7 +22,6 @@ export class MainContainer {
             side: THREE.BackSide,
             map: RODIN.Loader.loadTexture('./src/assets/space.jpg')
         }));
-
         /**
          * Loading placeholder
          * @type {RODIN.Plane}
@@ -29,11 +29,12 @@ export class MainContainer {
         this.loader = new RODIN.Plane(8, 4.5, new THREE.MeshBasicMaterial({transparent: true, map: RODIN.Loader.loadTexture('./src/assets/Rodin_video_gallery.png')}));
         this.loader.on(RODIN.CONST.READY, env => {
             this.enviroment.add(env.target);
-            env.target.position.z = - 10
+            env.target.position.z = - 10;
+            env.target.position.y = 2.25;
         });
         this.enviroment.needsUpdate = true;
         this.transition = blinkAnimation.get();
-        this.containers = [];
+        this.containers = {};
     }
 
     /**
@@ -82,6 +83,6 @@ export class MainContainer {
         this.loader.visible = false;
         this.enviroment._threeObject.material.map = RODIN.Loader.loadTexture('./src/assets/env.jpg');
         let videoContainer = new VideoContainer(this.transition);
-        this.containers.push(new Navigation(videoContainer));
+        this.containers.navigation = new Navigation(videoContainer);
     }
 }

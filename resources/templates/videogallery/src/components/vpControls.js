@@ -59,7 +59,7 @@ const secondsToH_MM_SS = (length, separator = ":") => {
     let hours = Math.floor(length / 3600);
     length %= 3600;
     let minutes = Math.floor(length / 60);
-    if (minutes < 10 && hours != 0) {
+    if (minutes < 10 && hours !== 0) {
         minutes = "0" + minutes;
     }
     let seconds = length % 60;
@@ -85,6 +85,7 @@ export class VPcontrolPanel extends RODIN.Sculpt {
         this.timeBarButton = null;
         this.coverEl = null;
         this.title = title;
+        this.isVideoReady = false;
 
         this.panelCenter = new RODIN.Sculpt();
 
@@ -199,6 +200,10 @@ export class VPcontrolPanel extends RODIN.Sculpt {
     createCover(distance, width) {
         let r = Math.sqrt(distance * distance + width * width / 4) * 3;
 
+        if (this.coverEl && this.coverEl._threeObject) {
+            this.coverEl._threeObject.material.map = new THREE.TextureLoader().load(this.cover);
+            return;
+        }
         let coverMesh = new THREE.Mesh(
             new THREE.SphereBufferGeometry(r, 720, 4),
             new THREE.MeshBasicMaterial({
@@ -242,30 +247,43 @@ export class VPcontrolPanel extends RODIN.Sculpt {
             evt.target.animation.start("hoverOutAnimation");
         });
         back.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, (evt) => {
-            this.pauseButton.scale.set(1, 1, 1);
-            this.playButton.scale.set(1, 1, 1);
-            this.pauseButton.parent = null;
-            this.playButton.parent = this.panel;
-            this.player.pause();
-            this.player.jumpTo(0);
-            this.transition.close();
+            console.log(this.isVideoReady)
+            if (this.isVideoReady) {
+                this.pauseButton.scale.set(1, 1, 1);
+                this.playButton.scale.set(1, 1, 1);
+                this.pauseButton.parent = null;
+                this.playButton.parent = this.panel;
+                this.player.pause();
+                this.player.jumpTo(0);
+                this.transition.close();
 
-            const onclose = (evt) => {
-                this.transition.removeEventListener('Closed', onclose);
+                const onclose = (evt) => {
+                    this.transition.removeEventListener('Closed', onclose);
 
-                RODIN.Scene.go('Main');
-                RODIN.Scene.HMDCamera.name = 'mainCamera';
-                this.transition.camera = RODIN.Scene.HMDCamera;
+                    RODIN.Scene.go('Main');
+                    RODIN.Scene.HMDCamera.name = 'mainCamera';
+                    this.transition.camera = RODIN.Scene.HMDCamera;
 
-                // we need this timeout because of a bug in lib
-                // remove this when lib is fixed
-                setTimeout(() => {
-                    this.transition.open();
-                }, 0);
-            };
+                    // we need this timeout because of a bug in lib
+                    // remove this when lib is fixed
+                    setTimeout(() => {
+                        this.transition.open();
+                    }, 0);
+                };
 
-            this.transition.on('Closed', onclose);
+                this.transition.on('Closed', onclose);
+            }
         });
+    }
+
+    loadVideo(title, url, cover) {
+        this.title = title;
+        this.player.loadVideo(url);
+        this.cover = cover;
+        this.createTitle();
+        this.createCover();
+        this.createTimeBar();
+
     }
 
     createTitle() {
@@ -276,12 +294,17 @@ export class VPcontrolPanel extends RODIN.Sculpt {
             fontSize: this.width * 0.04,
             ppm: 1000
         };
-        let titleButton = new RODIN.Text(titleParams);
+        if (this.titleButton) {
+            this.panel.remove(this.titleButton);
+            this.titleButton = null;
+            delete this.titleButton;
+        }
+        this.titleButton = new RODIN.Text(titleParams);
         this.elementsPending++;
 
-        titleButton.on(RODIN.CONST.READY, (evt) => {
-            titleButton.parent = this.panel;
-            titleButton.position.set(0, this.width / 4, 0);
+        this.titleButton.on(RODIN.CONST.READY, (evt) => {
+            this.titleButton.parent = this.panel;
+            this.titleButton.position.set(0, this.width / 4, 0);
             this.elementsPending--;
             this.readyCheck();
         });
@@ -526,6 +549,7 @@ export class VPcontrolPanel extends RODIN.Sculpt {
 
 
         timeLineBG.on(RODIN.CONST.READY, (evt) => {
+            this.isVideoReady = true;
             timeLineBG.parent = this.panel;
             timeLineBG.position.set(0, -this.width / 3.75, 0);
             this.elementsPending--;
@@ -648,6 +672,11 @@ export class VPcontrolPanel extends RODIN.Sculpt {
             fontSize: this.width / 30,
             ppm: 1000
         };
+        if(this.timeBarButton) {
+            this.panel.remove(this.timeBarButton);
+            this.timeBarButton = null;
+            delete this.timeBarButton;
+        }
         this.timeBarButton = new RODIN.Text(timeBarParams);
         this.elementsPending++;
         this.timeBarButton.on(RODIN.CONST.READY, (evt) => {
