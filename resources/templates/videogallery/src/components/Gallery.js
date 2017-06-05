@@ -1,23 +1,40 @@
 import * as RODIN from 'rodin/core';
 import {Thumbnail} from "./Thumbnail.js";
 
+/**
+ * our grid view
+ * @type {null}
+ */
 let view = null;
 
+/**
+ * function for changing grid's layout
+ * @param thumbs
+ * @param viewNumber
+ */
 export const setView = (thumbs, viewNumber) => {
-
+    /**
+     * a variable for keeping our postion when changing the view
+     * @type {null}
+     */
     let lastCenter = null;
 
+    /**
+     * remove the old view before creating a new one
+     */
     if (view && view.sculpt) {
         RODIN.Scene.remove(view.sculpt);
         view.sculpt = null;
         lastCenter = view.center;
     }
     view = null;
-
+    /**
+     * choose the type we need
+     */
     switch (viewNumber) {
         case 0:
-            view = new RODIN.HorizontalGrid(4, 1, 1.1, 1.8);
-            view.sculpt.position.set(0, 2.1, -3);
+            view = new RODIN.HorizontalSemiCircleGrid(7, 1, 1.1, 1.8, 3.5);
+            view.sculpt.position.set(0, 2.1, 0);
 
             break;
         case 1:
@@ -26,12 +43,28 @@ export const setView = (thumbs, viewNumber) => {
 
             break;
         case 2:
-            view = new RODIN.VerticalSemiCircleGrid(5, 2, 0.5, 1.8, 3);
-            view.sculpt.position.set(0, 2.5, -3);
-
+            view = new RODIN.VerticalSemiCircleGrid(7, 2, 0.5, 1.2, 3.5);
+            view.sculpt.position.set(0, 2.6, 0);
             break;
     }
 
+    let isScrolling = false;
+    view.on(RODIN.CONST.SCROLL_START, (evt) => {
+        // evt.stopPropagation();
+        if (isScrolling) {
+            return;
+        }
+        isScrolling = true;
+        Thumbnail.reset(view.sculpt);
+    });
+
+    view.on(RODIN.CONST.SCROLL_END, (evt) => {
+        evt.stopPropagation();
+        isScrolling = false;
+    });
+
+
+    // events for our view
     view.onShow((elem, index, alpha) => {
         elem.visible = true;
     });
@@ -42,7 +75,7 @@ export const setView = (thumbs, viewNumber) => {
         elem.position.set(0, 0, -5);
         elem.visible = false;
     });
-    //view.onMove(()=>{});
+
     view.setGetElement((index) => {
         if (index < 0)
             return;
@@ -55,25 +88,39 @@ export const setView = (thumbs, viewNumber) => {
         }
         return thumbs[index];
     });
-    if (lastCenter)
-        view.center = lastCenter;
 
-    // view.on(RODIN.CONST.SCROLL_END, () => {
-    //     Thumbnail.reset(view.sculpt);
-    // });
+    /**
+     * restore the old position
+     */
+    // if (lastCenter)
+    // view.center = lastCenter;
 
+    /**
+     * add the view to the scene
+     */
     RODIN.Scene.add(view.sculpt);
 
 };
-
+/**
+ * set linear view
+ * @param thumbs
+ */
 export function linearView(thumbs) {
     setView(thumbs, 0);
 }
 
+/**
+ * set grid view
+ * @param thumbs
+ */
 export function gridView(thumbs) {
     setView(thumbs, 1);
 }
 
-export function cylindricView(thumbs) {
+/**
+ * set cylindrical view
+ * @param thumbs
+ */
+export function cylindricalView(thumbs) {
     setView(thumbs, 2);
 }
