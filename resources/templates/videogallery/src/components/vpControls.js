@@ -85,7 +85,6 @@ export class VPcontrolPanel extends RODIN.Sculpt {
         this.timeBarButton = null;
         this.coverEl = null;
         this.title = title;
-        this.isVideoReady = false;
 
         this.panelCenter = new RODIN.Sculpt();
 
@@ -186,7 +185,6 @@ export class VPcontrolPanel extends RODIN.Sculpt {
                 color: 0x000000,
                 transparent: true,
                 opacity: 0.3,
-                //wireframe:true,
                 side: THREE.BackSide
             })
         ));
@@ -247,14 +245,14 @@ export class VPcontrolPanel extends RODIN.Sculpt {
             evt.target.animation.start("hoverOutAnimation");
         });
         back.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, (evt) => {
-            console.log(this.isVideoReady)
-            if (this.isVideoReady) {
+            evt.stopPropagation();
+            if (this.player.getLength()) {
                 this.pauseButton.scale.set(1, 1, 1);
                 this.playButton.scale.set(1, 1, 1);
                 this.pauseButton.parent = null;
                 this.playButton.parent = this.panel;
                 this.player.pause();
-                this.player.jumpTo(0);
+                // this.player.jumpTo(0);
                 this.transition.close();
 
                 const onclose = (evt) => {
@@ -366,6 +364,7 @@ export class VPcontrolPanel extends RODIN.Sculpt {
                 if (this.cover && this.coverEl) {
                     this.coverEl.visible = false;
                 }
+                this.canGo = true;
                 this.player.play();
             }
         });

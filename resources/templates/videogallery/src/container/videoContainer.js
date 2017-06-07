@@ -23,9 +23,8 @@ export class VideoContainer {
         this.standingArea.on(RODIN.CONST.READY, evt => {
             RODIN.Scene.add(this.standingArea);
             evt.target.position.z = -.3;
-            evt.target.position.y = -1.3;
+            evt.target.position.y = -1;
             evt.target.rotation.x = -Math.PI / 2;
-
         });
     }
 

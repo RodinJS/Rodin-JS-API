@@ -1,14 +1,15 @@
 import * as RODIN from 'rodin/core';
 import {blinkAnimation} from '../components/BlinkAnimation.js';
-import { VideoContainer } from './videoContainer.js';
-import { Navigation} from '../components/Navigation.js';
+import {VideoContainer} from './videoContainer.js';
+import {Navigation} from '../components/Navigation.js';
+import {Thumbnail} from '../components/Thumbnail.js'
 
 /**
  * Crates switch buttons on the bottom,
  * Eyelid animation,
  * Loader
  */
-export class MainContainer extends RODIN.Sculpt{
+export class MainContainer extends RODIN.Sculpt {
     constructor() {
         super();
         /**
@@ -22,19 +23,31 @@ export class MainContainer extends RODIN.Sculpt{
             side: THREE.BackSide,
             map: RODIN.Loader.loadTexture('./src/assets/space.jpg')
         }));
+        this.enviroment.on(RODIN.CONST.READY, () => {
+            this.enviroment.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, this.onButtonDown.bind(this));
+        });
         /**
          * Loading placeholder
          * @type {RODIN.Plane}
          */
-        this.loader = new RODIN.Plane(8, 4.5, new THREE.MeshBasicMaterial({transparent: true, map: RODIN.Loader.loadTexture('./src/assets/Rodin_video_gallery.png')}));
+        this.loader = new RODIN.Plane(8, 4.5, new THREE.MeshBasicMaterial({
+            transparent: true,
+            map: RODIN.Loader.loadTexture('./src/assets/Rodin_video_gallery.png')
+        }));
         this.loader.on(RODIN.CONST.READY, env => {
             this.enviroment.add(env.target);
-            env.target.position.z = - 10;
+            env.target.position.z = -10;
             env.target.position.y = 2.25;
         });
         this.enviroment.needsUpdate = true;
         this.transition = blinkAnimation.get();
         this.containers = {};
+    }
+
+    onButtonDown() {
+        if (this.containers.videoContainer && this.containers.videoContainer.thumbs) {
+            Thumbnail.reset(this.containers.videoContainer.thumbs)
+        }
     }
 
     /**
@@ -59,7 +72,7 @@ export class MainContainer extends RODIN.Sculpt{
         setTimeout(() => {
             // start our closing animation
             this.transition.close()
-        }, 5000);
+        }, 0);
 
         /**
          * eyelid transition event
@@ -68,7 +81,7 @@ export class MainContainer extends RODIN.Sculpt{
          * This way environment is changed in a "blink" of an eye
          * @param evt
          */
-        const onclose = (evt)=>{
+        const onclose = (evt) => {
             this.transition.removeEventListener('Closed', onclose);
             this.changeEnvironment();
             this.transition.open();
@@ -84,5 +97,6 @@ export class MainContainer extends RODIN.Sculpt{
         this.enviroment._threeObject.material.map = RODIN.Loader.loadTexture('./src/assets/env.jpg');
         let videoContainer = new VideoContainer(this.transition);
         this.containers.navigation = new Navigation(videoContainer);
+        this.containers.videoContainer = videoContainer;
     }
 }
