@@ -37,8 +37,7 @@ export class VideoPlayer {
                 width: 3
             }, transition);
             this.container();
-
-            this.player.loadVideo(url)
+            this.player.loadVideo(url);
         } else {
             this.controls.loadVideo(title, url, backgroundImage);
         }

@@ -1,18 +1,18 @@
 export const videos = [{
     "title": "Title 1",
-    "description": "description description description description",
+    "description": "description",
     "url": "./src/assets/videos/PedraBonita1k.mp4",
     "thumbnail": "./src/assets/thumbs/03.jpg"
 },
     {
         "title": "Title 2",
-        "description": "description description description description",
+        "description": "description",
         "url": "./rodin4k.mp4",
         "thumbnail": "./src/assets/thumbs/02.jpg"
     },
     {
         "title": "Title 3",
-        "description": "description description description description",
+        "description": "description",
         "url": "./src/assets/videos/PedraBonita1k.mp4",
         "thumbnail": "./src/assets/thumbs/01.jpg"
     },
@@ -60,19 +60,19 @@ export const videos = [{
     },
     {
         "title": "Title 11",
-        "description": "description description description description",
+        "description": "description",
         "url": "./src/assets/videos/PedraBonita1k.mp4",
         "thumbnail": "./src/assets/thumbs/03.jpg"
     },
     {
         "title": "Title 12",
-        "description": "description description description description",
+        "description": "description",
         "url": "./rodin4k.mp4",
         "thumbnail": "./src/assets/thumbs/02.jpg"
     },
     {
         "title": "Title 13",
-        "description": "description description description description",
+        "description": "description",
         "url": "./src/assets/videos/PedraBonita1k.mp4",
         "thumbnail": "./src/assets/thumbs/01.jpg"
     },
@@ -119,19 +119,19 @@ export const videos = [{
         "thumbnail": "./src/assets/thumbs/01.jpg"
     }, {
         "title": "Title 21",
-        "description": "description description description description",
+        "description": "description",
         "url": "./src/assets/videos/PedraBonita1k.mp4",
         "thumbnail": "./src/assets/thumbs/03.jpg"
     },
     {
         "title": "Title 22",
-        "description": "description description description description",
+        "description": "description",
         "url": "./rodin4k.mp4",
         "thumbnail": "./src/assets/thumbs/02.jpg"
     },
     {
         "title": "Title 23",
-        "description": "description description description description",
+        "description": "description",
         "url": "./src/assets/videos/PedraBonita1k.mp4",
         "thumbnail": "./src/assets/thumbs/01.jpg"
     },
@@ -179,19 +179,19 @@ export const videos = [{
     },
     {
         "title": "Title 31",
-        "description": "description description description description",
+        "description": "description",
         "url": "./src/assets/videos/PedraBonita1k.mp4",
         "thumbnail": "./src/assets/thumbs/03.jpg"
     },
     {
         "title": "Title 32",
-        "description": "description description description description",
+        "description": "description",
         "url": "./rodin4k.mp4",
         "thumbnail": "./src/assets/thumbs/02.jpg"
     },
     {
         "title": "Title 33",
-        "description": "description description description description",
+        "description": "description",
         "url": "./src/assets/videos/PedraBonita1k.mp4",
         "thumbnail": "./src/assets/thumbs/01.jpg"
     },

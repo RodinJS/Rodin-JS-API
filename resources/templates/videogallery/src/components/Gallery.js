@@ -34,33 +34,27 @@ export const setView = (thumbs, viewNumber) => {
     switch (viewNumber) {
         case 0:
             view = new RODIN.HorizontalSemiCircleGrid(7, 1, 1.1, 1.8, 3.5);
-            view.sculpt.position.set(0, 2.1, 0);
+            view.sculpt.position.set(0, 2.1, -2);
 
             break;
         case 1:
             view = new RODIN.HorizontalGrid(5, 2, 1.1, 1.8);
-            view.sculpt.position.set(0, 2.5, -3);
+            view.sculpt.position.set(0, 2.5, -4);
 
             break;
         case 2:
-            view = new RODIN.VerticalSemiCircleGrid(7, 2, 0.5, 1.2, 3.5);
-            view.sculpt.position.set(0, 2.6, 0);
+            view = new RODIN.VerticalSemiCircleGrid(7, 3, 0.5, 1.2, 3.5);
+            view.sculpt.position.set(0, 1.35, -2);
             break;
     }
 
-    let isScrolling = false;
     view.on(RODIN.CONST.SCROLL_START, (evt) => {
-        // evt.stopPropagation();
-        if (isScrolling) {
-            return;
-        }
-        isScrolling = true;
+        evt.stopPropagation();
         Thumbnail.reset(view.sculpt);
     });
 
     view.on(RODIN.CONST.SCROLL_END, (evt) => {
         evt.stopPropagation();
-        isScrolling = false;
     });
 
 

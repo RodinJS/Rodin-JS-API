@@ -1,6 +1,6 @@
 import * as RODIN from 'rodin/core';
-import { Icons } from '../data/buttons.js';
-import { Button } from './Button.js';
+import {Icons} from '../data/buttons.js';
+import {Button} from './Button.js';
 
 /**
  * a class that handles view changing buttons
@@ -22,10 +22,11 @@ export class Navigation {
                 radius: 0.2
             }
         });
+        this.btnArea.visible = false;
         this.isNavigationOpen = false;
         this.btnArea.on(RODIN.CONST.READY, e => {
             RODIN.Scene.add(e.target);
-            this.viewChange = new RODIN.Text({ text: 'CHANGE VIEW', fontSize: 0.04, color: 0xFFFFFF });
+            this.viewChange = new RODIN.Text({text: 'CHANGE VIEW', fontSize: 0.04, color: 0xFFFFFF});
             this.viewChange.name = 'textChange';
             this.viewChange._threeObject.material.visible = false;
             e.target.add(this.viewChange);
@@ -42,10 +43,11 @@ export class Navigation {
                     this.btnArea.add(btn);
                     btn.position.z = 0.02;
                     btn.position.x = -0.2 + 0.2 * i;
-                    let type = new RODIN.Text({ text: evt.target.name, fontSize: 0.04, color: 0xFFFFFF });
+                    let type = new RODIN.Text({text: evt.target.name, fontSize: 0.04, color: 0xFFFFFF});
 
                     type.name = 'hoverText';
                     type.on(RODIN.CONST.READY, (t) => {
+                        this.btnArea.visible = true;
                         button.active.add(type);
                         t.target.position.y = -0.13;
                         t.target._threeObject.material.visible = false;
@@ -78,21 +80,21 @@ export class Navigation {
                     x: 0
                 }
             }, 'navigationClose', 300);
-            btn.element.on(RODIN.CONST.ANIMATION_COMPLETE, e => {
+            btn.element.on(RODIN.CONST.ANIMATION_COMPLETE, (e) => {
                 if (e.animation === 'navigationClose') {
                     btn.element._threeObject.material.visible = btn.element.name.toLowerCase() === type.toLowerCase();
                     btn.element._threeObject.visible = btn.element.name.toLowerCase() === type.toLowerCase();
                 }
-            })
+            });
         });
         this.isNavigationOpen = false;
         this.videoContainer.setView(type)
     }
 
     onHoverAnimation(evt) {
-        let { target } = evt;
-        Navigation.animation(target._children[1], { scale: { x: .95, y: .95, z: .95 } }, 'scaleIn', 300);
-        if(!this.isNavigationOpen) {
+        let {target} = evt;
+        Navigation.animation(target._children[1], {scale: {x: .95, y: .95, z: .95}}, 'scaleIn', 300);
+        if (!this.isNavigationOpen) {
             this.showViewChange();
         }
         target._children.map((ch) => {
@@ -103,9 +105,9 @@ export class Navigation {
     }
 
     onHoverOutAnimation(evt) {
-        let { target } = evt;
-        Navigation.animation(target._children[1], { scale: { x: .8, y: .8, z: .8 } }, 'scaleOut', 300);
-        if(!this.isNavigationOpen) {
+        let {target} = evt;
+        Navigation.animation(target._children[1], {scale: {x: .8, y: .8, z: .8}}, 'scaleOut', 300);
+        if (!this.isNavigationOpen) {
             this.hideViewChange();
         }
         target._children.map((ch) => {
@@ -151,6 +153,5 @@ export class Navigation {
         navigationAnimation.duration(duration);
         obj.animation.add(navigationAnimation);
         obj.animation.start(name);
-        return navigationAnimation;
     }
 }
