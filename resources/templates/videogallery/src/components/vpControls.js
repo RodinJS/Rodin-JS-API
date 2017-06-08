@@ -277,10 +277,12 @@ export class VPcontrolPanel extends RODIN.Sculpt {
     loadVideo(title, url, cover) {
         this.title = title;
         this.player.loadVideo(url);
+        this.player.switchTo('HD');
         this.cover = cover;
         this.createTitle();
         this.createCover();
         this.createTimeBar();
+        this.createHDToggle();
 
     }
 
@@ -802,36 +804,41 @@ export class VPcontrolPanel extends RODIN.Sculpt {
             fontSize: this.width / 30,
             ppm: 1000
         };
-        let HDButton = new RODIN.Text(HDParams);
+        if(this.SDButton && this.SDButton.parent) {
+            this.SDButton.parent = null;
+            this.HDButton.parent = this.panel;
+            this.HDButton.position.set(this.width * 0.48, -this.width / 3.02, 0);
+        }
+        this.HDButton = new RODIN.Text(HDParams);
 
         this.elementsPending++;
 
-        HDButton.on(RODIN.CONST.READY, (evt) => {
-            HDButton.parent = this.panel;
-            HDButton.position.set(this.width * 0.48, -this.width / 3.02, 0);
+        this.HDButton.on(RODIN.CONST.READY, (evt) => {
+            this.HDButton.parent = this.panel;
+            this.HDButton.position.set(this.width * 0.48, -this.width / 3.02, 0);
             evt.target.animation.add(hoverAnimation, hoverOutAnimation);
             this.elementsPending--;
             this.readyCheck();
         });
 
-        HDButton.on(RODIN.CONST.GAMEPAD_HOVER, (evt) => {
+        this.HDButton.on(RODIN.CONST.GAMEPAD_HOVER, (evt) => {
             this.hoverAction(evt);
             evt.target.animation.start("hoverAnimation");
         });
 
-        HDButton.on(RODIN.CONST.GAMEPAD_HOVER_OUT, (evt) => {
+        this.HDButton.on(RODIN.CONST.GAMEPAD_HOVER_OUT, (evt) => {
             this.hoverOutAction(evt);
             evt.target.animation.start("hoverOutAnimation");
         });
 
-        HDButton.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, (evt) => {
+        this.HDButton.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, (evt) => {
             evt.stopPropagation();
             let playAfter = this.player.isPlaying();
             this.player.switchTo("SD");
 
-            HDButton.parent = null;
-            SDButton.parent = this.panel;
-            SDButton.position.set(this.width * 0.48, -this.width / 3.02, 0);
+            this.HDButton.parent = null;
+            this.SDButton.parent = this.panel;
+            this.SDButton.position.set(this.width * 0.48, -this.width / 3.02, 0);
 
             if (playAfter) {
                 this.player.play();
@@ -846,38 +853,38 @@ export class VPcontrolPanel extends RODIN.Sculpt {
             fontSize: this.width / 30,
             ppm: 1000
         };
-        let SDButton = new RODIN.Text(SDParams);
+        this.SDButton = new RODIN.Text(SDParams);
 
         this.elementsPending++;
 
-        SDButton.on(RODIN.CONST.READY, (evt) => {
-            SDButton.parent = this.panel;
-            SDButton.position.set(this.width * 0.48, -this.width / 3.02, 0);
+        this.SDButton.on(RODIN.CONST.READY, (evt) => {
+            this.SDButton.parent = this.panel;
+            this.SDButton.position.set(this.width * 0.48, -this.width / 3.02, 0);
             evt.target.animation.add(hoverAnimation, hoverOutAnimation);
             this.elementsPending--;
             this.readyCheck();
-            SDButton.parent = null;
+            this.SDButton.parent = null;
         });
 
-        SDButton.on(RODIN.CONST.GAMEPAD_HOVER, (evt) => {
+        this.SDButton.on(RODIN.CONST.GAMEPAD_HOVER, (evt) => {
             this.hoverAction(evt);
             evt.target.animation.start("hoverAnimation");
         });
 
-        SDButton.on(RODIN.CONST.GAMEPAD_HOVER_OUT, (evt) => {
+        this.SDButton.on(RODIN.CONST.GAMEPAD_HOVER_OUT, (evt) => {
             this.hoverOutAction(evt);
             evt.target.animation.start("hoverOutAnimation");
         });
 
-        SDButton.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, (evt) => {
+        this.SDButton.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, (evt) => {
             evt.stopPropagation();
 
             let playAfter = this.player.isPlaying();
             this.player.switchTo("HD");
 
-            SDButton.parent = null;
-            HDButton.parent = this.panel;
-            HDButton.position.set(this.width * 0.48, -this.width / 3.02, 0);
+            this.SDButton.parent = null;
+            this.HDButton.parent = this.panel;
+            this.HDButton.position.set(this.width * 0.48, -this.width / 3.02, 0);
 
             if (playAfter) {
                 this.player.play();
