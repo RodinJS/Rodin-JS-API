@@ -72,7 +72,7 @@ export class MainContainer extends RODIN.Sculpt {
         setTimeout(() => {
             // start our closing animation
             this.transition.close()
-        }, 0);
+        }, 5000);
 
         /**
          * eyelid transition event

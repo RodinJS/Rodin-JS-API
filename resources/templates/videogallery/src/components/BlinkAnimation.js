@@ -51,11 +51,11 @@ export class blinkAnimation extends RODIN.EventEmitter {
         /**
          * add animations to our eyelids
          */
-        this.topEyelid.animation.add(blinkAnimation._makeAnimation(0.12, 'open', 2000));
-        this.bottomEyelid.animation.add(blinkAnimation._makeAnimation(-0.12, 'open', 2000));
+        this.topEyelid.animation.add(blinkAnimation._makeAnimation(0.12, 'open', 1500));
+        this.bottomEyelid.animation.add(blinkAnimation._makeAnimation(-0.12, 'open', 1500));
 
-        this.topEyelid.animation.add(blinkAnimation._makeAnimation(0.025, 'close', 2000));
-        this.bottomEyelid.animation.add(blinkAnimation._makeAnimation(-0.025, 'close', 2000));
+        this.topEyelid.animation.add(blinkAnimation._makeAnimation(0.025, 'close', 1500));
+        this.bottomEyelid.animation.add(blinkAnimation._makeAnimation(-0.025, 'close', 1500));
 
     }
 

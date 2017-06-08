@@ -246,13 +246,14 @@ export class VPcontrolPanel extends RODIN.Sculpt {
         });
         back.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, (evt) => {
             evt.stopPropagation();
-            if (this.player.getLength()) {
                 this.pauseButton.scale.set(1, 1, 1);
                 this.playButton.scale.set(1, 1, 1);
                 this.pauseButton.parent = null;
                 this.playButton.parent = this.panel;
                 this.player.pause();
-                // this.player.jumpTo(0);
+                if(this.player.getLength()) {
+                    this.player.jumpTo(0);
+                }
                 this.transition.close();
 
                 const onclose = (evt) => {
@@ -270,7 +271,6 @@ export class VPcontrolPanel extends RODIN.Sculpt {
                 };
 
                 this.transition.on('Closed', onclose);
-            }
         });
     }
 
