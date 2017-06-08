@@ -826,7 +826,6 @@ export class VPcontrolPanel extends RODIN.Sculpt {
 
         HDButton.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, (evt) => {
             evt.stopPropagation();
-
             let playAfter = this.player.isPlaying();
             this.player.switchTo("SD");
 

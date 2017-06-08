@@ -9,6 +9,7 @@ export class Button {
         this.height = height;
         this.name = name;
         this.image = image;
+        this.isClicked = false;
         this.draw();
     }
 

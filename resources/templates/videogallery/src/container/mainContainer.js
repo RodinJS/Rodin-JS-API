@@ -32,7 +32,7 @@ export class MainContainer extends RODIN.Sculpt {
          */
         this.loader = new RODIN.Plane(8, 4.5, new THREE.MeshBasicMaterial({
             transparent: true,
-            map: RODIN.Loader.loadTexture('./src/assets/Rodin_video_gallery.png')
+            map: RODIN.Loader.loadTexture('./src/assets/loader.png')
         }));
         this.loader.on(RODIN.CONST.READY, env => {
             this.enviroment.add(env.target);
