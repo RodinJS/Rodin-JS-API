@@ -18,7 +18,7 @@ export class VideoContainer {
         this.thumbs = videos.map(v => new Thumbnail(v, this.videoPlayer, this.blinkAnimation));
         this.standingArea = new RODIN.Plane(8, 8, new THREE.MeshBasicMaterial({
             transparent: true,
-            map: RODIN.Loader.loadTexture('./src/assets/Floor.png')
+            map: RODIN.Loader.loadTexture('./src/assets/floor.png')
         }));
         this.standingArea.on(RODIN.CONST.READY, evt => {
             RODIN.Scene.add(this.standingArea);

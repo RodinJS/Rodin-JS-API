@@ -103,7 +103,6 @@ export class Thumbnail extends RODIN.Sculpt {
             });
             title.on(RODIN.CONST.READY, text => {
                 let {target} = text;
-                // title._threeObject.renderOrder = 12;
                 target.position.y = 0.3;
                 target.position.z = 0.01;
                 el.target.add(target);
@@ -201,7 +200,7 @@ export class Thumbnail extends RODIN.Sculpt {
         description.position.x = .1;
         let close = new RODIN.Text({
             text: 'Click To Close',
-            fontSize: 0.06,
+            fontSize: 0.08,
             color: 0xffffff
         });
         close._threeObject.renderOrder = 1;
@@ -212,7 +211,6 @@ export class Thumbnail extends RODIN.Sculpt {
             close.position.z = .01;
             close.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, this.showHideDescription.bind(this));
         });
-        this.description.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, this.showHideDescription.bind(this));
         return this.description;
     }
 
@@ -226,7 +224,9 @@ export class Thumbnail extends RODIN.Sculpt {
             const el = this.element._children[i];
             el.visible = !el.visible;
         }
-        this.more.visible = false;
+        if(!this.active) {
+            this.more.visible = false;
+        }
         this.isDescriptionMode = !this.isDescriptionMode;
     }
 

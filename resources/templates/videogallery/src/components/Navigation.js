@@ -52,8 +52,11 @@ export class Navigation {
                         t.target.position.y = -0.13;
                         t.target._threeObject.material.visible = false;
                     });
-                    btn.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, (e) => {
+                    btn.on(RODIN.CONST.GAMEPAD_BUTTON_UP, (e) => {
                         this.openNavigation(e);
+                    });
+                    btn.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, (e) => {
+                        this.onButtonDown(e);
                     });
                 });
                 button.active.on(RODIN.CONST.GAMEPAD_HOVER, this.onHoverAnimation.bind(this));
@@ -61,6 +64,11 @@ export class Navigation {
             }
             this.setActiveButton('Linear');
         });
+    }
+
+    onButtonDown(e) {
+        e.stopPropagation();
+        this._lastButtonDown = RODIN.Time.now;
     }
 
     get sculpt() {
@@ -114,11 +122,16 @@ export class Navigation {
             if (ch.name === 'hoverText') {
                 ch._threeObject.material.visible = false;
             }
-        })
+        });
     }
 
     openNavigation(evt) {
         evt.stopPropagation();
+        if (RODIN.Time.now - this._lastButtonDown > 150 || RODIN.Time.now - this._lastButtonDown < 50)
+            return;
+        if(evt.target.animation.isPlaying()) {
+            return;
+        }
         if (this.sculpt._threeObject.material.visible) {
             return this.setActiveButton(evt.target.name)
         }
@@ -131,7 +144,11 @@ export class Navigation {
                 position: {
                     x: -0.20 + 0.20 * key
                 }
-            }, 'navigationOpen', 300)
+            }, 'navigationOpen', 300);
+            if (value.element.animation && value.element.animation.isPlaying('navigationOpen')) {
+                value.element.animation.stop('navigationOpen', false);
+                console.log('aab')
+            }
         });
     }
 
