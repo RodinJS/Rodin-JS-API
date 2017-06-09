@@ -188,16 +188,16 @@ export class Thumbnail extends RODIN.Sculpt {
         this.description.visible = false;
         this.description.id = id;
         let description = new RODIN.DynamicText({
-            width: 1.6,
+            width: 1.45,
             height: .9,
             text: this.params.description,
             fontSize: 0.1,
             color: 0xffffff
         });
         description._threeObject.renderOrder = 1;
-        description.position.y = .32;
+        description.position.y = .1;
         description.position.z = .01;
-        description.position.x = .1;
+        description.position.x = 0;
         let close = new RODIN.Text({
             text: 'Click To Close',
             fontSize: 0.08,

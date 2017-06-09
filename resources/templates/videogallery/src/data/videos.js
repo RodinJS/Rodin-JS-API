@@ -1,7 +1,6 @@
-export const videos = [
-    {
-        "title": "Title 1",
-        "description": "description",
+export const videos = [{
+        "title": "Amsterdam Central",
+        "description": "The station, which is one of the most visited touristic destinations in the country, is situated literally in the center of Amsterdam.",
         "url": {
             "SD": "https://rodin.space/res/video/1_1k.mp4",
             "HD": "https://rodin.space/res/video/1_2k.mp4"
@@ -9,8 +8,8 @@ export const videos = [
         "thumbnail": "https://rodin.space/res/img/1.jpg"
     },
     {
-        "title": "Title 2",
-        "description": "description",
+        "title": "Veer Centraal Station",
+        "description": "",
         "url": {
             "SD": "https://rodin.space/res/video/2_1k.mp4",
             "HD": "https://rodin.space/res/video/2_2k.mp4"
@@ -18,8 +17,8 @@ export const videos = [
         "thumbnail": "https://rodin.space/res/img/2.jpg"
     },
     {
-        "title": "Title 3",
-        "description": "description",
+        "title": "Dam Square",
+        "description": "A dam, built in 1270 to protect the city from the inundation by Zuiderzee see, later became the heart of Amsterdam always crowded with buzzing tourists and locals. ",
         "url": {
             "SD": "https://rodin.space/res/video/3_1k.mp4",
             "HD": "https://rodin.space/res/video/3_2k.mp4"
@@ -27,8 +26,8 @@ export const videos = [
         "thumbnail": "https://rodin.space/res/img/3.jpg"
     },
     {
-        "title": "Title 4",
-        "description": "description",
+        "title": "Amsterdam Gay Pride",
+        "description": "Amsterdam Pride or Amsterdam Gay Pride is a citywide gay-festival held annually at the center of Amsterdam during the first weekend of August. ",
         "url": {
             "SD": "https://rodin.space/res/video/4_1k.mp4",
             "HD": "https://rodin.space/res/video/4_2k"
@@ -36,8 +35,8 @@ export const videos = [
         "thumbnail": "https://rodin.space/res/img/4.jpg"
     },
     {
-        "title": "Title 5",
-        "description": "description",
+        "title": "Magere Brug",
+        "description": "Originally a narrow bridge now is one of the charming bridges in Amsterdam. Magere brug means Skinny Bridge in English",
         "url": {
             "SD": "https://rodin.space/res/video/5_1k",
             "HD": "https://rodin.space/res/video/5_2k"
@@ -45,8 +44,8 @@ export const videos = [
         "thumbnail": "https://rodin.space/res/img/5.jpg"
     },
     {
-        "title": "Title 6",
-        "description": "description",
+        "title": "Amsterdam Zoo ARTIS",
+        "description": "It's already about 2 centuries, Amsterdam Zoo ARTIS entertains thousands of visitors, and it's still a modern and unique zoological.",
         "url": {
             "SD": "https://rodin.space/res/video/6_1k.mp4",
             "HD": "https://rodin.space/res/video/6_2k.mp4"
@@ -54,8 +53,8 @@ export const videos = [
         "thumbnail": "https://rodin.space/res/img/6.jpg"
     },
     {
-        "title": "Title 7",
-        "description": "description",
+        "title": "Aquarium Barcelona",
+        "description": "One of the best aquariums in Europe is Aquarium Barcelona with a series of 35 aquariums, 11,000 animals and 450 different species.",
         "url": {
             "SD": "https://rodin.space/res/video/7_1k.mp4",
             "HD": "https://rodin.space/res/video/7_2k.mp4"
@@ -63,8 +62,8 @@ export const videos = [
         "thumbnail": "https://rodin.space/res/img/7.jpg"
     },
     {
-        "title": "Title 8",
-        "description": "description",
+        "title": "Las Golondrinas ",
+        "description": "Las Golondrinas (translated as \"The Swallows\" in English) was the first the first one and still is the only one that organizes harbor tours.",
         "url": {
             "SD": "https://rodin.space/res/video/8_1k.mp4",
             "HD": "https://rodin.space/res/video/8_2k.mp4"
@@ -72,8 +71,8 @@ export const videos = [
         "thumbnail": "https://rodin.space/res/img/8.jpg"
     },
     {
-        "title": "Title 9",
-        "description": "description",
+        "title": "FC Barcelona victory parade",
+        "description": "FC Barcelona players and supporters celebrate the 2015/16 league title on Sunday afternoon in the streets of Barcelona.",
         "url": {
             "SD": "https://rodin.space/res/video/9_1k.mp4",
             "HD": "https://rodin.space/res/video/9_2k.mp4"
@@ -81,8 +80,8 @@ export const videos = [
         "thumbnail": "https://rodin.space/res/img/9.jpg"
     },
     {
-        "title": "Title 10",
-        "description": "description",
+        "title": "Magic Fountain of Montjuic",
+        "description": "Great Universal Exhibition of 1929 became even greater by the realisation of Carles Buigas's idea, i.e. creating the Magic Fountain of Montjuic. ",
         "url": {
             "SD": "https://rodin.space/res/video/10_1k.mp4",
             "HD": "https://rodin.space/res/video/10_2k.mp4"
@@ -90,8 +89,8 @@ export const videos = [
         "thumbnail": "https://rodin.space/res/img/10.jpg"
     },
     {
-        "title": "Title 11",
-        "description": "description",
+        "title": "Plaza de Catalonia",
+        "description": "Barcelona's busiest square, the Plaça de Catalunya is located between the old city and the 19th century Eixample district. ",
         "url": {
             "SD": "https://rodin.space/res/video/11_1k.mp4",
             "HD": "https://rodin.space/res/video/11_2k.mp4"
@@ -99,8 +98,8 @@ export const videos = [
         "thumbnail": "https://rodin.space/res/img/11.jpg"
     },
     {
-        "title": "Title 12",
-        "description": "description",
+        "title": "Barcelona Zoo",
+        "description": "14 hectares Barcelona Zoo inside the Parc de la Ciutadella was founded in 1892. Over 4000 animals from 400 different species live in naturally reproduced habitat in Barcelona Zoo.",
         "url": {
             "SD": "https://rodin.space/res/video/12_1k.mp4",
             "HD": "https://rodin.space/res/video/12_2k.mp4"
@@ -108,8 +107,8 @@ export const videos = [
         "thumbnail": "https://rodin.space/res/img/12.jpg"
     },
     {
-        "title": "Title 13",
-        "description": "description",
+        "title": "Copacabana Beach",
+        "description": "Recognized as the most famous and popular, Copacabana Beach stretching over 4 km. From left SUGARLOAF mountain, and the 18th-century fortress, the 20th-century fortress on the right side of the crescent-shaped beach wind.",
         "url": {
             "SD": "https://rodin.space/res/video/13_1k.mp4",
             "HD": "https://rodin.space/res/video/13_2k.mp4"
@@ -117,8 +116,8 @@ export const videos = [
         "thumbnail": "https://rodin.space/res/img/13.jpg"
     },
     {
-        "title": "Title 14",
-        "description": "description",
+        "title": "Boating in Vltava River",
+        "description": "With 430 km length, the Vltava is the longest river in the Czech Republic. Dams, weirs and a canal have been constructed over the river, that is the silent witness of the history of the millennial city.",
         "url": {
             "SD": "https://rodin.space/res/video/14_1k.mp4",
             "HD": "https://rodin.space/res/video/14_2k.mp4"
@@ -126,8 +125,8 @@ export const videos = [
         "thumbnail": "https://rodin.space/res/img/14.jpg"
     },
     {
-        "title": "Title 15",
-        "description": "description",
+        "title": "Prague Castle",
+        "description": "The largest castle in the world that attracts thousands of tourists is also the official residence from where the Czech Republic President governs the country. ",
         "url": {
             "SD": "https://rodin.space/res/video/15_1k.mp4",
             "HD": "https://rodin.space/res/video/15_2k.mp4"
@@ -135,8 +134,8 @@ export const videos = [
         "thumbnail": "https://rodin.space/res/img/15.jpg"
     },
     {
-        "title": "Title 16",
-        "description": "description",
+        "title": "Charles Bridge",
+        "description": "It took almost half a century to construct a bridge that was the only link between Vltava river sides for more than 300 years. 502 meters long bridge is pedestrianized since 1950. ",
         "url": {
             "SD": "https://rodin.space/res/video/16_1k.mp4",
             "HD": "https://rodin.space/res/video/16_2k.mp4"
@@ -144,8 +143,8 @@ export const videos = [
         "thumbnail": "https://rodin.space/res/img/16.jpg"
     },
     {
-        "title": "Title 17",
-        "description": "description",
+        "title": "Prague Astronomical Clock",
+        "description": "The oldest medieval astronomical clock still in operation is Prague Astronomical Clock on the southern wall of Old Town Hall in the Old Town Square.",
         "url": {
             "SD": "https://rodin.space/res/video/17_1k.mp4",
             "HD": "https://rodin.space/res/video/17_2k.mp4"
@@ -153,8 +152,8 @@ export const videos = [
         "thumbnail": "https://rodin.space/res/img/17.jpg"
     },
     {
-        "title": "Title 18",
-        "description": "description",
+        "title": "Old Town Square",
+        "description": "Prague old town square is the right place to feel the spirit of the city. Town Hall with the world famous astronomical clock on the facade and colorful houses soar around the square.",
         "url": {
             "SD": "https://rodin.space/res/video/18_1k.mp4",
             "HD": "https://rodin.space/res/video/18_2k.mp4"
@@ -162,8 +161,8 @@ export const videos = [
         "thumbnail": "https://rodin.space/res/img/18.jpg"
     },
     {
-        "title": "Title 19",
-        "description": "description",
+        "title": "Old tram tour in prague",
+        "description": "Forty historical vehicles, photographs, models of old trains, historical documents, tickets and posters: these all are displayed at the Public Transport Museum in Prague. ",
         "url": {
             "SD": "https://rodin.space/res/video/19_1k.mp4",
             "HD": "https://rodin.space/res/video/19_2k.mp4"
@@ -171,16 +170,16 @@ export const videos = [
         "thumbnail": "https://rodin.space/res/img/19.jpg"
     },
     {
-        "title": "Title 20",
-        "description": "description",
+        "title": "Statue of Franz Kafka",
+        "description": "20th-century literature outstanding representative Franz Kafka's bust of 11-meter-tall, 45 tons weight stands across from City Hall.  ",
         "url": {
             "SD": "https://rodin.space/res/video/20_1k.mp4",
             "HD": "https://rodin.space/res/video/20_2k.mp4"
         },
         "thumbnail": "https://rodin.space/res/img/20.jpg"
     }, {
-        "title": "Title 21",
-        "description": "description",
+        "title": "Sunset In prague ",
+        "description": "",
         "url": {
             "SD": "https://rodin.space/res/video/21_1k.mp4",
             "HD": "https://rodin.space/res/video/21_2k.mp4"
@@ -188,72 +187,72 @@ export const videos = [
         "thumbnail": "https://rodin.space/res/img/21.jpg"
     },
     {
-        "title": "Title 22",
-        "description": "description",
+        "title": "Prague Zoo",
+        "description": "Visiting Prague Zoo is an option to get a view of the countryside, be in a zoological garden where around 4500 animals of 650 species have found their shelter. ",
         "url": {
             "SD": "https://rodin.space/res/video/22_1k.mp4",
             "HD": "https://rodin.space/res/video/22_2k.mp4"
         },
         "thumbnail": "https://rodin.space/res/img/22.jpg"
     },{
-        "title": "Title 23",
-        "description": "description",
+        "title": "Joa Beach",
+        "description": "Joa Beach (Joatinga) is a relatively small beach with 300 meters length and is famous for its strong waves. This is a perfect place for those who want to surface.",
         "url": {
             "SD": "https://rodin.space/res/video/23_1k.mp4",
             "HD": "https://rodin.space/res/video/23_2k.mp4"
         },
         "thumbnail": "https://rodin.space/res/img/23.jpg"
     },{
-        "title": "Title 24",
-        "description": "description",
+        "title": "Cafesjian Sculpture Garden",
+        "description": "Cafesjian Sculpture Garden is located at the base of the Cascade, Yerevan and presents one of the finest collections of monumental sculpture found anywhere in the world. ",
         "url": {
             "SD": "https://rodin.space/res/video/24_1k.mp4",
             "HD": "https://rodin.space/res/video/24_2k.mp4"
         },
         "thumbnail": "https://rodin.space/res/img/24.jpg"
     },{
-        "title": "Title 25",
-        "description": "description",
+        "title": "France Square",
+        "description": "Take a look at the online webcam view of France Square, Yerevan, Armenia. By this cam you can follow the traffic of the crossroads of Sayat-Nova street and Mashtots avenue.",
         "url": {
             "SD": "https://rodin.space/res/video/25_1k.mp4",
             "HD": "https://rodin.space/res/video/25_2k.mp4"
         },
         "thumbnail": "https://rodin.space/res/img/25.jpg"
     },{
-        "title": "Title 26",
-        "description": "description",
+        "title": "Republic Square",
+        "description": "Main streets in the center of Yerevan lead to Republic Square where one will feel the pulse of the capital",
         "url": {
             "SD": "https://rodin.space/res/video/26_1k.mp4",
             "HD": "https://rodin.space/res/video/26_2k.mp4"
         },
         "thumbnail": "https://rodin.space/res/img/26.jpg"
     },{
-        "title": "Title 27",
-        "description": "description",
+        "title": "Rio Carnival",
+        "description": "Rio Carnival is the favored one in Brazil, and each year hundreds of thousands of people from all over the world gather to celebrate it. The carnival is notable for its mood and colors. ",
         "url": {
             "SD": "https://rodin.space/res/video/27_1k.mp4",
             "HD": "https://rodin.space/res/video/27_2k.mp4"
         },
         "thumbnail": "https://rodin.space/res/img/27.jpg"
     },{
-        "title": "Title 28",
-        "description": "description",
+        "title": "Pedra Bonita",
+        "description": "Pedra Bonita – “Beautiful Stone” is one of the highest mountains in Rio de Janeiro, part of the Parque da Floresta da Tijuca. A gorgeous view opens across the city.",
         "url": {
             "SD": "https://rodin.space/res/video/28_1k.mp4",
             "HD": "https://rodin.space/res/video/28_2k.mp4"
         },
         "thumbnail": "https://rodin.space/res/img/28.jpg"
     },{
-        "title": "Title 29",
-        "description": "description",
+        "title": "Red Beach",
+        "description": "Situated in the shadow of Sugarloaf, Red beach (Praia Vermelha) offers a breathtaking natural view. The rocky coastline has a superb view from the shore.",
         "url": {
             "SD": "https://rodin.space/res/video/29_1k.mp4",
             "HD": "https://rodin.space/res/video/29_2k.mp4"
         },
         "thumbnail": "https://rodin.space/res/img/29.jpg"
     },{
-        "title": "Title 30",
-        "description": "description",
+        "title": "Vista Chinesa",
+        "description": "On the 380 meters altitude stands Vista Chinesa of Rio de Janeiro (Chinese View in English) high up in the National Park of Tijuca, where one have incredible panoramic views of much of the city.",
         "url": {
             "SD": "https://rodin.space/res/video/30_1k.mp4",
             "HD": "https://rodin.space/res/video/30_2k.mp4"
