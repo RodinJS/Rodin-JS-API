@@ -17,7 +17,7 @@ export class VideoPlayer {
             HD: '',
             SD: '',
             default: 'HD'
-        });
+        }, false, 25, false, true);
     }
 
     /**

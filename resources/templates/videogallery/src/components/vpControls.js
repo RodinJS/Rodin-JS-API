@@ -246,44 +246,46 @@ export class VPcontrolPanel extends RODIN.Sculpt {
         });
         back.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, (evt) => {
             evt.stopPropagation();
-                this.pauseButton.scale.set(1, 1, 1);
-                this.playButton.scale.set(1, 1, 1);
+            this.pauseButton.scale.set(1, 1, 1);
+            this.playButton.scale.set(1, 1, 1);
+            if (this.pauseButton && this.pauseButton.parent) {
                 this.pauseButton.parent = null;
                 this.playButton.parent = this.panel;
                 this.player.pause();
-                if(this.player.getLength()) {
-                    this.player.jumpTo(0);
-                }
-                this.transition.close();
+                this.isPlayed = true;
+            }
 
-                const onclose = (evt) => {
-                    this.transition.removeEventListener('Closed', onclose);
+            if (this.player.getLength()) {
+                this.player.jumpTo(0);
+            }
+            this.transition.close();
 
-                    RODIN.Scene.go('Main');
-                    RODIN.Scene.HMDCamera.name = 'mainCamera';
-                    this.transition.camera = RODIN.Scene.HMDCamera;
+            const onclose = (evt) => {
+                this.transition.removeEventListener('Closed', onclose);
 
-                    // we need this timeout because of a bug in lib
-                    // remove this when lib is fixed
-                    setTimeout(() => {
-                        this.transition.open();
-                    }, 0);
-                };
+                RODIN.Scene.go('Main');
+                RODIN.Scene.HMDCamera.name = 'mainCamera';
+                this.transition.camera = RODIN.Scene.HMDCamera;
 
-                this.transition.on('Closed', onclose);
+                // we need this timeout because of a bug in lib
+                // remove this when lib is fixed
+                setTimeout(() => {
+                    this.transition.open();
+                }, 0);
+            };
+
+            this.transition.on('Closed', onclose);
         });
     }
 
     loadVideo(title, url, cover) {
+        this.isPlayed = false;
         this.title = title;
         this.player.loadVideo(url);
-        this.player.switchTo('HD');
         this.cover = cover;
         this.createTitle();
         this.createCover();
         this.createTimeBar();
-        this.createHDToggle();
-
     }
 
     createTitle() {
@@ -673,7 +675,7 @@ export class VPcontrolPanel extends RODIN.Sculpt {
             fontSize: this.width / 30,
             ppm: 1000
         };
-        if(this.timeBarButton) {
+        if (this.timeBarButton) {
             this.panel.remove(this.timeBarButton);
             this.timeBarButton = null;
             delete this.timeBarButton;
@@ -696,6 +698,16 @@ export class VPcontrolPanel extends RODIN.Sculpt {
 
             if (!isNaN(this.player.getLength())) {
                 evt.target.lastTime = time;
+                if (!this.isPlayed) {
+                    this.playButton.parent = null;
+                    this.pauseButton.parent = this.panel;
+                    this.pauseButton.animation.start("scaleInAnimation");
+                    if (this.cover && this.coverEl) {
+                        this.coverEl.visible = false;
+                    }
+                    this.isPlayed = true;
+                    this.player.play();
+                }
             }
 
             evt.target._threeObject.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(evt.target._threeObject.geometry.parameters.width / 2, 0, 0));
@@ -797,19 +809,24 @@ export class VPcontrolPanel extends RODIN.Sculpt {
     }
 
     createHDToggle() {
-        let HDParams = {
+        if (this.SDButton && this.SDButton.parent) {
+            this.SDButton.parent = null;
+            this.HDButton.parent = this.panel;
+            this.HDButton.position.set(this.width * 0.48, -this.width / 3.02, 0);
+        } else if (this.HDButton && this.HDButton.parent) {
+            this.HDButton.parent = null;
+            this.SDButton.parent = this.panel;
+            this.SDButton.position.set(this.width * 0.48, -this.width / 3.02, 0);
+        }
+        this.HDParams = {
             text: "HD",
             color: 0xffffff,
             fontFamily: "Arial",
             fontSize: this.width / 30,
             ppm: 1000
         };
-        if(this.SDButton && this.SDButton.parent) {
-            this.SDButton.parent = null;
-            this.HDButton.parent = this.panel;
-            this.HDButton.position.set(this.width * 0.48, -this.width / 3.02, 0);
-        }
-        this.HDButton = new RODIN.Text(HDParams);
+
+        this.HDButton = new RODIN.Text(this.HDParams);
 
         this.elementsPending++;
 
@@ -846,14 +863,14 @@ export class VPcontrolPanel extends RODIN.Sculpt {
         });
 
 
-        let SDParams = {
+        this.SDParams = {
             text: "SD",
             color: 0xffffff,
             fontFamily: "Arial",
             fontSize: this.width / 30,
             ppm: 1000
         };
-        this.SDButton = new RODIN.Text(SDParams);
+        this.SDButton = new RODIN.Text(this.SDParams);
 
         this.elementsPending++;
 
