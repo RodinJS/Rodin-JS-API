@@ -42,6 +42,12 @@ const modules = new mongoose.Schema({
     documentationLink: {
         type: String,
     },
+    status:{
+      type:String,
+      enum: ['Pending', 'Rejected', 'InReview', 'Active'],
+      default: 'Pending',
+      required: true,
+    }
 
 });
 
@@ -66,7 +72,7 @@ modules.statics = {
     delete(code) {
     },
 
-    list({ skip = 0, limit = 50 } = {},  _queryString = null) {
+    list({ skip = 0, limit = 50 } = {},  _queryString = null, status = 'Active') {
         const query = {};
         if (_queryString) {
             _queryString = _queryString.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
@@ -83,6 +89,10 @@ modules.statics = {
             },
             ];
         }
+
+        query.$and = [
+          {status:{$eq:status}}
+        ];
 
         return this.find(query)
           .sort({ createdAt: -1 })
