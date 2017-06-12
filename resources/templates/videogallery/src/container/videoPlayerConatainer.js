@@ -39,7 +39,7 @@ export class VideoPlayer {
             this.container();
             this.player.loadVideo(url);
         } else {
-            this.controls.loadVideo(title, url, backgroundImage);
+            this.controls.loadVideo(title, url, backgroundImage, this.sphere);
         }
 
 
@@ -49,7 +49,7 @@ export class VideoPlayer {
      * Initializes environment for the video player
      */
     container() {
-        let controlPanel, material, sphere;
+        let controlPanel, material;
 
         videoPlayerScene.preRender(() => {
             this.player.update(RODIN.Time.delta);
@@ -65,10 +65,10 @@ export class VideoPlayer {
         material = new THREE.MeshBasicMaterial({
             map: this.player.getTexture()
         });
-        sphere = new RODIN.Sculpt(new THREE.Mesh(new THREE.SphereBufferGeometry(90, 720, 4), material));
-        sphere.scale.set(1, 1, -1);
-        sphere.rotation.y = Math.PI / 2;
-        videoPlayerScene.add(sphere);
+        this.sphere = new RODIN.Sculpt(new THREE.Mesh(new THREE.SphereBufferGeometry(90, 720, 4), material));
+        this.sphere.scale.set(1, 1, -1);
+        this.sphere.rotation.y = Math.PI / 2;
+        videoPlayerScene.add(this.sphere);
     }
 
 }
