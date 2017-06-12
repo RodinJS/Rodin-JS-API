@@ -1,4 +1,5 @@
-export const videos = [{
+export const videos = [
+    {
         "title": "Amsterdam Central",
         "description": "The station, which is one of the most visited touristic destinations in the country, is situated literally in the center of Amsterdam.",
         "url": {
@@ -9,7 +10,7 @@ export const videos = [{
     },
     {
         "title": "Veer Centraal Station",
-        "description": "",
+        "description": "In Veer Centraal Station you can free cross the river. Really fast and convenient. You can even go with your bike.",
         "url": {
             "SD": "https://rodin.space/res/video/2_1k.mp4",
             "HD": "https://rodin.space/res/video/2_2k.mp4"
@@ -71,7 +72,7 @@ export const videos = [{
         "thumbnail": "https://rodin.space/res/img/8.jpg"
     },
     {
-        "title": "FC Barcelona victory parade",
+        "title": "FCB victory parade",
         "description": "FC Barcelona players and supporters celebrate the 2015/16 league title on Sunday afternoon in the streets of Barcelona.",
         "url": {
             "SD": "https://rodin.space/res/video/9_1k.mp4",
@@ -99,7 +100,7 @@ export const videos = [{
     },
     {
         "title": "Barcelona Zoo",
-        "description": "14 hectares Barcelona Zoo inside the Parc de la Ciutadella was founded in 1892. Over 4000 animals from 400 different species live in naturally reproduced habitat in Barcelona Zoo.",
+        "description": "14 hectares Barcelona Zoo inside the Parc de la Ciutadella was founded in 1892. Over 4000 animals live in Barcelona Zoo.",
         "url": {
             "SD": "https://rodin.space/res/video/12_1k.mp4",
             "HD": "https://rodin.space/res/video/12_2k.mp4"
@@ -108,7 +109,7 @@ export const videos = [{
     },
     {
         "title": "Copacabana Beach",
-        "description": "Recognized as the most famous and popular, Copacabana Beach stretching over 4 km. From left SUGARLOAF mountain, and the 18th-century fortress, the 20th-century fortress on the right side of the crescent-shaped beach wind.",
+        "description": "Recognized as the most famous and popular, Copacabana Beach stretching over 4 km.",
         "url": {
             "SD": "https://rodin.space/res/video/13_1k.mp4",
             "HD": "https://rodin.space/res/video/13_2k.mp4"
@@ -117,7 +118,7 @@ export const videos = [{
     },
     {
         "title": "Boating in Vltava River",
-        "description": "With 430 km length, the Vltava is the longest river in the Czech Republic. Dams, weirs and a canal have been constructed over the river, that is the silent witness of the history of the millennial city.",
+        "description": "With 430 km length, the Vltava is the longest river in the Czech Republic. Dams, weirs and a canal have been constructed over the river.",
         "url": {
             "SD": "https://rodin.space/res/video/14_1k.mp4",
             "HD": "https://rodin.space/res/video/14_2k.mp4"
@@ -179,7 +180,7 @@ export const videos = [{
         "thumbnail": "https://rodin.space/res/img/20.jpg"
     }, {
         "title": "Sunset In prague ",
-        "description": "",
+        "description": "From this point you can admire the beautiful Prague. People love to spend the night here and see the sun rising.",
         "url": {
             "SD": "https://rodin.space/res/video/21_1k.mp4",
             "HD": "https://rodin.space/res/video/21_2k.mp4"
@@ -212,7 +213,7 @@ export const videos = [{
         "thumbnail": "https://rodin.space/res/img/24.jpg"
     },{
         "title": "France Square",
-        "description": "Take a look at the online webcam view of France Square, Yerevan, Armenia. By this cam you can follow the traffic of the crossroads of Sayat-Nova street and Mashtots avenue.",
+        "description": "France Square, Yerevan, Armenia. By this cam you can follow the traffic of the crossroads of Sayat-Nova street and Mashtots avenue.",
         "url": {
             "SD": "https://rodin.space/res/video/25_1k.mp4",
             "HD": "https://rodin.space/res/video/25_2k.mp4"
@@ -228,7 +229,7 @@ export const videos = [{
         "thumbnail": "https://rodin.space/res/img/26.jpg"
     },{
         "title": "Rio Carnival",
-        "description": "Rio Carnival is the favored one in Brazil, and each year hundreds of thousands of people from all over the world gather to celebrate it. The carnival is notable for its mood and colors. ",
+        "description": "Rio Carnival is the favored one in Brazil, and each year hundreds of thousands of people from all over the world gather to celebrate it.",
         "url": {
             "SD": "https://rodin.space/res/video/27_1k.mp4",
             "HD": "https://rodin.space/res/video/27_2k.mp4"
@@ -252,7 +253,7 @@ export const videos = [{
         "thumbnail": "https://rodin.space/res/img/29.jpg"
     },{
         "title": "Vista Chinesa",
-        "description": "On the 380 meters altitude stands Vista Chinesa of Rio de Janeiro (Chinese View in English) high up in the National Park of Tijuca, where one have incredible panoramic views of much of the city.",
+        "description": "On the 380 meters altitude stands Vista Chinesa of Rio de Janeiro (Chinese View in English) high up in the National Park of Tijuca.",
         "url": {
             "SD": "https://rodin.space/res/video/30_1k.mp4",
             "HD": "https://rodin.space/res/video/30_2k.mp4"
