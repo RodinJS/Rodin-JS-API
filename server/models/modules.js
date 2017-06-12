@@ -28,6 +28,11 @@ const modules = new mongoose.Schema({
         required: true,
         default: 'Rodin team',
     },
+    email:{
+      type: String,
+      required: true,
+      default: 'support@rodin.io',
+    },
     createdAt: {
         type: Date,
         default: Date.now,

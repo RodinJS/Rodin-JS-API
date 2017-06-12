@@ -24,11 +24,14 @@ router.route('/subscribe')
 router.route('/assign')
   .post(check.ifTokenValid, modulesCtrl.checkIsSubscribed, modulesCtrl.getById,  modulesCtrl.assignToProject);
 
+
 router.route('/hook/validate')
   .get(modulesCtrl.checkHookToken, modulesCtrl.validateModules);
 
 router.route('/hook/:moduleId')
-  .get(modulesCtrl.checkHookToken, modulesCtrl.getById);
+  .get(modulesCtrl.checkHookToken, modulesCtrl.getById)
+  .post(modulesCtrl.checkHookToken, modulesCtrl.submit);
+
 
 
 export default router;

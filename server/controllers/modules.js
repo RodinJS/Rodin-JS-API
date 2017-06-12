@@ -135,6 +135,18 @@ function update(req, res, next) {
 
 }
 
+function submit(req, res, next) {
+  const query = {_id:req.params.moduleId};
+  const update = _.omit(req.body, ['moduleId']);
+
+
+  Modules.findOneAndUpdate(query, update, {new: true})
+    .then(module => onSuccess(module, res))
+    .catch(err => onError(err, next));
+
+}
+
+
 function subscribe(req, res, next) {
   ModulesSubscribe.findOne({moduleId: req.module._id, owner: req.user.username})
     .then(module => {
@@ -338,4 +350,5 @@ export default {
   unsubscribe,
   validateModules,
   checkHookToken,
+  submit
 };
