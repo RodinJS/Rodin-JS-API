@@ -189,40 +189,48 @@ function create(req, res, next) {
 
               if (req.body.githubUrl) { // RO-243 #create project from git repo
                 git.clone(req.user.username, help.cleanUrl(req.body.githubUrl), rootDir)
+                  .then(gago => {
+                      updateUserProjects(User, savedProject);
+                  })
                   .catch(e => {
                     const err = new APIError(`Can't clone GitHub repo!`, httpStatus.REPO_DOES_NOT_EXIST, true);
                     return next(err);
                   });
+              } else {
+                updateUserProjects(User, savedProject);
               }
 
-              User.get(req.user.username)
-                .then(user => {
-                  if (user) {
-                    User.updateAsync({username: req.user.username}, {
-                      $push: {
-                        "projects": savedProject._id
-                      }
-                    })
-                      .then(updatedUser => {
-                        return res.status(201).json({
-                          "success": true,
-                          "data": savedProject.outcome()
-                        });
+              let updateUserProjects = (User, savedProject) => {
+                User.get(req.user.username)
+                  .then(user => {
+                    if (user) {
+                      User.updateAsync({username: req.user.username}, {
+                        $push: {
+                          "projects": savedProject._id
+                        }
                       })
-                      .catch((e) => {
-                        const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
-                        return next(err);
-                      });
-                  }
-                  else {
-                    const err = new APIError('User not found!', 310);
+                        .then(updatedUser => {
+                          return res.status(201).json({
+                            "success": true,
+                            "data": savedProject.outcome()
+                          });
+                        })
+                        .catch((e) => {
+                          const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+                          return next(err);
+                        });
+                    }
+                    else {
+                      const err = new APIError('User not found!', 310);
+                      return next(err);
+                    }
+                  })
+                  .error((e) => {
+                    const err = new APIError("Something went wrong!", 312, true);
                     return next(err);
-                  }
-                })
-                .error((e) => {
-                  const err = new APIError("Something went wrong!", 312, true);
-                  return next(err);
-                });
+                  });
+              }
+              
             }
           })
           .catch((e) => {
