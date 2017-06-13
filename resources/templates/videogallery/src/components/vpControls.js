@@ -283,8 +283,11 @@ export class VPcontrolPanel extends RODIN.Sculpt {
             this.pauseButton.scale.set(1, 1, 1);
             this.playButton.scale.set(1, 1, 1);
             if (this.pauseButton && this.pauseButton.parent) {
-                this.pauseButton.parent = null;
-                this.playButton.parent = this.panel;
+                // this.pauseButton.parent = null;
+                // this.playButton.parent = this.panel;
+
+                this.pauseButton.parent.remove(this.pauseButton);
+                this.panel.add(this.playButton);
                 this.player.pause();
             }
 
