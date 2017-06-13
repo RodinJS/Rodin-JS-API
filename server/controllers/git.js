@@ -127,7 +127,7 @@ function create(req, res, next) {
                 console.log('git remote add error: ', err)
                 return next(err);
               } else {
-                shell.exec(`git push -u origin master`, projectRoot, (err) => {
+                shell.exec(`git push -f origin master`, projectRoot, (err) => {
                   console.log('git push error: ', err);
                   if (err) {
                     const err = {
