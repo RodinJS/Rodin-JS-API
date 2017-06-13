@@ -119,7 +119,7 @@ function create(req, res, next) {
 
         fsExtra.ensureFile(`${projectRoot}README.md`, (err) => {
           if (err) return reject({error: `Can't create file!`, code: httpStatus.COULD_NOT_CREATE_FILE});
-          fs.appendFileSync(filePath, '# ' + req.body.name);
+          fs.appendFileSync(`${projectRoot}README.md`, '# ' + req.body.name);
           shell.series([
             'git init',
             'git add .',
