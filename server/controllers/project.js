@@ -187,19 +187,6 @@ function create(req, res, next) {
                 });
               }
 
-              if (req.body.githubUrl) { // RO-243 #create project from git repo
-                git.clone(req.user.username, help.cleanUrl(req.body.githubUrl), rootDir)
-                  .then(gago => {
-                      updateUserProjects(User, savedProject);
-                  })
-                  .catch(e => {
-                    const err = new APIError(`Can't clone GitHub repo!`, httpStatus.REPO_DOES_NOT_EXIST, true);
-                    return next(err);
-                  });
-              } else {
-                updateUserProjects(User, savedProject);
-              }
-
               let updateUserProjects = function(User, savedProject) {
                 User.get(req.user.username)
                   .then(user => {
@@ -230,6 +217,21 @@ function create(req, res, next) {
                     return next(err);
                   });
               }
+
+              
+              if (req.body.githubUrl) { // RO-243 #create project from git repo
+                git.clone(req.user.username, help.cleanUrl(req.body.githubUrl), rootDir)
+                  .then(gago => {
+                      updateUserProjects(User, savedProject);
+                  })
+                  .catch(e => {
+                    const err = new APIError(`Can't clone GitHub repo!`, httpStatus.REPO_DOES_NOT_EXIST, true);
+                    return next(err);
+                  });
+              } else {
+                updateUserProjects(User, savedProject);
+              }
+
               
             }
           })
