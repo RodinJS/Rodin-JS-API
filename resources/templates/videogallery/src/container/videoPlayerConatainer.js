@@ -41,8 +41,6 @@ export class VideoPlayer {
         } else {
             this.controls.loadVideo(title, url, backgroundImage, this.sphere);
         }
-
-
     }
 
     /**

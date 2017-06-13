@@ -1,5 +1,5 @@
 export const videos = [
-    {
+{
         "title": "Amsterdam Central",
         "description": "The station, which is one of the most visited touristic destinations in the country, is situated literally in the center of Amsterdam.",
         "url": {
@@ -19,7 +19,7 @@ export const videos = [
     },
     {
         "title": "Dam Square",
-        "description": "A dam, built in 1270 to protect the city from the inundation by Zuiderzee see, later became the heart of Amsterdam always crowded with buzzing tourists and locals. ",
+        "description": "A dam, built in 1270 to protect the city from the inundation by Zuiderzee sea, later became the heart of Amsterdam always crowded with buzzing tourists and locals. ",
         "url": {
             "SD": "https://rodin.space/res/video/3_1k.mp4",
             "HD": "https://rodin.space/res/video/3_2k.mp4"
@@ -27,26 +27,17 @@ export const videos = [
         "thumbnail": "https://rodin.space/res/img/3.jpg"
     },
     {
-        "title": "Amsterdam Gay Pride",
-        "description": "Amsterdam Pride or Amsterdam Gay Pride is a citywide gay-festival held annually at the center of Amsterdam during the first weekend of August. ",
-        "url": {
-            "SD": "https://rodin.space/res/video/4_1k.mp4",
-            "HD": "https://rodin.space/res/video/4_2k"
-        },
-        "thumbnail": "https://rodin.space/res/img/4.jpg"
-    },
-    {
         "title": "Magere Brug",
         "description": "Originally a narrow bridge now is one of the charming bridges in Amsterdam. Magere brug means Skinny Bridge in English",
         "url": {
-            "SD": "https://rodin.space/res/video/5_1k",
-            "HD": "https://rodin.space/res/video/5_2k"
+            "SD": "https://rodin.space/res/video/5_1k.mp4",
+            "HD": "https://rodin.space/res/video/5_2k.mp4"
         },
         "thumbnail": "https://rodin.space/res/img/5.jpg"
     },
     {
         "title": "Amsterdam Zoo ARTIS",
-        "description": "It's already about 2 centuries, Amsterdam Zoo ARTIS entertains thousands of visitors, and it's still a modern and unique zoological.",
+        "description": "It's already about 2 centuries, Amsterdam Zoo ARTIS entertains thousands of visitors, and it's still a modern and unique zoological garden.",
         "url": {
             "SD": "https://rodin.space/res/video/6_1k.mp4",
             "HD": "https://rodin.space/res/video/6_2k.mp4"
@@ -82,7 +73,7 @@ export const videos = [
     },
     {
         "title": "Magic Fountain of Montjuic",
-        "description": "Great Universal Exhibition of 1929 became even greater by the realisation of Carles Buigas's idea, i.e. creating the Magic Fountain of Montjuic. ",
+        "description": "Great Universal Exhibition of 1929 became even greater by the realization of Carles Buigas's idea, i.e. creating the Magic Fountain of Montjuic. ",
         "url": {
             "SD": "https://rodin.space/res/video/10_1k.mp4",
             "HD": "https://rodin.space/res/video/10_2k.mp4"
@@ -259,5 +250,14 @@ export const videos = [
             "HD": "https://rodin.space/res/video/30_2k.mp4"
         },
         "thumbnail": "https://rodin.space/res/img/30.jpg"
+    },
+    {
+        "title": "Amsterdam Gay Pride",
+        "description": "Amsterdam Pride or Amsterdam Gay Pride is a citywide gay-festival held annually at the center of Amsterdam during the first weekend of August. ",
+        "url": {
+            "SD": "https://rodin.space/res/video/4_1k.mp4",
+            "HD": "https://rodin.space/res/video/4_2k.mp4"
+        },
+        "thumbnail": "https://rodin.space/res/img/4.jpg"
     },
 ];

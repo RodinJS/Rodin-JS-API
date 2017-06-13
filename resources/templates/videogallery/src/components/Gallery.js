@@ -44,7 +44,7 @@ export const setView = (thumbs, viewNumber) => {
             break;
         case 2:
             view = new RODIN.VerticalSemiCircleGrid(7, 3, 0.5, 1.2, 3.5);
-            view.sculpt.position.set(0, 1.35, -2);
+            view.sculpt.position.set(0, 1.35, -.5);
             break;
     }
 

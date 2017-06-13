@@ -52,7 +52,7 @@ export class Thumbnail extends RODIN.Sculpt {
      * @param evt
      */
     static moreHover(evt) {
-        Thumbnail.thumbAnimation(evt.target._children[0], {position: {z: 0.2}}, 'moreHover', 50);
+        Thumbnail.thumbAnimation(evt.target._children[0], {position: {z: 0.02}}, 'moreHover', 50);
     }
 
     /**
@@ -60,7 +60,7 @@ export class Thumbnail extends RODIN.Sculpt {
      * @param evt
      */
     static moreHoverOut(evt) {
-        Thumbnail.thumbAnimation(evt.target._children[0], {position: {z: 0.1}}, 'moreHoverOut', 50);
+        Thumbnail.thumbAnimation(evt.target._children[0], {position: {z: 0.01}}, 'moreHoverOut', 50);
     }
 
 
@@ -113,8 +113,24 @@ export class Thumbnail extends RODIN.Sculpt {
 
         this.element.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, this.onButtonDown.bind(this));
         this.element.on(RODIN.CONST.GAMEPAD_BUTTON_UP, this.onButtonUp.bind(this));
+        this.element.on(RODIN.CONST.GAMEPAD_HOVER, this.onElementHover.bind(this));
+        this.element.on(RODIN.CONST.GAMEPAD_HOVER_OUT, this.onElementHoverOut.bind(this));
         this.element.on(RODIN.CONST.GAMEPAD_MOVE, Thumbnail.onButtonMove.bind(this));
         return this;
+    }
+
+    onElementHover(e) {
+        if (!this.active) {
+            this.more.visible = true;
+            Thumbnail.reset(e.target.container.parent);
+            Thumbnail.thumbAnimation(e.target, {position: {z: .05}}, 'elementShow', 100);
+            this.active = true;
+        }
+    }
+    onElementHoverOut(e) {
+        if(!this.description.visible) {
+            Thumbnail.reset(e.target.container.parent);
+        }
     }
 
     static onButtonMove(e) {
@@ -138,12 +154,7 @@ export class Thumbnail extends RODIN.Sculpt {
     onButtonUp(e) {
         if (RODIN.Time.now - this._lastButtonDown > 400)
             return;
-        if (!this.active) {
-            this.more.visible = true;
-            Thumbnail.reset(e.target.container.parent);
-            Thumbnail.thumbAnimation(e.target, {position: {z: .5}}, 'elementShow', 100);
-            this.active = true;
-        } else if (!this.description._threeObject.visible && e.target.position.z > 0) {
+        if (!this.description._threeObject.visible && e.target.position.z > 0) {
             this.transition.camera = RODIN.Scene.HMDCamera;
             this.transition.close();
 
@@ -189,31 +200,40 @@ export class Thumbnail extends RODIN.Sculpt {
         this.description.id = id;
         let description = new RODIN.DynamicText({
             width: 1.45,
-            height: .9,
             text: this.params.description,
-            fontSize: 0.1,
+            fontSize: 0.07,
+            lineHeight: 0.1,
             color: 0xffffff
         });
         description._threeObject.renderOrder = 1;
-        description.position.y = .1;
         description.position.z = .01;
         description.position.x = 0;
         let close = new RODIN.Text({
             text: 'Click To Close',
-            fontSize: 0.08,
+            fontSize: 0.065,
             color: 0xffffff
         });
         close._threeObject.renderOrder = 1;
         this.description.on(RODIN.CONST.READY, evt => {
             evt.target.add(description);
+            description.position.y = 0.39 - description._threeObject.geometry.parameters.height / 2 ;
             evt.target.add(close);
-            close.position.y = -.35;
+            close.position.y = -0.38;
             close.position.z = .01;
             close.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, this.showHideDescription.bind(this));
+            close.on(RODIN.CONST.GAMEPAD_HOVER, this.clickToCloseHover.bind(this));
+            close.on(RODIN.CONST.GAMEPAD_HOVER_OUT, this.clickToCloseHoverOut.bind(this));
         });
         return this.description;
     }
 
+    clickToCloseHover (e) {
+        Thumbnail.thumbAnimation(e.target, {position: {z: 0.02}}, 'clickToCloseHover', 50);
+    }
+
+    clickToCloseHoverOut (e) {
+        Thumbnail.thumbAnimation(e.target, {position: {z: 0.01}}, 'clickToCloseHoverOut', 50);
+    }
     /**
      * toggle description visibility
      * @param evt

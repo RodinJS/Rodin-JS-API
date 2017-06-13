@@ -29,8 +29,10 @@ export class Navigation {
             this.viewChange = new RODIN.Text({text: 'CHANGE VIEW', fontSize: 0.04, color: 0xFFFFFF});
             this.viewChange.name = 'textChange';
             this.viewChange._threeObject.material.visible = false;
-            e.target.add(this.viewChange);
-            this.viewChange.position.y = 0.135;
+            this.viewChange.on(RODIN.CONST.READY, () => {
+                e.target.add(this.viewChange);
+                this.viewChange.position.y = 0.135;
+            });
             e.target._threeObject.renderOrder = 0;
             e.target.position.z = -2;
             e.target.position.y = 1.1;
@@ -58,11 +60,11 @@ export class Navigation {
                     btn.on(RODIN.CONST.GAMEPAD_BUTTON_DOWN, (e) => {
                         this.onButtonDown(e);
                     });
+                    this.setActiveButton('Linear');
                 });
                 button.active.on(RODIN.CONST.GAMEPAD_HOVER, this.onHoverAnimation.bind(this));
                 button.active.on(RODIN.CONST.GAMEPAD_HOVER_OUT, this.onHoverOutAnimation.bind(this));
             }
-            this.setActiveButton('Linear');
         });
     }
 
@@ -133,7 +135,7 @@ export class Navigation {
             return;
         }
         if (this.sculpt._threeObject.material.visible) {
-            return this.setActiveButton(evt.target.name)
+            return this.setActiveButton(evt.target.name);
         }
         this.showNavigation();
         this.showViewChange();
