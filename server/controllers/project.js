@@ -241,7 +241,7 @@ function create(req, res, next) {
             project.githubUrl = help.cleanUrl(req.body.githubUrl);
             saveProject(project, req, res, next);
           } else {
-            const err = new APIError('GitHub project does not exist!', httpStatus.REPO_DOES_NOT_EXIST, true);
+            const err = new APIError('GitHub project does not exist!-', httpStatus.REPO_DOES_NOT_EXIST, true);
             return next(err);
           }
         });
