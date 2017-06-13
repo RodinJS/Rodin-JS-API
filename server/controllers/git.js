@@ -117,6 +117,7 @@ function create(req, res, next) {
 
         shell.series([
           'git init',
+          `echo "# ${req.body.name}" >> README.md`,
           'git add .',
         ], projectRoot, (err) => {
           shell.exec(`git commit -m \"first\"`, projectRoot, (err) => {
