@@ -200,7 +200,7 @@ function create(req, res, next) {
                 updateUserProjects(User, savedProject);
               }
 
-              let updateUserProjects = (User, savedProject) => {
+              let updateUserProjects = function(User, savedProject) {
                 User.get(req.user.username)
                   .then(user => {
                     if (user) {
