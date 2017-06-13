@@ -127,7 +127,7 @@ export class Navigation {
 
     openNavigation(evt) {
         evt.stopPropagation();
-        if (RODIN.Time.now - this._lastButtonDown > 150 || RODIN.Time.now - this._lastButtonDown < 50)
+        if (RODIN.Time.now - this._lastButtonDown > 200 || RODIN.Time.now - this._lastButtonDown < 50)
             return;
         if(evt.target.animation.isPlaying()) {
             return;
