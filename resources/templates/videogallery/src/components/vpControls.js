@@ -366,7 +366,8 @@ export class VPcontrolPanel extends RODIN.Sculpt {
         this.elementsPending++;
 
         playButton.on(RODIN.CONST.READY, (evt) => {
-            playButton.parent = this.panel;
+            // playButton.parent = this.panel;
+            this.panel.add(playButton);
             playButton.position.set(0, 0, 0);
             playButton.animation.add(hoverAnimation, hoverOutAnimation, scaleOutAnimation, scaleInAnimation);
             this.elementsPending--;
@@ -392,8 +393,11 @@ export class VPcontrolPanel extends RODIN.Sculpt {
 
         playButton.on(RODIN.CONST.ANIMATION_COMPLETE, (evt) => {
             if (evt.animation === "scaleOutAnimation") {
-                playButton.parent = null;
-                pauseButton.parent = this.panel;
+                // playButton.parent = null;
+                // pauseButton.parent = this.panel;
+
+                playButton.parent.remove(playButton);
+                this.panel.add(pauseButton);
                 pauseButton.animation.start("scaleInAnimation");
                 if (this.cover && this.coverEl) {
                     this.coverEl.visible = false;
@@ -434,7 +438,8 @@ export class VPcontrolPanel extends RODIN.Sculpt {
         this.elementsPending++;
 
         pauseButton.on(RODIN.CONST.READY, (evt) => {
-            pauseButton.parent = this.panel;
+            // pauseButton.parent = this.panel;
+            this.panel.add(pauseButton);
             pauseButton.position.set(0, 0, 0);
             pauseButton.parent = null;
             evt.target.animation.add(hoverAnimation, hoverOutAnimation, scaleOutAnimation, scaleInAnimation);
@@ -461,8 +466,11 @@ export class VPcontrolPanel extends RODIN.Sculpt {
 
         pauseButton.on(RODIN.CONST.ANIMATION_COMPLETE, (evt) => {
             if (evt.animation === "scaleOutAnimation") {
-                pauseButton.parent = null;
-                playButton.parent = this.panel;
+                // pauseButton.parent = null;
+                // playButton.parent = this.panel;
+
+                pauseButton.parent.remove(pauseButton);
+                this.panel.add(playButton);
                 playButton.animation.start("scaleInAnimation");
                 this.player.pause();
             }
