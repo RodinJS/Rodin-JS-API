@@ -286,7 +286,7 @@ export class VPcontrolPanel extends RODIN.Sculpt {
                 // this.pauseButton.parent = null;
                 // this.playButton.parent = this.panel;
 
-                this.pauseButton.parent.remove(this.pauseButton);
+                this.pauseButton.parent && this.pauseButton.parent.remove(this.pauseButton);
                 this.panel.add(this.playButton);
                 this.player.pause();
             }
@@ -399,7 +399,7 @@ export class VPcontrolPanel extends RODIN.Sculpt {
                 // playButton.parent = null;
                 // pauseButton.parent = this.panel;
 
-                playButton.parent.remove(playButton);
+                playButton.parent && playButton.parent.remove(playButton);
                 this.panel.add(pauseButton);
                 pauseButton.animation.start("scaleInAnimation");
                 if (this.cover && this.coverEl) {
@@ -472,7 +472,7 @@ export class VPcontrolPanel extends RODIN.Sculpt {
                 // pauseButton.parent = null;
                 // playButton.parent = this.panel;
 
-                pauseButton.parent.remove(pauseButton);
+                pauseButton.parent && pauseButton.parent.remove(pauseButton);
                 this.panel.add(playButton);
                 playButton.animation.start("scaleInAnimation");
                 this.player.pause();
@@ -758,7 +758,7 @@ export class VPcontrolPanel extends RODIN.Sculpt {
                     // this.playButton.parent = null;
                     // this.pauseButton.parent = this.panel;
 
-                    this.playButton.parent.remove(this.playButton);
+                    this.playButton.parent && this.playButton.parent.remove(this.playButton);
                     this.panel.add(this.pauseButton);
 
                     this.pauseButton.animation.start("scaleInAnimation");
@@ -896,14 +896,14 @@ export class VPcontrolPanel extends RODIN.Sculpt {
         if (this.HDButton && this.HDButton.parent) {
             this.panel.remove(this.HDButton);
             // this.HDButton.parent = null;
-            this.HDButton.parent.remove(this.HDButton);
+            this.HDButton.parent && this.HDButton.parent.remove(this.HDButton);
             this.HDButton = null;
             delete this.HDButton;
         }
         if (this.SDButton && this.SDButton.parent) {
             this.panel.remove(this.SDButton);
             // this.SDButton.parent = null;
-            this.SDButton.parent.remove(this.SDButton);
+            this.SDButton.parent && this.SDButton.parent.remove(this.SDButton);
             this.SDButton = null;
             delete this.SDButton;
         }
@@ -938,7 +938,7 @@ export class VPcontrolPanel extends RODIN.Sculpt {
             // this.HDButton.parent = null;
             // this.SDButton.parent = this.panel;
 
-            this.HDButton.parent.remove(this.HDButton);
+            this.HDButton.parent && this.HDButton.parent.remove(this.HDButton);
             this.panel.add(this.SDButton);
             this.SDButton.position.set(this.width * 0.48, -this.width / 3.02, 0);
 
@@ -967,7 +967,7 @@ export class VPcontrolPanel extends RODIN.Sculpt {
             this.elementsPending--;
             this.readyCheck();
             // this.SDButton.parent = null;
-            this.SDButton.parent.remove(this.SDButton);
+            this.SDButton.parent && this.SDButton.parent.remove(this.SDButton);
         });
 
         this.SDButton.on(RODIN.CONST.GAMEPAD_HOVER, (evt) => {
@@ -989,7 +989,7 @@ export class VPcontrolPanel extends RODIN.Sculpt {
             // this.SDButton.parent = null;
             // this.HDButton.parent = this.panel;
 
-            this.SDButton.parent.remove(this.SDButton);
+            this.SDButton.parent && this.SDButton.parent.remove(this.SDButton);
             this.panel.add(this.HDButton);
             this.HDButton.position.set(this.width * 0.48, -this.width / 3.02, 0);
 
