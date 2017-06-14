@@ -49,7 +49,7 @@ export const setView = (thumbs, viewNumber) => {
     }
 
     view.on(RODIN.CONST.SCROLL_START, (evt) => {
-        evt.stopPropagation();
+        // evt.stopPropagation();
         Thumbnail.reset(view.sculpt);
     });
 
