@@ -153,7 +153,7 @@ export class Thumbnail extends RODIN.Sculpt {
     onButtonUp(e) {
         if (RODIN.Time.now - this._lastButtonDown > 200)
             return;
-        if (!this.description._threeObject.visible && e.target.position.z > 0) {
+        if (!this.description._threeObject.visible) {
             this.transition.camera = RODIN.Scene.HMDCamera;
             this.transition.close();
 
