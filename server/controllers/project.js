@@ -112,7 +112,8 @@ function create(req, res, next) {
         owner: req.user.username,
         displayName: req.body.displayName,
         description: req.body.description,
-        isNew: true
+        isNew: true,
+        defaultThumbnail: req.body.defaultThumbnail
       });
 
       let saveProject = function (project, req, res, next) {
@@ -218,7 +219,7 @@ function create(req, res, next) {
                   });
               }
 
-              
+
               if (req.body.githubUrl) { // RO-243 #create project from git repo
                 git.clone(req.user.username, help.cleanUrl(req.body.githubUrl), rootDir)
                   .then(gago => {
@@ -232,7 +233,7 @@ function create(req, res, next) {
                 updateUserProjects(User, savedProject);
               }
 
-              
+
             }
           })
           .catch((e) => {
