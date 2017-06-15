@@ -301,7 +301,11 @@ function create(req, res, next) {
         },
         usernameConfirmed: true,
       };
-
+      
+      //for public beta
+      userObject.storageSize = 500;
+      userObject.allowProjectsCount = 5;
+      
       if (req.body.invitationCode) {
         userObject.role = 'Premium';
         userObject.storageSize = 500;
@@ -326,15 +330,15 @@ function create(req, res, next) {
           }
 
           if (!fs.existsSync(publicDir)) {
-            fs.mkdirSync(publicDir); //creating root dir for public
+            fs.mkdirSync(publicDir); //creating public dir for public
           }
 
           if (!fs.existsSync(publishDir)) {
-            fs.mkdirSync(publishDir); //creating root dir for publish
+            fs.mkdirSync(publishDir); //creating publish dir for publish
           }
 
           if (!fs.existsSync(historyDir)) {
-            fs.mkdirSync(historyDir); //creating root dir for history
+            fs.mkdirSync(historyDir); //creating history dir for history
           }
 
           if (req.body.invitationCode) {
