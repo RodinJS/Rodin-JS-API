@@ -1,7 +1,7 @@
 (function (global) {
 
   var paths = {
-    'npm:': 'https://cdn.rodin.io/v0.0.6/'
+    'npm:': 'https://cdn.rodin.io/v0.0.7/'
   };
 
   var map = {
@@ -40,7 +40,10 @@
         'core/color',
         'core/camera',
         'core/avatar',
-        'core/math'
+        'core/math',
+        'core/transport',
+        'core/device',
+        'core/grid',
   ];
 
   function packIndex(moduleName) {

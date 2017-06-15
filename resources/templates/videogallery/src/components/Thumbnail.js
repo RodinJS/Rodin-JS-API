@@ -142,7 +142,6 @@ export class Thumbnail extends RODIN.Sculpt {
      * @param e
      */
     onButtonDown(e) {
-        e.stopPropagation();
         this._lastButtonDown = RODIN.Time.now;
     }
 
@@ -152,9 +151,9 @@ export class Thumbnail extends RODIN.Sculpt {
      * @param e
      */
     onButtonUp(e) {
-        if (RODIN.Time.now - this._lastButtonDown > 400)
+        if (RODIN.Time.now - this._lastButtonDown > 200)
             return;
-        if (!this.description._threeObject.visible && e.target.position.z > 0) {
+        if (!this.description._threeObject.visible) {
             this.transition.camera = RODIN.Scene.HMDCamera;
             this.transition.close();
 
@@ -269,7 +268,13 @@ export class Thumbnail extends RODIN.Sculpt {
      * @param thumbnailContainer
      */
     static reset(thumbnailContainer) {
-        let thumbs = thumbnailContainer._children ? thumbnailContainer._children : thumbnailContainer;
+        if(!thumbnailContainer) return;
+        let thumbs;
+        if(thumbnailContainer && thumbnailContainer._children) {
+            thumbs = thumbnailContainer._children;
+        } else {
+            thumbs = thumbnailContainer;
+        }
         for (let i = 0; i < thumbs.length; i++) {
             const ch = thumbs[i];
             if (!ch.active) {
