@@ -3,7 +3,7 @@ export default {
   jwtSecret: '4DNSrMPuQ3Y3McBu96wd2GzGheDXuft8gDqLEQVWHnXQfcaGFtM2ZBgyNYzPN7CK',
   db: 'mongodb://localhost/rodin-js-api-stage',
   clientURL: 'https://rodin.design',
-  editortURL: 'https://editor.rodin.design',
+  editorURL: 'https://editor.rodin.design',
   port: 3000,
   socketPort: 4000,
   socketURL: 'https://ss.rodin.space',
@@ -60,6 +60,17 @@ export default {
     },
     appId: 'b250ab167fca8e94',
     appSecret: '6a1e68ce-ea2b-d99d-b5eb-7cbca83a',
+  },
+  daydream: {
+    urls: {
+      build: 'http://13.92.235.174:10001/api/v1/project',
+      cancel: 'http://13.92.235.174:10001/api/v1/project',
+      get: 'http://13.92.235.174:10001/api/v1/project',
+      download: 'http://13.92.235.174:10001/api/v1/bin',
+      getStatus: 'http://13.92.235.174:10001/api/v1/status',
+    },
+    appId: 'f4357582f4711a27',
+    appSecret: '780befc0-fa03-a5ef-f942-94c142da',
   },
   oculus: {
     urls: {

@@ -61,6 +61,17 @@ export default {
     appId: 'b250ab167fca8e94',
     appSecret: '6a1e68ce-ea2b-d99d-b5eb-7cbca83a',
   },
+  daydream: {
+    urls: {
+      build: 'http://13.92.235.174:10001/api/v1/project',
+      cancel: 'http://13.92.235.174:10001/api/v1/project',
+      get: 'http://13.92.235.174:10001/api/v1/project',
+      download: 'http://13.92.235.174:10001/api/v1/bin',
+      getStatus: 'http://13.92.235.174:10001/api/v1/status',
+    },
+    appId: 'f4357582f4711a27',
+    appSecret: '780befc0-fa03-a5ef-f942-94c142da',
+  },
   oculus: {
     urls: {
       build: 'http://45.55.92.49:9002/api/v1/project',
@@ -93,6 +104,6 @@ export default {
   },
   mandrill: 'ouOYaHWxlDaabLYVjrG1BA',
   stuff_path: '/var/www/stuff/',
-  nginx_template_path: '/var/www/api.rodinapp.com/resources/nginx/',
+  nginx_template_path: '/var/www/api.rodin.io/resources/nginx/',
   nginx_dest_path: '/etc/nginx/custom/',
 };

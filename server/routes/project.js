@@ -146,6 +146,9 @@ router.route('/')
    */
   .post(check.ifTokenValid, validate(paramValidation.createProject), projectCtrl.getProjectsCount, projectCtrl.create);
 
+router.route('/count')
+  .get(projectCtrl.getAllProjectsCount);
+
 router.route('/:id')
 /**
  * @api {get} /api/project/:projectId Get single project
