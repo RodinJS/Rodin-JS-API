@@ -1,6 +1,7 @@
 import express from 'express';
 import iosRouter from './ios';
 import androidRouter from './android';
+import daydreamRouter from './daydream';
 import oculusRouter from './oculus';
 import viveRouter from './vive';
 
@@ -60,6 +61,7 @@ router.use('/', upload.fields(
 
 router.use('/ios', iosRouter);
 router.use('/android', androidRouter);
+router.use('/daydream', daydreamRouter);
 router.use('/oculus', oculusRouter);
 router.use('/vive', viveRouter);
 

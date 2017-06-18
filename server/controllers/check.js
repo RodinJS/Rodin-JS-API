@@ -119,7 +119,6 @@ function checkAdminPermission(req, res, next) {
 // 	});
 // }
 
-
 /**
  * JWT token verification police. Check's if JWT token is valid one and assign token owners nfo to req.
  * @param req
@@ -248,4 +247,14 @@ function validateStorage(req, res, next) {
     });
 }
 
-export default { ifAdmin, ifPremium, isGod, ifTokenValid, project, ifSelfUpdate, isProjectOwn, validateStorage, checkAdminPermission};
+function validateToken(req){
+  const token = req.headers['x-access-token']; //TODO: Get from Auth header
+  return new Promise((resolve, reject) => {
+    jwt.verify(token, config.jwtSecret, (err, decoded) => {
+      if(err) return resolve(false);
+      return resolve(decoded);
+    })
+  });
+}
+
+export default { ifAdmin, ifPremium, isGod, ifTokenValid, project, ifSelfUpdate, isProjectOwn, validateStorage, checkAdminPermission, validateToken};

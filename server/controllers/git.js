@@ -12,6 +12,7 @@ import shell from '../helpers/shell';
 import Q from 'q';
 import notifications from './notifications';
 import fs from 'fs';
+import fsExtra from 'fs-extra';
 import utils from '../helpers/common';
 
 
@@ -115,75 +116,80 @@ function create(req, res, next) {
         let token = result.token;
         let repo_url = [clone_url.slice(0, position), token, '@', clone_url.slice(position)].join('');
 
-        shell.series([
-          'git init',
-          'git add .',
-        ], projectRoot, (err) => {
-          shell.exec(`git commit -m \"first\"`, projectRoot, (err) => {
-            console.log('git commit error: ', err);
-            shell.exec(`git remote add origin  ${repo_url}`, projectRoot, (err) => {
-              console.log('git remote add error: ', err);
-              if (err) {
-                console.log('git remote add error: ', err)
-                return next(err);
-              } else {
-                shell.exec(`git push -u origin master`, projectRoot, (err) => {
-                  console.log('git push error: ', err);
-                  if (err) {
-                    const err = {
-                      status: 353,
-                      code: 353,
-                      message: 'GitHub project does not exist!',
-                    };
-                    return res.status(353).send({
-                      success: false,
-                      error: err
-                    });
-                  }
 
-                  Project.findOneAndUpdateAsync(
-                    {
-                      _id: req.body.id,
-                      owner: req.user.username,
-                    },
-                    {
-                      $set: {
-                        github: {
-                          git: result.data.git_url,
-                          https: result.data.clone_url,
+        fsExtra.ensureFile(`${projectRoot}README.md`, (err) => {
+          if (err) return reject({error: `Can't create file!`, code: httpStatus.COULD_NOT_CREATE_FILE});
+          fs.appendFileSync(`${projectRoot}README.md`, '# ' + req.body.name);
+          shell.series([
+            'git init',
+            'git add .',
+          ], projectRoot, (err) => {
+            shell.exec(`git commit -m \"first\"`, projectRoot, (err) => {
+              console.log('git commit error: ', err);
+              shell.exec(`git remote add origin  ${repo_url}`, projectRoot, (err) => {
+                console.log('git remote add error: ', err);
+                if (err) {
+                  console.log('git remote add error: ', err)
+                  return next(err);
+                } else {
+                  shell.exec(`git push -f origin master`, projectRoot, (err) => {
+                    console.log('git push error: ', err);
+                    if (err) {
+                      const err = {
+                        status: 353,
+                        code: 353,
+                        message: 'GitHub project does not exist!',
+                      };
+                      return res.status(353).send({
+                        success: false,
+                        error: err
+                      });
+                    }
+
+                    Project.findOneAndUpdateAsync(
+                      {
+                        _id: req.body.id,
+                        owner: req.user.username,
+                      },
+                      {
+                        $set: {
+                          github: {
+                            git: result.data.git_url,
+                            https: result.data.clone_url,
+                          },
                         },
                       },
-                    },
-                    {
-                      new: true,
-                    }).then(projData => {
-                    let repo_info = result;
-                    git.createBranch(req.user.username, help.cleanUrl(req.body.id), projectRoot, 'rodin_editor')
-                      .then(result => {
-                        return res.status(200).json({
-                          success: true,
-                          data: {
-                            name: repo_info.data.name,
-                            private: repo_info.data.private,
-                            git_url: repo_info.data.git_url,
-                            clone_url: repo_info.data.clone_url,
-                            location: repo_info.data.meta.location,
-                            status: repo_info.data.meta.status,
-                            branch: result,
-                          },
+                      {
+                        new: true,
+                      }).then(projData => {
+                      let repo_info = result;
+                      git.createBranch(req.user.username, help.cleanUrl(req.body.id), projectRoot, 'rodin_editor')
+                        .then(result => {
+                          return res.status(200).json({
+                            success: true,
+                            data: {
+                              name: repo_info.data.name,
+                              private: repo_info.data.private,
+                              git_url: repo_info.data.git_url,
+                              clone_url: repo_info.data.clone_url,
+                              location: repo_info.data.meta.location,
+                              status: repo_info.data.meta.status,
+                              branch: result,
+                            },
+                          });
+                        })
+                        .catch(e => {
+                          const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
+                          return next(e);
                         });
-                      })
+                    })
                       .catch(e => {
                         const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
                         return next(e);
                       });
-                  })
-                    .catch(e => {
-                      const err = new APIError('Can\'t update info', httpStatus.BAD_REQUEST, true);
-                      return next(e);
-                    });
-                });
-              }
+                  });
+                }
+              });
             });
           });
         });

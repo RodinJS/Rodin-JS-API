@@ -48,6 +48,7 @@ describe('## Projects APIs', () => {
         });
 
     });
+
     it('should throw error projectExist', (done) => {
         request(app)
           .post('/api/project')

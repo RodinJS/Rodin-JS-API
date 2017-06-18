@@ -29,7 +29,7 @@ const assignedModulesSchema = new mongoose.Schema({
 assignedModulesSchema.statics = {
 
     get(projectId) {
-        return this.findOne({ projectId: mongoose.Types.ObjectId(projectId) }).execAsync()
+        return this.find({ projectId: mongoose.Types.ObjectId(projectId) }).execAsync()
           .then((module) => {
             if (module) {
                 return module;
