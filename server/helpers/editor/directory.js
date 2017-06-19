@@ -17,7 +17,12 @@ import extract from 'extract-zip';
  */
 function create(req, filePath) {
   return new Promise((resolve, reject) => {
-    if (fs.existsSync(filePath)) return reject({error: 'Folder already exists!', code: httpStatus.FILE_ALREDY_EXIST});
+    let stats = fs.statSync(filePath);
+    if(fs.existsSync(filePath) && !stats.isDirectory()) {
+      return reject({error: `
+      There is already a file with the same name as the folder name you specified.Specify a different name.
+      `, code: httpStatus.FILE_ALREDY_EXIST});
+    }else if (fs.existsSync(filePath)) return reject({error: `Folder already exists!`, code: httpStatus.FILE_ALREDY_EXIST});
     fsExtra.ensureDir(filePath, (err) => {
       if (err) reject({error: `Can't create folder!`, code: httpStatus.COULD_NOT_CREATE_FILE});
       resolve(true);
