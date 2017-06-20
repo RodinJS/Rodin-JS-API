@@ -6,10 +6,10 @@ export default {
   editorURL: 'https://editor.rodin.design',
   port: 3000,
   socketPort: 4000,
-  socketURL: 'https://ss.rodin.space',
+  socketURL: 'https://ss.rodin.design',
   modules: {
     socketService: {
-      URL: 'https://modules.rodin.io',
+      URL: 'https://stage.modules.rodin.io',
       port: 4000,
     },
   },
