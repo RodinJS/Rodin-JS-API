@@ -9,7 +9,21 @@ import utils from '../common';
 import _  from 'lodash';
 import extract from 'extract-zip';
 
-
+/**
+ *
+ * @param filePath
+ */
+function isDirectory(filePath) {
+  try {
+    return fs.statSync(filePath).isDirectory();
+  } catch (e) {
+    if (e.code === 'ENOENT') {
+      return false;
+    } else {
+      throw e;
+    }
+  }
+}
 /**
  *
  * @param req
@@ -17,12 +31,18 @@ import extract from 'extract-zip';
  */
 function create(req, filePath) {
   return new Promise((resolve, reject) => {
-    let stats = fs.statSync(filePath);
-    if(fs.existsSync(filePath) && !stats.isDirectory()) {
-      return reject({error: `
+
+    if (fs.existsSync(filePath) && !isDirectory(filePath)) {
+      return reject({
+        error: `
       There is already a file with the same name as the folder name you specified.Specify a different name.
-      `, code: httpStatus.FILE_ALREDY_EXIST});
-    }else if (fs.existsSync(filePath)) return reject({error: `Folder already exists!`, code: httpStatus.FILE_ALREDY_EXIST});
+      `, code: httpStatus.FILE_ALREDY_EXIST
+      });
+    }
+
+    if (fs.existsSync(filePath)) {
+      return reject({error: `Folder already exists!`, code: httpStatus.FILE_ALREDY_EXIST})
+    }
     fsExtra.ensureDir(filePath, (err) => {
       if (err) reject({error: `Can't create folder!`, code: httpStatus.COULD_NOT_CREATE_FILE});
       resolve(true);
@@ -66,9 +86,9 @@ function copy(req, srcPath, filePath, rootPath) {
  * @param req
  * @param filePath
  */
-function remove(req, filePath){
+function remove(req, filePath) {
   return new Promise((resolve, reject) => {
-    if (!fs.existsSync(filePath)) return reject({error:'Path does not exist!', code:httpStatus.PATH_DOES_NOT_EXIST});
+    if (!fs.existsSync(filePath)) return reject({error: 'Path does not exist!', code: httpStatus.PATH_DOES_NOT_EXIST});
     utils.deleteFolderRecursive(filePath);
     return resolve(true);
   });
