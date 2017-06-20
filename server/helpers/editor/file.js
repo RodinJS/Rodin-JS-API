@@ -10,7 +10,21 @@ import help from '../editor';
 import utils from '../common';
 import _ from 'lodash';
 
-
+/**
+ *
+ * @param filePath
+ */
+function isDirectory(filePath) {
+  try {
+    return fs.statSync(filePath).isDirectory();
+  } catch (e) {
+    if (e.code === 'ENOENT') {
+      return false;
+    } else {
+      throw e;
+    }
+  }
+}
 /**
  *
  * @param req
@@ -35,8 +49,7 @@ function read(req, filePath) {
  */
 function create(req, filePath) {
   return new Promise((resolve, reject) => {
-    let stats = fs.statSync(filePath);
-    if (fs.existsSync(filePath) && stats.isDirectory()) {
+    if (fs.existsSync(filePath) && isDirectory(filePath)) {
       return reject({error: `There is already a folder with the same name as the file name you specified.Specify a different name.`, code: httpStatus.FILE_DOES_NOT_EXIST});
     } else if (fs.existsSync(filePath)) return reject({
       error: 'File already exists!',
