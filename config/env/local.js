@@ -50,39 +50,50 @@ export default {
         appId: '2e659ea81e645f84',
         appSecret: 'af7cffae-17ce-25b2-8b76-849df75a',
     },
-    android: {
-        urls: {
-            build: 'http://45.55.92.49:10001/api/v1/project',
-            cancel: 'http://45.55.92.49:10001/api/v1/project',
-            get: 'http://45.55.92.49:10001/api/v1/project',
-            download: 'http://45.55.92.49:10001/api/v1/bin',
-            getStatus: 'http://45.55.92.49:10001/api/v1/status',
-        },
-        appId: 'b250ab167fca8e94',
-        appSecret: '6a1e68ce-ea2b-d99d-b5eb-7cbca83a',
+  android: {
+    urls: {
+      build: 'http://13.92.235.174:10001/api/v1/project',
+      cancel: 'http://13.92.235.174:10001/api/v1/project',
+      get: 'http://13.92.235.174:10001/api/v1/project',
+      download: 'http://13.92.235.174:10001/api/v1/bin',
+      getStatus: 'http://13.92.235.174:10001/api/v1/status',
     },
-    oculus: {
-        urls: {
-            build: 'http://45.55.92.49:10002/api/v1/project',
-            cancel: 'http://45.55.92.49:10002/api/v1/project',
-            get: 'http://45.55.92.49:10002/api/v1/project',
-            download: 'http://45.55.92.49:10002/api/v1/bin',
-            getStatus: 'http://45.55.92.49:10002/api/v1/status',
-        },
-        appId: '8fb0e4c6fdac3847',
-        appSecret: '86bae61d-ddfe-9fbe-e4cd-904fced2',
+    appId: 'f4357582f4711a27',
+    appSecret: '780befc0-fa03-a5ef-f942-94c142da',
+  },
+  daydream: {
+    urls: {
+      build: 'http://13.92.235.174:10001/api/v1/project',
+      cancel: 'http://13.92.235.174:10001/api/v1/project',
+      get: 'http://13.92.235.174:10001/api/v1/project',
+      download: 'http://13.92.235.174:10001/api/v1/bin',
+      getStatus: 'http://13.92.235.174:10001/api/v1/status',
     },
-    vive: {
-      urls: {
-        build: 'http://45.55.92.49:10003/api/v1/project',
-        cancel: 'http://45.55.92.49:10003/api/v1/project',
-        get: 'http://45.55.92.49:10003/api/v1/project',
-        download: 'http://45.55.92.49:10003/api/v1/bin',
-        getStatus: 'http://45.55.92.49:10003/api/v1/status',
-      },
-      appId: '1f07df95852ba6b1',
-      appSecret: '6d221d4d-aad7-7b94-1542-de2f31b4',
+    appId: 'f4357582f4711a27',
+    appSecret: '780befc0-fa03-a5ef-f942-94c142da',
+  },
+  oculus: {
+    urls: {
+      build: 'http://13.92.235.174:10002/api/v1/project',
+      cancel: 'http://13.92.235.174:10002/api/v1/project',
+      get: 'http://13.92.235.174:10002/api/v1/project',
+      download: 'http://13.92.235.174:10002/api/v1/bin',
+      getStatus: 'http://13.92.235.174:10002/api/v1/status',
     },
+    appId: 'f07e5efe21c47d2a',
+    appSecret: '61d75b4f-d2d1-3cba-3129-ef4e3c03',
+  },
+  vive: {
+    urls: {
+      build: 'http://13.92.235.174:10003/api/v1/project',
+      cancel: 'http://13.92.235.174:10003/api/v1/project',
+      get: 'http://13.92.235.174:10003/api/v1/project',
+      download: 'http://13.92.235.174:10003/api/v1/bin',
+      getStatus: 'http://13.92.235.174:10003/api/v1/status',
+    },
+    appId: 'b17bbf258ca3e14a',
+    appSecret: 'a13ecb3d-2fbe-2d2f-dbb4-21e4cdd0',
+  },
     payments: {
         tokens: {
             stripe: {
@@ -97,7 +108,7 @@ export default {
         },
     },
     mandrill: 'ouOYaHWxlDaabLYVjrG1BA',
-    stuff_path: '/Applications/XAMPP/xamppfiles/htdocs/Rodin-JS-API/',
+    stuff_path: '',
     nginx_template_path: 'resources/nginx/',
     nginx_dest_path: 'resources/domain_name/',
 };

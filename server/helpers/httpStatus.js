@@ -88,6 +88,20 @@ const httpStatus = {
     360: 'NO_DOMAIN_NAME',
     361: 'COULD_NOT_CREATE_TEMPLATE',
     362: 'ERROR_IN_CONFIG_FILE',
+
+    363: 'Build server unavialable',
+    364: 'Buld failed',
+    365: 'FILEREADERR',
+    366: 'FILEWRITEERR',
+    367: 'MKDIRERR',
+    368: 'RMDIRERR',
+    369: 'RMERROR',
+    370: 'CPERR',
+    371: 'BUILDERROR',
+    372: 'CLEANERROR',
+    373: 'CERTIMPORTERROR',
+    374: 'PROFILECONTENTERROR',
+
     601: 'UNKNOWN_SOCKET_CHANNEL',
     602: 'UNKNOWN_SOCKET_ROOM',
     603: 'PERMISSION_SOCKET_DENIED',
@@ -179,10 +193,52 @@ const httpStatus = {
     REPO_NAME_EXIST: 352,
     REPO_DOES_NOT_EXIST: 353,
     CANT_DELETE_REPO: 354,
-    // working with custom domain names [360-370]
+    // working with custom domain names [360-362]
     NO_DOMAIN_NAME: 360,
     COULD_NOT_CREATE_TEMPLATE: 361,
     ERROR_IN_CONFIG_FILE: 362,
+    //working with builders [363-373]
+    FILEREADERR: { 
+        code:365,
+        messgae: `build failed. Unknown reason.`,
+    },
+    FILEWRITEERR: { 
+        code:366,
+        messgae: `build failed. Unknown reason.`,
+    },
+    MKDIRERR: { 
+        code:367,
+        messgae: `build failed. Unknown reason.`,
+    },
+    RMDIRERR: { 
+        code:368,
+        messgae: `build failed. Unknown reason.`,
+    },
+    RMERROR: { 
+        code:369,
+        messgae: `build failed. Unknown reason.`,
+    },
+    CPERR: { 
+        code:370,
+        messgae: `build failed. Unknown reason.`,
+    },
+    BUILDERROR: { 
+        code:371,
+        messgae: `build failed. Unknown reason.`,
+    },
+    CLEANERROR: { 
+        code:372,
+        messgae: `build failed. Unknown reason.`,
+    },
+    CERTIMPORTERROR: { 
+        code:373,
+        messgae: `build failed. Invalid certificate or Password.`,
+    },
+    PROFILECONTENTERROR : {
+        code:374,
+        messgae: `build failed. Incorrect Provisioning profile.`,        
+    },
+
 
     // working with sockets [600~]
     BAD_SOCKET_REQUEST: 600,

@@ -35,7 +35,7 @@ function read(req, filePath){
  */
 function create(req, filePath) {
   return new Promise((resolve, reject) => {
-    if (fs.existsSync(filePath)) return reject({error: 'File already exist!', code: httpStatus.FILE_DOES_NOT_EXIST});
+    if (fs.existsSync(filePath)) return reject({error: 'File already exists!', code: httpStatus.FILE_DOES_NOT_EXIST});
     fsExtra.ensureFile(filePath, (err) => {
       if (err) return reject({error: `Can't create file!`, code: httpStatus.COULD_NOT_CREATE_FILE});
       fs.appendFileSync(filePath, '//Created by ' + req.user.username);
@@ -57,7 +57,7 @@ function copy(req, srcPath, filePath) {
       _readFile(filePath, (err, content) => {
         if (err && err.code === 'ENOENT') {
           return fsExtra.copy(srcPath, filePath, (err) => {
-            if (err) return reject({error: 'Could not write to file!', code: httpStatus.COULD_NOT_WRITE_TO_FILE})
+            if (err) return reject({error: 'Could not write to file!', code: httpStatus.COULD_NOT_WRITE_TO_FILE});
             return resolve(true);
           });
         }

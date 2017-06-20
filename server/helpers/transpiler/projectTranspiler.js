@@ -13,8 +13,8 @@ process.on('message', (message) => {
     const project = message.project;
     gulp.task('transpiler', () => gulp.src([project + '/**/*.js', '!' + project + '/build/**', '!' + project + '/pre_build/**'])
           .pipe(babel({
-            presets: ['es2015'],
-            plugins: ['transform-es2015-modules-systemjs'],
+            presets: ['es2016'],
+            plugins: ['transform-es2015-modules-systemjs', 'transform-class-properties'],
         }))
           .on('error', onError)
           .pipe(gulp.dest(project + '/pre_build'))
