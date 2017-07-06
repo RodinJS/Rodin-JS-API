@@ -89,7 +89,7 @@ function build(req, res, next) {
 
         let appName = project.name;
         let notificationSTATUS = 200;
-        if (req.body.project.appName) {
+        if (req.body.project && req.body.project.appName) {
           appName = req.body.project.appName;
         }
 
@@ -110,7 +110,7 @@ function build(req, res, next) {
           req.notification = {
             success: true,
             data: `${appName} ${req.params.device} build complete`,
-          };  
+          };
         }
 
         RDSendgrid.send(req)
