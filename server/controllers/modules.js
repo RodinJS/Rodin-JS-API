@@ -14,14 +14,14 @@ const HookSecretKey = 'K7rd6FzEZwzcc6dQr3cv9kz4tTTZzAc9hdXYJpukvEnxmbdB42V4b6HeP
 function list(req, res, next) {
   const limit = parseInt(req.query.limit) || 50;
   const skip = parseInt(req.query.skip) || 0;
-
-  Modules.list({limit, skip}, req.query._queryString).then((modules) => {
+  Modules.list({limit, skip}, req.query._queryString)
+    .then((modules) => {
     res.status(200).json({
       success: true,
       data: modules,
     });
   })
-    .error((e) => next(e));
+    .catch((e) => next(e));
 }
 
 function getById(req, res, next) {

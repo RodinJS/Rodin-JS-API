@@ -1,0 +1,27 @@
+/**
+ * Created by Reinchard on 6/27/2017.
+ */
+import express from 'express';
+import validate from 'express-validation';
+import paramValidation from '../../config/param-validation';
+import adminCtrl from '../controllers/admin';
+import check from '../controllers/check';
+import userCapacity from '../helpers/directorySize';
+import authCtrl from '../controllers/auth';
+
+const router = express.Router();	// eslint-disable-line new-cap
+
+router.route('/user')
+  .get(check.isGod, adminCtrl.getAllUsers);
+
+router.route('/user/:username')
+  .get(check.isGod,adminCtrl.getByUsername)
+  .put(check.isGod, adminCtrl.update)
+  .delete(check.isGod, adminCtrl.remove);
+
+router.route('/counts')
+  .get(adminCtrl.getCounts);
+
+
+
+export default router;

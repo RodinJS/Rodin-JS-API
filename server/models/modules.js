@@ -98,13 +98,18 @@ modules.statics = {
         query.$and = [
           {status:{$eq:status}}
         ];
-
-        return this.find(query)
+        return this.find()
           .sort({ createdAt: -1 })
           .skip(skip)
           .limit(limit)
-          .execAsync();
     },
+
+    countByModuleStatus() {
+      return this.aggregate([{ "$group": {
+        "_id": "$status",
+        "count": { "$sum": 1 }
+      } }]);
+    }
 
 };
 

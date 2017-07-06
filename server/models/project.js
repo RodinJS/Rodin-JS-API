@@ -326,6 +326,15 @@ ProjectSchema.statics = {
       .limit(limit)
       .execAsync();
   },
+
+  projectsCountByState() {
+    return this.aggregate([
+      { "$group": {
+        "_id": "$state",
+        "count": { "$sum": 1 }
+      }},
+    ])
+  }
 };
 
 ProjectSchema.pre('save', function (next) {
@@ -372,6 +381,6 @@ ProjectSchema.methods.outcome = function () {
 
 
 /**
- * @typedef User
+ * @typedef Project
  */
 export default mongoose.model('Project', ProjectSchema);
