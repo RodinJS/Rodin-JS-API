@@ -11,6 +11,7 @@ import gitRoute from './git';
 import domainsRoute from './domains';
 import modulesRoute from './modules';
 import pagesRoute from './pages';
+import blogRoute from './blog';
 import RodinSanitizer from '../helpers/sanitizer';
 
 import _ from 'lodash';
@@ -65,6 +66,10 @@ const apiRoutes = {
     pages: {
         route: '/pages',
         module: [pagesRoute],
+    },
+    blog: {
+        route: '/blog',
+        module: [blogRoute],
     },
 };
 /** GET /health-check - Check service health */
