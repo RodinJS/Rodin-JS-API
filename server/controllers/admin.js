@@ -9,41 +9,6 @@ import httpStatus from '../helpers/httpStatus';
 import * as fsExtra from "fs-extra";
 import config from '../../config/env';
 
-
-function me(req, res) {
-  let response = {
-    success: true,
-    data: {
-      email: req.user.email,
-      username: req.user.username,
-      role: req.user.role,
-      profile: req.user.profile,
-      creationDate: req.user.creationDate,
-      usernameConfirmed: req.user.usernameConfirmed,
-      github: req.user.github,
-      facebook: req.user.facebook,
-      google: req.user.google,
-      steam: req.user.steam,
-      oculus: req.user.oculus,
-      allowProjectsCount: req.user.allowProjectsCount,
-    },
-  };
-
-  //concat stripe
-  if (req.user.stripe)
-    response.data.stripe = req.user.stripe;
-
-  //concat projects count
-  if (req.query.projectsCount)
-    response.data.projects = req.projectsCount;
-
-  //concat usedStorage
-  if (req.query.usedStorage)
-    response.data.usedStorage = utils.byteToMb(req.usedStorage);
-
-  return res.status(200).json(response);
-}
-
 function getAllUsers(req, res, next) {
   const {limit = 50, skip = 0, sort = '-createdAt'} = req.query;
   User.list({limit, skip, sort}).then((users) => res.status(200).json({success: true, data: users}))
@@ -172,7 +137,6 @@ function getCounts(req, res, next) {
 }
 
 export default {
-  me,
   getAllUsers,
   getByUsername,
   remove,
