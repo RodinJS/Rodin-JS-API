@@ -16,16 +16,22 @@ function list(req, res, next) {
   const skip = parseInt(req.query.skip) || 0;
   Modules.list({limit, skip}, req.query._queryString)
     .then((modules) => res.status(200).json({
-        success: true,
-        data: modules,
-      }))
+      success: true,
+      data: modules,
+    }))
     .catch((e) => next(e));
 }
 
 function getById(req, res, next) {
   const moduleID = req.body.moduleId || req.query.moduleId || req.params.moduleId;
-  Modules.findById(moduleID)
-    .then(module => onSuccess(module, res))
+  Modules.getById(moduleID)
+    .then(module => {
+      // if (req.originalUrl.indexOf('hook') > -1) {
+        // console.log(req.originalUrl.indexOf('hook'))
+        onSuccess(module, res);
+      // }
+      req.module = module;
+    })
     .catch(err => onError(err, next));
 }
 
