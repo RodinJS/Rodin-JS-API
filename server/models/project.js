@@ -334,6 +334,14 @@ ProjectSchema.statics = {
         "count": { "$sum": 1 }
       }},
     ])
+  },
+
+  getAll({skip = 0, limit = 50, sort} = {}) {
+    return this.find()
+      .sort(sort)
+      .skip(skip)
+      .limit(Number(limit))
+      .execAsync();
   }
 };
 

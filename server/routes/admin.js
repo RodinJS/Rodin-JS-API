@@ -15,6 +15,8 @@ router.route('/user/:username')
   .put(check.isGod, adminCtrl.update)
   .delete(check.isGod, adminCtrl.remove);
 
+router.route('/projects')
+  .get(check.checkAdminPermission, adminCtrl.getProjects);
 router.route('/counts')
   .get(adminCtrl.getCounts);
 
