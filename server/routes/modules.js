@@ -24,6 +24,8 @@ router.route('/subscribe')
 router.route('/assign')
   .post(check.ifTokenValid, modulesCtrl.checkIsSubscribed, modulesCtrl.getById,  modulesCtrl.assignToProject);
 
+router.route('/:moduleId')
+  .get(check.ifTokenValid, check.isGod, modulesCtrl.getById);
 
 router.route('/hook/validate')
   .get(modulesCtrl.checkHookToken, modulesCtrl.validateModules);

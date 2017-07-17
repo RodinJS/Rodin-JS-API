@@ -15,12 +15,10 @@ function list(req, res, next) {
   const limit = parseInt(req.query.limit) || 50;
   const skip = parseInt(req.query.skip) || 0;
   Modules.list({limit, skip}, req.query._queryString)
-    .then((modules) => {
-    res.status(200).json({
+    .then((modules) => res.status(200).json({
       success: true,
       data: modules,
-    });
-  })
+    }))
     .catch((e) => next(e));
 }
 
@@ -28,11 +26,11 @@ function getById(req, res, next) {
   const moduleID = req.body.moduleId || req.query.moduleId || req.params.moduleId;
   Modules.getById(moduleID)
     .then(module => {
-      if (req.originalUrl.indexOf('hook') > -1) {
-        return onSuccess(module, res);
-      }
+      // if (req.originalUrl.indexOf('hook') > -1) {
+        // console.log(req.originalUrl.indexOf('hook'))
+        onSuccess(module, res);
+      // }
       req.module = module;
-      return next();
     })
     .catch(err => onError(err, next));
 }
@@ -136,7 +134,7 @@ function update(req, res, next) {
 }
 
 function submit(req, res, next) {
-  const query = {_id:req.params.moduleId};
+  const query = {_id: req.params.moduleId};
   const update = _.omit(req.body, ['moduleId']);
 
 

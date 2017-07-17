@@ -59,7 +59,7 @@ const modules = new mongoose.Schema({
 modules.statics = {
 
     getById(moduleId) {
-        return this.findById(moduleId).execAsync()
+        return this.findById(moduleId)
           .then((module) => {
             if (module) {
                 return module;
@@ -98,6 +98,7 @@ modules.statics = {
         query.$and = [
           {status:{$eq:status}}
         ];
+
         return this.find()
           .sort({ createdAt: -1 })
           .skip(skip)
