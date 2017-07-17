@@ -107,7 +107,7 @@ function getCounts(req, res, next) {
       let count = data.map(resp => {
         let countObj = resp.map((value) => {
           return {
-            name: value._id.toLowerCase(),
+            name: value._id ? value._id.toLowerCase() : 'unknown',
             count: value.count
           }
         });
@@ -136,10 +136,16 @@ function getCounts(req, res, next) {
     });
 }
 
+function getProjects(req, res, next) {
+  const {limit = 50, skip = 0, sort = '-createdAt'} = req.query;
+  Project.getAll({limit, skip, sort}).then((projects) => res.status(200).json({success: true, data: projects}))
+    .error((e) => next(e));
+}
 export default {
   getAllUsers,
   getByUsername,
   remove,
   update,
-  getCounts
+  getCounts,
+  getProjects
 }
