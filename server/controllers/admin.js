@@ -187,7 +187,7 @@ function getProjects(req, res, next) {
     .error((e) => next(e));
 }
 
-function getByProjectId(req, res, next) {
+function getProjectById(req, res, next) {
   Project.findById(req.params.id)
     .then((project) => {
       if (!project) return _onError(next, {error: 'Project is empty', code: httpStatus.NOT_FOUND});
@@ -207,7 +207,7 @@ function getByProjectId(req, res, next) {
 
 function updateProjectById(req, res, next) {
   req.body.updatedAt = new Date();
-  if(!req.body.state) {
+  if (!req.body.state) {
     req.body.state = 'pending';
   }
   Project.findOneAndUpdate({_id: req.params.id}, {$set: req.body}, {new: true})
@@ -254,6 +254,37 @@ function deleteProjectById(req, res, next) {
     .catch((e) => next(e));
 }
 
+function getAllModules(req, res, next) {
+  const limit = parseInt(req.query.limit) || 50;
+  const skip = parseInt(req.query.skip) || 0;
+  Modules.list({limit, skip}, req.query._queryString)
+    .then((modules) => res.status(200).json({
+      success: true,
+      data: modules,
+    }))
+    .catch((e) => next(e));
+}
+
+function getModuleById(req, res, next) {
+  let {id} = req.params;
+  Modules.findById(id)
+    .then((module) => res.status(200).json({
+      success: true,
+      data: module,
+    }))
+    .catch((e) => next(e));
+}
+
+function updateModuleById(req, res, next) {
+  let {id} = req.params;
+  let update = req.body;
+  Modules.findByIdAndUpdate(id, {$set: update})
+    .then((success) => res.status(200).json({
+      success: true,
+      data: success,
+    }))
+    .catch((e) => console.error('Cant update module', e));
+}
 function _onError(next, error) {
   const err = new APIError(error.error, error.code, true);
   return next(err);
@@ -269,8 +300,11 @@ export default {
   updateUserById,
   getCounts,
   getProjects,
-  getByProjectId,
+  getProjectById,
   updateProjectById,
+  getAllModules,
+  getModuleById,
+  updateModuleById,
   deleteProjectById,
   finalizeProjects,
 }
