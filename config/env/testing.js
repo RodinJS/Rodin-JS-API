@@ -1,9 +1,9 @@
 export default {
-  env: 'production',
+  env: 'testing',
   jwtSecret: '4DNSrMPuQ3Y3McBu96wd2GzGheDXuft8gDqLEQVWHnXQfcaGFtM2ZBgyNYzPN7CK',
-  db: 'mongodb://localhost/rodin-js-api-production',
-  clientURL: 'https://rodin.io',
-  editorURL: 'https://editor.rodin.io',
+  db: 'mongodb://mongo:27017/rodin-js-api-testing',
+  clientURL: 'https://rodinapp.com',
+  editorURL: 'https://editor.rodinapp.com',
   port: 3000,
   socketPort: 4000,
   socketURL: 'https://ss.rodin.space',
