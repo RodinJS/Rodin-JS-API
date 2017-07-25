@@ -12,17 +12,18 @@ router.route('/:type')
   .get(supportCtrl.getQuestionsList)
   .post(check.ifTokenValid, supportCtrl.validateCustomer, supportCtrl.createQuestion);
 
-router.route('/thread')
+router.route('/thread/:conversationId')
   .post(check.ifTokenValid, supportCtrl.validateCustomer, supportCtrl.createQuestionThread);
 
-router.route('/conversation/:id')
-  .get(supportCtrl.getConversation);
+router.route('/conversation/:type/:id')
+  .get(supportCtrl.getConversation)
+  .put(check.ifTokenValid, supportCtrl.updateConversation);
 
 router.route('/tags/:type')
-  .get(supportCtrl.getTags)
+  .get(supportCtrl.getTags);
 
 router.route('/search/:type')
-  .get(supportCtrl.searchConversations)
+  .get(supportCtrl.searchConversations);
 
 
 export default router;

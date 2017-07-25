@@ -12,15 +12,18 @@ const apiKey = '19796176812c0a05720d4c046949abbbc335d950';
 const mailboxes = {
   'Q&A': {
     id: 116708,
-    name: 'Q&A'
+    name: 'Q&A',
+    voteId: 3774
   },
   'issues': {
-    id: 116708,
-    name: 'issues'
+    id: 116974,
+    name: 'issues',
+    voteId: 3775
   },
   'features': {
     id: 116708,
-    name: 'features'
+    name: 'features',
+    voteId: 3776
   }
 
 };
@@ -59,6 +62,48 @@ const defaultParams = {
   },
 };
 
+const mappers = {
+  pickerParams: ['id', 'threadCount', 'subject', 'status', 'preview', 'createdAt', 'modifiedAt', 'user', 'tags', 'threads', 'rating'],
+
+  conversation(data){
+    return new Promise((resolve, reject) => {
+      Q.all(_.map(data.items, (conversation, key) => {
+        const options = {
+          url: `https://api.helpscout.net/v1/conversations/${conversation.id}.json`,
+          method: 'GET',
+        };
+        Object.assign(options, defaultParams);
+        return _submit(options);
+      }))
+        .then(responses => {
+          const items = _.map(responses, (data) => this.singleConversation(data.item, false));
+          data.items = items;
+          return resolve(data);
+        })
+        .catch(err => reject(err));
+    })
+  },
+
+  singleConversation(conversation, getThreads = true){
+    let pickerParams = _.clone(this.pickerParams);
+    if(!getThreads){
+      pickerParams = _.remove(pickerParams, (param)=> param !== 'threads');
+    }
+    else{
+      conversation.threads = _.map(conversation.threads, (thread, key)=>{
+        thread.createdBy = _.pick(thread.createdBy, ['firstName', 'lastName', 'email','photoUrl']);
+        thread = _.pick(thread, ['body', 'createdBy', 'createdAt']);
+        return thread;
+      });
+    }
+    conversation.rating = conversation.customFields[0] ? parseInt(conversation.customFields[0].value) : 0;
+    conversation.user = _.pick(conversation.customer, ['firstName', 'lastName', 'email', 'photoUrl']);
+    conversation = _.pick(conversation, pickerParams);
+    return conversation;
+  }
+
+};
+
 function _initThread(req) {
   const customer = {
     id: req.hsUser.id,
@@ -76,7 +121,7 @@ function _initThread(req) {
 
 function _initThreadParams(method, req) {
   const data = {
-    url: `https://api.helpscout.net/v1/conversations/${req.body.conversationId}.json`,
+    url: `https://api.helpscout.net/v1/conversations/${req.params.conversationId}.json`,
     method: method,
     body: _initThread(req)
   };
@@ -102,9 +147,15 @@ function _initConversationParams(method, req, mailbox) {
       createdAt: new Date(),
       tags: req.body.tags,
       threads: [],
+      customFields: []
     }
   };
   data.body.threads.push(_initThread(req));
+  data.body.customFields.push({
+    fieldId: mailbox.voteId,
+    value: 0,
+    name: 'vote',
+  });
   Object.assign(data, defaultParams);
   return data;
 
@@ -153,9 +204,9 @@ function _initSearchParams(req) {
       query: `mailboxid:${mailboxId}`
     }
   };
-  if(req.query.subject) data.qs.query+=` AND subject:"${req.query.subject}"`;
-  if(req.query.tags){
-    data.qs.query+= ` AND ${req.query.tags.map((date) => `tag:"${date}" `).join(" OR ")}`
+  if (req.query.subject) data.qs.query += ` AND subject:"${req.query.subject}"`;
+  if (req.query.tags) {
+    data.qs.query += ` AND ${req.query.tags.map((date) => `tag:"${date}" `).join(" OR ")}`
   }
   Object.assign(data, defaultParams);
   console.log('QUERY', data.qs.query);
@@ -201,6 +252,7 @@ function _submit(options) {
   })
 }
 
+
 function createQuestion(req, res, next) {
   let param = '';
   switch (req.params.type) {
@@ -214,7 +266,6 @@ function createQuestion(req, res, next) {
     default:
       param = mailboxes['Q&A'];
       break;
-
   }
   const conversationParams = _initConversationParams('POST', req, param);
   _submit(conversationParams)
@@ -223,20 +274,6 @@ function createQuestion(req, res, next) {
 }
 
 function createQuestionThread(req, res, next) {
-  let param = '';
-  switch (req.params.type) {
-    case 'issues':
-      param = mailboxes['issues'];
-      break;
-    case 'features':
-      param = mailboxes['features'];
-      break;
-    case 'questions':
-    default:
-      param = mailboxes['Q&A'];
-      break;
-
-  }
   const threadParams = _initThreadParams('POST', req);
   _submit(threadParams)
     .then(response => onSuccess(`thread Create`, res))
@@ -283,6 +320,7 @@ function getQuestionsList(req, res, next) {
 
   const options = _initConversationListParams(param);
   return _submit(options)
+    .then(response => mappers.conversation(response))
     .then(response => onSuccess(response, res))
     .catch(err => onError(err, next))
 }
@@ -295,8 +333,66 @@ function getConversation(req, res, next) {
   };
   Object.assign(options, defaultParams);
   return _submit(options)
-    .then(response => onSuccess(response, res))
+    .then(response => onSuccess(mappers.singleConversation(response.item), res))
     .catch(err => onError(err, next))
+}
+
+function updateConversation(req, res, next) {
+  if (_.isUndefined(req.params.id)) return onError(`Provide conversation id`, next);
+  let mailbox = '';
+  switch (req.params.type) {
+    case 'issues':
+      mailbox = mailboxes['issues'];
+      break;
+    case 'features':
+      mailbox = mailboxes['features'];
+      break;
+    case 'questions':
+    default:
+      mailbox = mailboxes['Q&A'];
+      break;
+
+  }
+  const getOptions = {
+    url: `https://api.helpscout.net/v1/conversations/${req.params.id}.json`,
+    method: 'GET',
+  };
+  Object.assign(getOptions, defaultParams);
+  const options = {
+    url: `https://api.helpscout.net/v1/conversations/${req.params.id}.json`,
+    method: 'PUT',
+    body: {}
+  };
+  Object.assign(options, defaultParams);
+
+
+  return _submit(getOptions)
+    .then(response => {
+      Object.assign(options.body, {
+        subject: req.body.subject || response.item.subject,
+        status: req.body.status || response.item.status,
+        tags: req.body.tags ? _.uniq(_.concat(req.body.tags, response.item.tags)) : response.item.tags,
+        reload: true
+      });
+      if (req.body.vote) {
+        const voteField = response.item.customFields || [];
+        if (voteField.length > 0 && voteField[0].fieldId === mailbox.voteId) {
+          voteField[0].value = parseInt(voteField[0].value) + parseInt(req.body.vote > 0 ? 1 : -1);
+        }
+        else {
+          voteField.push({
+            fieldId: mailbox.voteId,
+            value: parseInt(req.body.vote > 0 ? 1 : 0),
+          })
+        }
+        console.log('voteField', voteField);
+        Object.assign(options.body, {customFields: voteField})
+      }
+      return _submit(options)
+    })
+    .then(response => onSuccess(response.item, res))
+    .catch(err => onError(err, next))
+
 }
 
 function getTags(req, res, next) {
@@ -310,7 +406,6 @@ function getTags(req, res, next) {
       break;
     default:
       param = mailboxes['Q&A'].id;
-
   }
   const options = _initConversationListParams(param);
   Object.assign(options, defaultParams);
@@ -319,10 +414,11 @@ function getTags(req, res, next) {
     .catch(err => onError(err, next))
 }
 
-function searchConversations(req, res, next){
-  const options  = _initSearchParams(req);
+function searchConversations(req, res, next) {
+  const options = _initSearchParams(req);
   return _submit(options)
-    .then(response => onSuccess(response, res))
+    .then(response => mappers.conversation(response))
+    .then(response=>onSuccess(response, res))
     .catch(err => onError(err, next))
 }
 
@@ -342,6 +438,7 @@ export default {
   createQuestionThread,
   getQuestionsList,
   getConversation,
+  updateConversation,
   getTags,
   searchConversations
 };
