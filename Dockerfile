@@ -14,4 +14,5 @@ ADD . /var/www/api.rodin.io
 
 EXPOSE 3000 4000
 
-CMD ["sh", "-c", "export NODE_ENV=${env} npm start"]
+# CMD npm start
+CMD ["sh", "-c", "export NODE_ENV=testing; npm start"]
