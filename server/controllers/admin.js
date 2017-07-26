@@ -156,13 +156,13 @@ function getCounts(req, res, next) {
             count: value.count
           }
         });
-        let total = 0;
+        let total = {};
         if (countObj && countObj.length === 1) {
-          total = countObj[0].count
+          total.count = countObj[0].count
         } else if (countObj && countObj.length > 1) {
-          total = countObj.reduce((x, y) => y && y.count ? x.count + y.count : x.count);
+          total = countObj.reduce((x, y) => ({count: x.count + y.count}));
         }
-        countObj.push({name: 'total', count: total});
+        countObj.push({name: 'total', count: total.count});
         return countObj
       });
       let finalData = {

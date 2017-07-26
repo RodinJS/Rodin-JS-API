@@ -263,10 +263,23 @@ UserSchema.statics = {
 
   list({skip = 0, limit = 50, sort} = {}) {
     return this.find()
-      .sort(sort)
-      .skip(skip)
       .limit(Number(limit))
+      .skip(Number(skip))
+      .sort(sort)
       .execAsync();
+  },
+
+  filtered({skip = 0, limit = 50, sort} = {}) {
+    let cond = sort.startsWith('-');
+    let d = sort;
+    if(cond) {
+      d = sort.slice(1)
+    }
+    return this.aggregate([
+      {$skip:Number(skip)},
+      {$limit: Number(limit)},
+      // {$sort: { [d] : cond ? -1: 1 }}
+    ]).execAsync();
   },
 
   countByRole() {
