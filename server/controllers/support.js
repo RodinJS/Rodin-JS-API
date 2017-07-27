@@ -86,15 +86,18 @@ const mappers = {
 
   singleConversation(conversation, getThreads = true){
     let pickerParams = _.clone(this.pickerParams);
+    conversation.threads = _.map(conversation.threads, (thread, key)=>{
+      thread.createdBy = _.pick(thread.createdBy, ['firstName', 'lastName', 'email','photoUrl']);
+      thread = _.pick(thread, ['body', 'createdBy', 'createdAt']);
+      return thread;
+    });
+    conversation.preview = _.last(conversation.threads).body;
+
     if(!getThreads){
       pickerParams = _.remove(pickerParams, (param)=> param !== 'threads');
     }
     else{
-      conversation.threads = _.map(conversation.threads, (thread, key)=>{
-        thread.createdBy = _.pick(thread.createdBy, ['firstName', 'lastName', 'email','photoUrl']);
-        thread = _.pick(thread, ['body', 'createdBy', 'createdAt']);
-        return thread;
-      });
+      conversation.threads.pop();
     }
     conversation.rating = conversation.customFields[0] ? parseInt(conversation.customFields[0].value) : 0;
     conversation.user = _.pick(conversation.customer, ['firstName', 'lastName', 'email', 'photoUrl']);
