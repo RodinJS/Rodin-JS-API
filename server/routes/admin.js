@@ -11,13 +11,22 @@ router.route('/user')
   .get(check.isGod, adminCtrl.getAllUsers);
 
 router.route('/user/:username')
-  .get(check.isGod,adminCtrl.getByUsername)
-  .put(check.isGod, adminCtrl.update)
-  .delete(check.isGod, adminCtrl.remove);
+  .get(check.isGod, adminCtrl.getUserByUsername)
+  .put(check.isGod, adminCtrl.updateUserById)
+  .delete(check.isGod, adminCtrl.removeUserById);
+
+router.route('/projects')
+  .get(check.checkAdminPermission, adminCtrl.getProjects);
+
+router.route('/projects/:id')
+  .get(check.checkAdminPermission, adminCtrl.getByProjectId, adminCtrl.finalizeProjects)
+  .put(check.checkAdminPermission, adminCtrl.updateProjectById);
+
+router.route('/projects/:owner/:id')
+  .delete(check.checkAdminPermission, adminCtrl.getByProjectId, adminCtrl.deleteProjectById);
 
 router.route('/counts')
   .get(adminCtrl.getCounts);
-
 
 
 export default router;
