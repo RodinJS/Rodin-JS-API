@@ -21,7 +21,7 @@ const mailboxes = {
     voteId: 3775
   },
   'features': {
-    id: 116708,
+    id: 116976,
     name: 'features',
     voteId: 3776
   }
@@ -318,6 +318,7 @@ function getQuestionsList(req, res, next) {
 
   }
 
+  console.log(req.params.type)
   const options = _initConversationListParams(param);
   return _submit(options)
     .then(response => mappers.conversation(response))
