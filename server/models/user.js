@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 import httpStatus from '../helpers/httpStatus';
 import APIError from '../helpers/APIError';
 import bcrypt from 'bcrypt-nodejs';
-
+import moongosePaginate from 'mongoose-paginate';
 /**
  * User Schema
  */
@@ -261,12 +261,16 @@ UserSchema.statics = {
    * @returns {Promise<User[]>}
    */
 
-  list({skip = 0, limit = 50, sort} = {}) {
-    return this.find()
-      .limit(Number(limit))
-      .skip(Number(skip))
-      .sort(sort)
-      .execAsync();
+  // list({skip = 0, limit = 50, sort} = {}) {
+  //   return this.find()
+  //     .limit(Number(limit))
+  //     .skip(Number(skip))
+  //     .sort(sort)
+  //     .execAsync();
+  // },
+
+  list({page = 1, sort = {}}) {
+    return this.paginate({}, { sort: { createdAt: -1 },page: Number(page), limit: 50 })
   },
 
   filtered({skip = 0, limit = 50, sort} = {}) {
@@ -295,4 +299,6 @@ UserSchema.statics = {
 /**
  * @typedef User
  */
+UserSchema.plugin(moongosePaginate);
+
 export default mongoose.model('User', UserSchema);

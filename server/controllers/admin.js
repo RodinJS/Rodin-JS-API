@@ -55,8 +55,9 @@ const getStatus = (project, device, cb) => {
 };
 
 function getAllUsers(req, res, next) {
-  const {limit = 50, skip = 0, sort = '-createdAt'} = req.query;
-  User.list({limit, skip, sort}).then((users) => res.status(200).json({success: true, data: users}))
+  const {page = 50, sort = '-createdAt'} = req.query;
+
+  User.list({page, sort}).then((users) => res.status(200).json({success: true, data: users}))
     .error((e) => next(e));
 }
 
