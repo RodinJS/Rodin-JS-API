@@ -59,7 +59,7 @@ const modules = new mongoose.Schema({
 modules.statics = {
 
     getById(moduleId) {
-        return this.findById(moduleId).execAsync()
+        return this.findById(moduleId)
           .then((module) => {
             if (module) {
                 return module;
@@ -99,12 +99,18 @@ modules.statics = {
           {status:{$eq:status}}
         ];
 
-        return this.find(query)
+        return this.find()
           .sort({ createdAt: -1 })
           .skip(skip)
           .limit(limit)
-          .execAsync();
     },
+
+    countByModuleStatus() {
+      return this.aggregate([{ "$group": {
+        "_id": "$status",
+        "count": { "$sum": 1 }
+      } }]);
+    }
 
 };
 
