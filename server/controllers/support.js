@@ -204,7 +204,9 @@ function _initSearchParams(req) {
     url: 'https://api.helpscout.net/v1/search/conversations.json',
     method: 'GET',
     qs: {
-      query: `mailboxid:${mailboxId}`
+      query: `mailboxid:${mailboxId}`,
+      pageSize:req.query.limit || 10,
+      page:req.query.page || 1
     }
   };
   if (req.query.subject) data.qs.query += ` AND subject:"${req.query.subject}"`;
