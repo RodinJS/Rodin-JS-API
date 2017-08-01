@@ -11,7 +11,7 @@ import config from '../../config/env';
 import * as request from "request";
 import * as fs from "fs";
 import utils from "../helpers/common";
-
+import queryString from 'querystring';
 const getStatus = (project, device, cb) => {
   return new Promise((resolve, reject) => {
 
@@ -55,41 +55,41 @@ const getStatus = (project, device, cb) => {
 };
 
 function getAllUsers(req, res, next) {
-  const {page = 50, sort = '-createdAt'} = req.query;
-
-  User.list({page, sort}).then((users) => res.status(200).json({success: true, data: users}))
+  const {page = 50} = req.query;
+  let sortData = queryString.parse(req.query.sort);
+  User.list({page, sortData}).then((users) => res.status(200).json({success: true, data: users}))
     .error((e) => next(e));
 }
 
 function getUserByUsername(req, res, next) {
-  User.get(req.params.username).then((user) => {
+  User.getWithProjects(req.params.username).then((user) => {
     if (!user) {
       const err = new APIError('Not found', httpStatus.NOT_FOUND, true);
       return next(err);
     }
 
-    let data = {
-      allowProjectsCount: user.allowProjectsCount,
-      createdAt: user.createdAt,
-      editorSettings: user.editorSettings,
-      email: user.email,
-      github: user.github,
-      projects: user.projects,
-      role: user.role,
-      storageSize: user.storageSize,
-      type: user.type,
-      updatedAt: user.updatedAt,
-      username: user.username,
-      usernameConfirmed: user.usernameConfirmed
-    };
+    // let data = {
+    //   allowProjectsCount: user.allowProjectsCount,
+    //   createdAt: user.createdAt,
+    //   editorSettings: user.editorSettings,
+    //   email: user.email,
+    //   github: user.github,
+    //   projects: user.projects,
+    //   role: user.role,
+    //   storageSize: user.storageSize,
+    //   type: user.type,
+    //   updatedAt: user.updatedAt,
+    //   username: user.username,
+    //   usernameConfirmed: user.usernameConfirmed
+    // };
 
     let response = {
       success: true,
-      data,
+      data: user,
     };
 
     return res.status(200).json(response);
-  }).error((e) => {
+  }).catch((e) => {
     const err = new APIError('Something happen', httpStatus.BAD_REQUEST, true);
     return next(err);
   });
@@ -183,8 +183,8 @@ function getCounts(req, res, next) {
 }
 
 function getProjects(req, res, next) {
-  const {limit = 50, skip = 0, sort = '-createdAt'} = req.query;
-  Project.getAll({limit, skip, sort}).then((projects) => res.status(200).json({success: true, data: projects}))
+  const {page = 1, sort = {createdAt: -1}} = req.query;
+  Project.projectsListPaginated({page, sort}).then((projects) => res.status(200).json({success: true, data: projects}))
     .error((e) => next(e));
 }
 
@@ -256,14 +256,15 @@ function deleteProjectById(req, res, next) {
 }
 
 function getAllModules(req, res, next) {
-  const limit = parseInt(req.query.limit) || 50;
-  const skip = parseInt(req.query.skip) || 0;
-  Modules.list({limit, skip}, req.query._queryString)
+  console.log(req.query)
+  const page = parseInt(req.query.page) || 1;
+  Modules.modulesListPaginated({page})
     .then((modules) => res.status(200).json({
       success: true,
       data: modules,
     }))
     .catch((e) => next(e));
+
 }
 
 function getModuleById(req, res, next) {

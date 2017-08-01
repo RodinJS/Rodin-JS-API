@@ -162,7 +162,11 @@ const UserSchema = new mongoose.Schema({
     type: String
   }
 });
-
+UserSchema.virtual('Project', {
+  ref: 'Project',
+  localField: '_id',
+  foreignField: 'owner'
+});
 // Pre-save of user to database, hash password if password is modified or new
 UserSchema.pre('save', function (next) { // eslint-disable-line
   const user = this;// jscs:ignore safeContextKeyword
@@ -225,6 +229,11 @@ UserSchema.statics = {
       });
   },
 
+  getWithProjects(username) {
+    username = username.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
+
+    return this.findOne({username: new RegExp('^' + username + '$', 'i')}).populate('Project')
+  },
   /**
    * Check if user has permission to modify project
    * @param {ObjectId} id - The objectId of user.
@@ -257,20 +266,13 @@ UserSchema.statics = {
    * List users in descending order of 'createdAt' timestamp.
    * @param {number} skip - Number of users to be skipped.
    * @param {number} limit - Limit number of users to be returned.
-   * @param {string} sort - sorting field
+   * @param {{createdAt: number}} sort - sorting field
    * @returns {Promise<User[]>}
    */
 
-  // list({skip = 0, limit = 50, sort} = {}) {
-  //   return this.find()
-  //     .limit(Number(limit))
-  //     .skip(Number(skip))
-  //     .sort(sort)
-  //     .execAsync();
-  // },
 
-  list({page = 1, sort = {}}) {
-    return this.paginate({}, { sort: { createdAt: -1 },page: Number(page), limit: 50 })
+  list({page = 1, sort = {createdAt: -1}}) {
+    return this.paginate({}, { sort: sort ,page: Number(page), limit: 50 })
   },
 
   filtered({skip = 0, limit = 50, sort} = {}) {
