@@ -162,11 +162,7 @@ const UserSchema = new mongoose.Schema({
     type: String
   }
 });
-UserSchema.virtual('Project', {
-  ref: 'Project',
-  localField: '_id',
-  foreignField: 'owner'
-});
+
 // Pre-save of user to database, hash password if password is modified or new
 UserSchema.pre('save', function (next) { // eslint-disable-line
   const user = this;// jscs:ignore safeContextKeyword
