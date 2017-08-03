@@ -9,12 +9,12 @@ const router = express.Router();	// eslint-disable-line new-cap
 
 //Users CRUD
 router.route('/user')
-  .get(check.isGod, adminCtrl.getAllUsers);
+  .get(check.checkAdminPermission, adminCtrl.getAllUsers);
 
 router.route('/user/:username')
-  .get(check.isGod, adminCtrl.getUserByUsername)
-  .put(check.isGod, adminCtrl.updateUserById)
-  .delete(check.isGod, adminCtrl.removeUserById);
+  .get(check.checkAdminPermission, adminCtrl.getUserByUsername)
+  .put(check.checkAdminPermission, adminCtrl.updateUserById)
+  .delete(check.checkAdminPermission, adminCtrl.removeUserById);
 
 // Projects CRUD
 router.route('/projects')
@@ -39,7 +39,7 @@ router.route('/modules/:id')
 
 //Counts
 router.route('/counts')
-  .get(adminCtrl.getCounts);
+  .get(check.checkAdminPermission, adminCtrl.getCounts);
 
 
 export default router;
