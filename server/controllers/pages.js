@@ -7,7 +7,9 @@ import Landing from '../models/landing';
 import HelpScoutDocs from 'helpscout-docs';
 import Q from 'q';
 import helpscout from 'helpscout';
-const helscoutKey = 'f73de0163c51a6fab050f8f4d5fb550c4e7b0f0e';
+import request from 'request';
+const helscoutKey = '30cb62d47f4d29a73e6f1e268a90a5c7102178fd';
+var HpScout = require('helpscout')(helscoutKey);
 const HelpDesk = Promise.promisifyAll(helpscout(helscoutKey));
 
 const hsdocs = _.reduce(new HelpScoutDocs(helscoutKey), (result, value, key) => {
