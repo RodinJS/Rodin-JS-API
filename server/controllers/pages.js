@@ -8,7 +8,7 @@ import HelpScoutDocs from 'helpscout-docs';
 import Q from 'q';
 import helpscout from 'helpscout';
 import request from 'request';
-const helscoutKey = '38e44e9519b4fd0339d79ada2625a74018500e67';
+const helscoutKey = '30cb62d47f4d29a73e6f1e268a90a5c7102178fd';
 var HpScout = require('helpscout')(helscoutKey);
 const HelpDesk = Promise.promisifyAll(helpscout(helscoutKey));
 

@@ -26,11 +26,12 @@ function getById(req, res, next) {
   const moduleID = req.body.moduleId || req.query.moduleId || req.params.moduleId;
   Modules.getById(moduleID)
     .then(module => {
-      // if (req.originalUrl.indexOf('hook') > -1) {
-        // console.log(req.originalUrl.indexOf('hook'))
+      if (req.originalUrl.indexOf('hook') > -1) {
+        console.log(req.originalUrl.indexOf('hook'))
         onSuccess(module, res);
-      // }
+      }
       req.module = module;
+      return next();
     })
     .catch(err => onError(err, next));
 }
