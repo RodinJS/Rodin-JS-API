@@ -28,4 +28,5 @@ router.route('/support/knowledgebase/articles/:categoryId')
 router.route('/support/knowledgebase/article/:articleId')
   .get(pagesCtrl.getKnwolegeArticle);
 
+
 export default router;
