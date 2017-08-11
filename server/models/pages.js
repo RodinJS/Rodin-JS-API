@@ -2,7 +2,6 @@ import Promise from 'bluebird';
 import mongoose from 'mongoose';
 import httpStatus from '../helpers/httpStatus';
 import APIError from '../helpers/APIError';
-import pages from "../controllers/pages";
 
 const Schema = mongoose.Schema;
 const ObjectId = Schema.ObjectId;
@@ -53,11 +52,6 @@ Pages.statics = {
   getPagesList() {
     return this.aggregate([
       {$group: {_id: "$category", values: {$push: "$$ROOT"}}},
-      // {
-      //   "$project": {
-      //     title: 1, slug: 1, state: 1, putOnFooter: 1, externalURL: 1, category: 1
-      //   }
-      // }
     ]).then(pages => {
       if (!pages) {
         const err = new APIError('Error while requesting pages list!----', httpStatus.NOT_FOUND, true);
@@ -70,22 +64,6 @@ Pages.statics = {
         return Promise.reject(err);
       });
   },
-  // getPagesList() {
-  //   return this.find().select({title: 1, slug: 1, state: 1, putOnFooter: 1, externalURL: 1, category: 1}).lean()
-  //     .then((pages) => {
-  //       if (!pages) {
-  //         const err = new APIError('Error while requesting pages list!----', httpStatus.NOT_FOUND, true);
-  //         return Promise.reject(err);
-  //       }
-  //       return pages;
-  //
-  //     })
-  //     .catch((e) => {
-  //       const err = new APIError('Error while requesting pages list!----', httpStatus.NOT_FOUND, true);
-  //       return Promise.reject(err);
-  //     });
-  // },
-
 };
 
 export default mongoose.model('cms_pages', Pages);
