@@ -5,6 +5,7 @@ import httpStatus from '../helpers/httpStatus';
 import APIError from '../helpers/APIError';
 import bcrypt from 'bcrypt-nodejs';
 import moongosePaginate from 'mongoose-paginate';
+
 /**
  * User Schema
  */
@@ -209,7 +210,7 @@ UserSchema.statics = {
    * @returns {Promise<User, APIError>}
    */
 
-  get(username) {
+  get (username) {
 
     username = username.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
     return this.findOne({username: new RegExp('^' + username + '$', 'i')})
@@ -267,18 +268,26 @@ UserSchema.statics = {
    */
 
 
-  list({page = 1, sort = {createdAt: -1}}) {
-    return this.paginate({}, { sort: sort ,page: Number(page), limit: 50 })
+  list({skip = 0, limit = 50, sort} = {}) {
+    return this.find()
+      .limit(Number(limit))
+      .skip(Number(skip))
+      .sort(sort)
+      .execAsync();
+  },
+
+  listPaginated({page = 1, sort = {createdAt: -1}}) {
+    return this.paginate({}, {sort: sort, page: Number(page), limit: 50})
   },
 
   filtered({skip = 0, limit = 50, sort} = {}) {
     let cond = sort.startsWith('-');
     let d = sort;
-    if(cond) {
+    if (cond) {
       d = sort.slice(1)
     }
     return this.aggregate([
-      {$skip:Number(skip)},
+      {$skip: Number(skip)},
       {$limit: Number(limit)},
       // {$sort: { [d] : cond ? -1: 1 }}
     ]).execAsync();
@@ -286,10 +295,12 @@ UserSchema.statics = {
 
   countByRole() {
     return this.aggregate([
-      { "$group": {
-        "_id": "$role",
-        "count": { "$sum": 1 }
-      }},
+      {
+        "$group": {
+          "_id": "$role",
+          "count": {"$sum": 1}
+        }
+      },
     ])
   }
 };

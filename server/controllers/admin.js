@@ -57,7 +57,7 @@ const getStatus = (project, device, cb) => {
 function getAllUsers(req, res, next) {
   const {page = 50} = req.query;
   let sortData = queryString.parse(req.query.sort);
-  User.list({page, sortData}).then((users) => res.status(200).json({success: true, data: users}))
+  User.listPaginated({page, sortData}).then((users) => res.status(200).json({success: true, data: users}))
     .error((e) => next(e));
 }
 
