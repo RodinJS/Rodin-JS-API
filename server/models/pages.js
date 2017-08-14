@@ -51,6 +51,7 @@ Pages.statics = {
 
   getPagesList() {
     return this.aggregate([
+      {$match: {state: 'published'}},
       {$group: {_id: "$category", values: {$push: "$$ROOT"}}},
     ]).then(pages => {
       if (!pages) {
