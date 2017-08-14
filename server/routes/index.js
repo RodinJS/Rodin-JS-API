@@ -11,6 +11,7 @@ import gitRoute from './git';
 import domainsRoute from './domains';
 import modulesRoute from './modules';
 import pagesRoute from './pages';
+import supportRoute from './support';
 import adminRoute from './admin';
 import RodinSanitizer from '../helpers/sanitizer';
 
@@ -66,6 +67,10 @@ const apiRoutes = {
   pages: {
     route: '/pages',
     module: [pagesRoute],
+  },
+  support: {
+    route: '/support',
+    module: [supportRoute],
   },
   admin: {
     route: '/admin',
