@@ -11,7 +11,7 @@ import config from '../../config/env';
 import * as request from "request";
 import * as fs from "fs";
 import utils from "../helpers/common";
-
+import queryString from 'querystring';
 const getStatus = (project, device, cb) => {
   return new Promise((resolve, reject) => {
 
@@ -55,40 +55,41 @@ const getStatus = (project, device, cb) => {
 };
 
 function getAllUsers(req, res, next) {
-  const {limit = 50, skip = 0, sort = '-createdAt'} = req.query;
-  User.list({limit, skip, sort}).then((users) => res.status(200).json({success: true, data: users}))
+  const {page = 50} = req.query;
+  let sortData = queryString.parse(req.query.sort);
+  User.listPaginated({page, sortData}).then((users) => res.status(200).json({success: true, data: users}))
     .error((e) => next(e));
 }
 
 function getUserByUsername(req, res, next) {
-  User.get(req.params.username).then((user) => {
+  User.getWithProjects(req.params.username).then((user) => {
     if (!user) {
       const err = new APIError('Not found', httpStatus.NOT_FOUND, true);
       return next(err);
     }
 
-    let data = {
-      allowProjectsCount: user.allowProjectsCount,
-      createdAt: user.createdAt,
-      editorSettings: user.editorSettings,
-      email: user.email,
-      github: user.github,
-      projects: user.projects,
-      role: user.role,
-      storageSize: user.storageSize,
-      type: user.type,
-      updatedAt: user.updatedAt,
-      username: user.username,
-      usernameConfirmed: user.usernameConfirmed
-    };
+    // let data = {
+    //   allowProjectsCount: user.allowProjectsCount,
+    //   createdAt: user.createdAt,
+    //   editorSettings: user.editorSettings,
+    //   email: user.email,
+    //   github: user.github,
+    //   projects: user.projects,
+    //   role: user.role,
+    //   storageSize: user.storageSize,
+    //   type: user.type,
+    //   updatedAt: user.updatedAt,
+    //   username: user.username,
+    //   usernameConfirmed: user.usernameConfirmed
+    // };
 
     let response = {
       success: true,
-      data,
+      data: user,
     };
 
     return res.status(200).json(response);
-  }).error((e) => {
+  }).catch((e) => {
     const err = new APIError('Something happen', httpStatus.BAD_REQUEST, true);
     return next(err);
   });
@@ -156,13 +157,13 @@ function getCounts(req, res, next) {
             count: value.count
           }
         });
-        let total = 0;
+        let total = {};
         if (countObj && countObj.length === 1) {
-          total = countObj[0].count
+          total.count = countObj[0].count
         } else if (countObj && countObj.length > 1) {
-          total = countObj.reduce((x, y) => y && y.count ? x.count + y.count : x.count);
+          total = countObj.reduce((x, y) => ({count: x.count + y.count}));
         }
-        countObj.push({name: 'total', count: total});
+        countObj.push({name: 'total', count: total.count});
         return countObj
       });
       let finalData = {
@@ -182,12 +183,12 @@ function getCounts(req, res, next) {
 }
 
 function getProjects(req, res, next) {
-  const {limit = 50, skip = 0, sort = '-createdAt'} = req.query;
-  Project.getAll({limit, skip, sort}).then((projects) => res.status(200).json({success: true, data: projects}))
+  const {page = 1, sort = {createdAt: -1}} = req.query;
+  Project.projectsListPaginated({page, sort}).then((projects) => res.status(200).json({success: true, data: projects}))
     .error((e) => next(e));
 }
 
-function getByProjectId(req, res, next) {
+function getProjectById(req, res, next) {
   Project.findById(req.params.id)
     .then((project) => {
       if (!project) return _onError(next, {error: 'Project is empty', code: httpStatus.NOT_FOUND});
@@ -207,7 +208,7 @@ function getByProjectId(req, res, next) {
 
 function updateProjectById(req, res, next) {
   req.body.updatedAt = new Date();
-  if(!req.body.state) {
+  if (!req.body.state) {
     req.body.state = 'pending';
   }
   Project.findOneAndUpdate({_id: req.params.id}, {$set: req.body}, {new: true})
@@ -254,6 +255,38 @@ function deleteProjectById(req, res, next) {
     .catch((e) => next(e));
 }
 
+function getAllModules(req, res, next) {
+  console.log(req.query)
+  const page = parseInt(req.query.page) || 1;
+  Modules.modulesListPaginated({page})
+    .then((modules) => res.status(200).json({
+      success: true,
+      data: modules,
+    }))
+    .catch((e) => next(e));
+
+}
+
+function getModuleById(req, res, next) {
+  let {id} = req.params;
+  Modules.findById(id)
+    .then((module) => res.status(200).json({
+      success: true,
+      data: module,
+    }))
+    .catch((e) => next(e));
+}
+
+function updateModuleById(req, res, next) {
+  let {id} = req.params;
+  let update = req.body;
+  Modules.findByIdAndUpdate(id, {$set: update})
+    .then((success) => res.status(200).json({
+      success: true,
+      data: success,
+    }))
+    .catch((e) => console.error('Cant update module', e));
+}
 function _onError(next, error) {
   const err = new APIError(error.error, error.code, true);
   return next(err);
@@ -269,8 +302,11 @@ export default {
   updateUserById,
   getCounts,
   getProjects,
-  getByProjectId,
+  getProjectById,
   updateProjectById,
+  getAllModules,
+  getModuleById,
+  updateModuleById,
   deleteProjectById,
   finalizeProjects,
 }
