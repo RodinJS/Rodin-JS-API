@@ -11,7 +11,7 @@ import help from '../helpers/editor';
 import utils from '../helpers/common';
 
 import fsExtra from 'fs-extra';
-// import Minizip from 'node-minizip';
+import Minizip from 'node-minizip';
 
 import fileContentSearch from '../helpers/fileSearch';
 import config from '../../config/env';
@@ -424,16 +424,16 @@ function isUnitTest(req, res, next) {
       //UNIT TEST FOLDER UPLOAD
       let path = help.generateFilePath(req, req.body.path);
       let templatePath = 'resources/templates/blank';
-      // Minizip.zip(templatePath, path + '/test.zip', (err) => {
-      //   if (err) {
-      //     const err = new APIError('Test failed', httpStatus.BAD_REQUEST, true);
-      //     return next(err);
-      //   } else {
-      //     let file = fs.readFileSync(path + '/test.zip');
-      //     req.files = [{originalname: 'test.zip', buffer: new Buffer(file)}];
-      //     next();
-      //   }
-      // });
+      Minizip.zip(templatePath, path + '/test.zip', (err) => {
+        if (err) {
+          const err = new APIError('Test failed', httpStatus.BAD_REQUEST, true);
+          return next(err);
+        } else {
+          let file = fs.readFileSync(path + '/test.zip');
+          req.files = [{originalname: 'test.zip', buffer: new Buffer(file)}];
+          next();
+        }
+      });
     }
     //UNIT TEST FOLDER UPLOAD
     else {
