@@ -100,6 +100,7 @@ function build(req, res, next) {
           req.mailSettings.fromName = 'Rodin team';
           req.mailSettings.templateName = 'rodun_build_failed';
           req.mailSettings.subject = `${project.displayName} ${req.params.device} build failed`;
+          req.mailSettings.handleBars.push({name:'buildId', content:req.body.buildId});
           req.notification = {
             success: false,
             error: {
