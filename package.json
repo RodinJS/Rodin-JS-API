@@ -53,7 +53,7 @@
     "express-validation": "1.0.0",
     "express-winston": "^1.2.0",
     "extract-zip": "^1.6.0",
-    "fs-extra": "^0.30.0",
+    "fs-extra": "^3.0.0",
     "github": "^7.0.0",
     "google-closure-compiler": "20170626.0.0",
     "goo.gl": "^0.1.4",
