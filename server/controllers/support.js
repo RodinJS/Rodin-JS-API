@@ -257,7 +257,6 @@ function _submit(options) {
   })
 }
 
-
 function createQuestion(req, res, next) {
   let param = '';
   switch (req.params.type) {
