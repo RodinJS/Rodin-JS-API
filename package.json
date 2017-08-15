@@ -48,7 +48,7 @@
     "debug": "^2.2.0",
     "dir-to-json": "0.0.3",
     "express": "4.14.0",
-    "express-jwt": "3.4.0",
+    "express-jwt": "5.3.0",
     "express-sanitize-escape": "^1.1.0",
     "express-validation": "1.0.0",
     "express-winston": "^1.2.0",
