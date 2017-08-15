@@ -14,6 +14,7 @@ const templateIDs = {
   'rodin_metaverse':'60788a60-c482-4d0b-9acb-72d6123c416e',
   'rodin_publish':'6282e035-fd82-4f7a-a0f5-fc036e3111d0',
   'rodin_subsribe':'b84113aa-5c85-4c68-8d3a-cd3ce717d5b0',
+  'rodun_build_failed':'0e0696bd-dd39-4138-aa86-6f3da77008ff'
 };
 
 

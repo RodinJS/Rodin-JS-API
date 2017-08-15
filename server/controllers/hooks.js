@@ -63,10 +63,6 @@ function build(req, res, next) {
 
         req.mailSettings = {
           to: user.email,
-          from: 'team@rodin.io',
-          fromName: 'Rodin team',
-          templateName: 'rodin_build',
-          subject: `${project.displayName} ${req.params.device} build complete`,
           handleBars: [{
             name: 'dateTime',
             content: Utils.convertDate(),
@@ -99,6 +95,11 @@ function build(req, res, next) {
             errorMessage = httpStatus[`${req.body.error.message}`].messgae;
           }
           notificationSTATUS = 500;
+
+          req.mailSettings.from = 'noreplay@rodin.io';
+          req.mailSettings.fromName = 'Rodin team';
+          req.mailSettings.templateName = 'rodun_build_failed';
+          req.mailSettings.subject = `${project.displayName} ${req.params.device} build failed`;
           req.notification = {
             success: false,
             error: {
@@ -106,7 +107,12 @@ function build(req, res, next) {
               status: notificationSTATUS,
             }
           };
-        } else {
+        }
+        else {
+          req.mailSettings.from = 'team@rodin.io';
+          req.mailSettings.fromName = 'Rodin team';
+          req.mailSettings.templateName = 'rodin_build';
+          req.mailSettings.subject = `${project.displayName} ${req.params.device} build complete`;
           req.notification = {
             success: true,
             data: `${appName} ${req.params.device} build complete`,
