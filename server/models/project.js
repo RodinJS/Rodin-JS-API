@@ -2,6 +2,7 @@ import Promise from 'bluebird';
 import mongoose from 'mongoose';
 import httpStatus from '../helpers/httpStatus';
 import APIError from '../helpers/APIError';
+import moongosePaginate from 'mongoose-paginate';
 
 /**
  * Project Schema
@@ -142,7 +143,6 @@ const ProjectSchema = new mongoose.Schema({
     default: "pending"
   }
 });
-
 /**
  * Statics
  */
@@ -327,6 +327,11 @@ ProjectSchema.statics = {
       .execAsync();
   },
 
+
+  projectsListPaginated({page = 1, sort = {createdAt: -1}}) {
+    return this.paginate({}, { sort: sort ,page: Number(page), limit: 50 })
+  },
+
   projectsCountByState() {
     return this.aggregate([
       { "$group": {
@@ -387,6 +392,7 @@ ProjectSchema.methods.outcome = function () {
   };
 };
 
+ProjectSchema.plugin(moongosePaginate);
 
 /**
  * @typedef Project

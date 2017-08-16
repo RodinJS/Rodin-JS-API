@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import httpStatus from '../helpers/httpStatus';
 import APIError from '../helpers/APIError';
 import bcrypt from 'bcrypt-nodejs';
+import moongosePaginate from 'mongoose-paginate';
 
 /**
  * User Schema
@@ -209,7 +210,7 @@ UserSchema.statics = {
    * @returns {Promise<User, APIError>}
    */
 
-  get(username) {
+  get (username) {
 
     username = username.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
     return this.findOne({username: new RegExp('^' + username + '$', 'i')})
@@ -225,6 +226,11 @@ UserSchema.statics = {
       });
   },
 
+  getWithProjects(username) {
+    username = username.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
+
+    return this.findOne({username: new RegExp('^' + username + '$', 'i')}).populate('Project')
+  },
   /**
    * Check if user has permission to modify project
    * @param {ObjectId} id - The objectId of user.
@@ -257,24 +263,44 @@ UserSchema.statics = {
    * List users in descending order of 'createdAt' timestamp.
    * @param {number} skip - Number of users to be skipped.
    * @param {number} limit - Limit number of users to be returned.
-   * @param {string} sort - sorting field
+   * @param {{createdAt: number}} sort - sorting field
    * @returns {Promise<User[]>}
    */
 
+
   list({skip = 0, limit = 50, sort} = {}) {
     return this.find()
-      .sort(sort)
-      .skip(skip)
       .limit(Number(limit))
+      .skip(Number(skip))
+      .sort(sort)
       .execAsync();
+  },
+
+  listPaginated({page = 1, sort = {createdAt: -1}}) {
+    return this.paginate({}, {sort: sort, page: Number(page), limit: 50})
+  },
+
+  filtered({skip = 0, limit = 50, sort} = {}) {
+    let cond = sort.startsWith('-');
+    let d = sort;
+    if (cond) {
+      d = sort.slice(1)
+    }
+    return this.aggregate([
+      {$skip: Number(skip)},
+      {$limit: Number(limit)},
+      // {$sort: { [d] : cond ? -1: 1 }}
+    ]).execAsync();
   },
 
   countByRole() {
     return this.aggregate([
-      { "$group": {
-        "_id": "$role",
-        "count": { "$sum": 1 }
-      }},
+      {
+        "$group": {
+          "_id": "$role",
+          "count": {"$sum": 1}
+        }
+      },
     ])
   }
 };
@@ -282,4 +308,6 @@ UserSchema.statics = {
 /**
  * @typedef User
  */
+UserSchema.plugin(moongosePaginate);
+
 export default mongoose.model('User', UserSchema);
