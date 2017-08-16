@@ -40,26 +40,29 @@ const Menus = new mongoose.Schema({
 Menus.statics = {
   getMenusList() {
     return this.aggregate([
-      {"$match": {"state": "published"}},
-      [
-        { "$unwind": {"path":"$items", "preserveNullAndEmptyArrays": true}},
-        { "$lookup": {
+      {$match: {"state": "published"}},
+
+      {$unwind: {path: "$items", "preserveNullAndEmptyArrays": true}},
+      {
+        $lookup: {
           "from": "cms_menuitems",
           "localField": "items",
           "foreignField": "_id",
           "as": "menuitem"
-        }},
-        { "$unwind": {"path":"$menuitem", "preserveNullAndEmptyArrays": true} },
-        { "$group": {
-          "_id": "$_id",
-          "slug": { "$first": "$slug" },
-          "name":{"$first": "$name"},
-          "state":{"$first": "$state"},
-          "position":{"$first": "$position"},
-          "items": { "$push": "$items" },
-          "menuitems": { "$push": "$menuitem" }
-        }}
-      ]
+        }
+      },
+      {$unwind: {path: "$menuitem", "preserveNullAndEmptyArrays": true}},
+      {
+        $group: {
+          _id: "$_id",
+          slug: {"$first": "$slug"},
+          name: {"$first": "$name"},
+          state: {"$first": "$state"},
+          position: {"$first": "$position"},
+          items: {"$push": "$items"},
+          menuitems: {"$push": "$menuitem"}
+        }
+      }
     ]).then(menus => {
       if (!menus) {
         const err = new APIError('Error while requesting menus list!----', httpStatus.NOT_FOUND, true);
