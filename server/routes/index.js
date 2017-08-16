@@ -13,6 +13,7 @@ import modulesRoute from './modules';
 import pagesRoute from './pages';
 import supportRoute from './support';
 import adminRoute from './admin';
+import menusRoute from './menus';
 import RodinSanitizer from '../helpers/sanitizer';
 
 import _ from 'lodash';
@@ -71,6 +72,10 @@ const apiRoutes = {
   support: {
     route: '/support',
     module: [supportRoute],
+  },
+  menus: {
+    route: '/menus',
+    module: [menusRoute],
   },
   admin: {
     route: '/admin',
