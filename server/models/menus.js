@@ -57,6 +57,7 @@ Menus.statics = {
           _id: "$_id",
           slug: {"$first": "$slug"},
           name: {"$first": "$name"},
+          href: {"$first": "$href"},
           state: {"$first": "$state"},
           position: {"$first": "$position"},
           items: {"$push": "$items"},
