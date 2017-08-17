@@ -15,7 +15,7 @@ export default {
   },
   social: {
     facebook: {
-      clientID: '214577345643265',
+      clientID: '1981479458801362',
       clientSecret: 'c7c79a4791b592c54cb79a8b3a671384',
       callbackURL: 'https://rodinapp.com/auth/facebook/callback',
     },
